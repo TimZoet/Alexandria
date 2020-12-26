@@ -1,12 +1,12 @@
-[submodule "modules\\parsertongue"]
-	path = modules\\parsertongue
+[submodule "modules/parsertongue"]
+	path = modules/parsertongue
 	url = https://github.com/TimZoet/parsertongue-module
-[submodule "modules\\cppql"]
-	path = modules\\cppql
+[submodule "modules/cppql"]
+	path = modules/cppql
 	url = https://github.com/TimZoet/cppql-module
-[submodule "modules\\alexandria"]
-	path = modules\\alexandria
+[submodule "modules/alexandria"]
+	path = modules/alexandria
 	url = https://github.com/TimZoet/alexandria-module
-[submodule "modules\\dot"]
-	path = modules\\dot
+[submodule "modules/dot"]
+	path = modules/dot
 	url = https://github.com/TimZoet/dot-module
