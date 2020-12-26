@@ -1,3 +1,6 @@
 [submodule "modules\\parsertongue"]
 	path = modules\\parsertongue
 	url = https://github.com/TimZoet/parsertongue-module
+[submodule "modules\\cppql"]
+	path = modules\\cppql
+	url = https://github.com/TimZoet/cppql-module
