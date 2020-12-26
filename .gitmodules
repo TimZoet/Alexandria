@@ -7,3 +7,6 @@
 [submodule "modules\\alexandria"]
 	path = modules\\alexandria
 	url = https://github.com/TimZoet/alexandria-module
+[submodule "modules\\dot"]
+	path = modules\\dot
+	url = https://github.com/TimZoet/dot-module
