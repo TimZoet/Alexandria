@@ -4,3 +4,6 @@
 [submodule "modules\\cppql"]
 	path = modules\\cppql
 	url = https://github.com/TimZoet/cppql-module
+[submodule "modules\\alexandria"]
+	path = modules\\alexandria
+	url = https://github.com/TimZoet/alexandria-module
