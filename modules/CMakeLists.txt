@@ -1,4 +1,5 @@
 add_subdirectory(alexandria)
+add_subdirectory(common)
 add_subdirectory(cppql)
 add_subdirectory(dot)
 add_subdirectory(parsertongue)

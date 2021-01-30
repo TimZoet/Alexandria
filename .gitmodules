@@ -10,3 +10,6 @@
 [submodule "modules/dot"]
 	path = modules/dot
 	url = https://github.com/TimZoet/dot-module
+[submodule "modules/common"]
+	path = modules/common
+	url = https://github.com/TimZoet/common-module.git
