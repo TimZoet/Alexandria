@@ -28,7 +28,7 @@ include(MakeTarget)
 option(USE_CONAN "If you are using the Conan package manager, enable this option." OFF)
 if(USE_CONAN)
     include(ConanPkgUtils)
-    conan_pkg_utils(PROFILE gcc10.1 PACKAGES fmt/7.0.3)
+    conan_pkg_utils(PROFILE gcc10.1 PACKAGES fmt/7.0.3 nlohmann_json/3.9.1)
 endif()
 
 ################################################################################
@@ -36,13 +36,9 @@ endif()
 ################################################################################
 
 add_subdirectory(applications)
+add_subdirectory(external)
 add_subdirectory(modules)
-
-# Can run these after add_subdirectory calls.
-# get_property(TARGETS_ALL GLOBAL PROPERTY TARGETS_ALL)
-# get_property(TARGETS_APPLICATIONS GLOBAL PROPERTY TARGETS_APPLICATIONS)
-# get_property(TARGETS_MODULES GLOBAL PROPERTY TARGETS_MODULES)
-# get_property(TARGETS_TESTS GLOBAL PROPERTY TARGETS_TESTS)
+add_subdirectory(tests)
 
 ################################################################################
 # Set startup project.

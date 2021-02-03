@@ -34,7 +34,7 @@ int main()
         auto& prop_children  = library->createNestedArrayProperty("children", node_t);
         auto& prop_meshes    = library->createNestedArrayProperty("meshes", mesh_t);
         auto& prop_material  = library->createNestedProperty("material", material_t);
-
+        
         float3_t.addProperty(prop_x);
         float3_t.addProperty(prop_y);
         float3_t.addProperty(prop_z);
