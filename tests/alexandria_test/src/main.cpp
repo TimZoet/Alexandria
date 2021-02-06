@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria_test/create_library.h"
+#include "alexandria_test/create_type_blob.h"
+#include "alexandria_test/create_type_blob_array.h"
+#include "alexandria_test/create_type_nested.h"
 
 #ifdef WIN32
 #include "Windows.h"
@@ -29,6 +32,6 @@ int main(int argc, char** argv)
     }
 #endif
 
-    bt::run<CreateLibrary>(argc, argv, "alexandria");
+    bt::run<CreateLibrary, CreateTypeBlob, CreateTypeBlobArray, CreateTypeNested>(argc, argv, "alexandria");
     return 0;
 }

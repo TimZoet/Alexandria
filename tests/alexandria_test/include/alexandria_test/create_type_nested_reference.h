@@ -1,0 +1,13 @@
+#pragma once
+
+////////////////////////////////////////////////////////////////
+// Current target includes.
+////////////////////////////////////////////////////////////////
+
+#include "alexandria_test/utils.h"
+
+class CreateTypeNestedReference : public utils::LibraryMember
+{
+public:
+    void operator()() override;
+};

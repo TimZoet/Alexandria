@@ -24,16 +24,16 @@ int main()
         auto& prop_y         = library->createPrimitiveProperty("y", alex::DataType::Float);
         auto& prop_z         = library->createPrimitiveProperty("z", alex::DataType::Float);
         auto& prop_name      = library->createPrimitiveProperty("name", alex::DataType::String);
-        auto& prop_albedo    = library->createNestedProperty("albedo", float3_t);
+        auto& prop_albedo    = library->createNestedProperty("albedo", float3_t, false);
         auto& prop_specular  = library->createPrimitiveProperty("specular", alex::DataType::Float);
-        auto& prop_vertices  = library->createBlobProperty("vertices");
-        auto& prop_r1        = library->createNestedProperty("r1", float3_t);
-        auto& prop_r2        = library->createNestedProperty("r2", float3_t);
-        auto& prop_r3        = library->createNestedProperty("r3", float3_t);
-        auto& prop_transform = library->createNestedProperty("transform", mat3x3_t);
+        auto& prop_vertices  = library->createBlobProperty("vertices", true);
+        auto& prop_r1        = library->createNestedProperty("r1", float3_t, false);
+        auto& prop_r2        = library->createNestedProperty("r2", float3_t, false);
+        auto& prop_r3        = library->createNestedProperty("r3", float3_t, false);
+        auto& prop_transform = library->createNestedProperty("transform", mat3x3_t, false);
         auto& prop_children  = library->createNestedArrayProperty("children", node_t);
         auto& prop_meshes    = library->createNestedArrayProperty("meshes", mesh_t);
-        auto& prop_material  = library->createNestedProperty("material", material_t);
+        auto& prop_material  = library->createNestedProperty("material", material_t, true);
         
         float3_t.addProperty(prop_x);
         float3_t.addProperty(prop_y);
@@ -50,7 +50,7 @@ int main()
         node_t.addProperty(prop_transform);
         node_t.addProperty(prop_children);
         node_t.addProperty(prop_meshes);
-        node_t.addPropertyReference(prop_material);
+        node_t.addProperty(prop_material);
 
         library->commitTypes();
 #else
