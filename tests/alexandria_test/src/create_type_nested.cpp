@@ -32,6 +32,7 @@ void CreateTypeNested::operator()()
     expectNoThrow([this]() { library->commitTypes(); });
 
     // Check type tables.
+    // When types and properties are committed, their dependencies are committed first; hence the order here.
     std::vector<utils::Type>     types      = {{0, "type0"}, {0, "type1"}, {0, "type2"}, {0, "type3"}};
     std::vector<utils::Property> properties = {
       {0, "propA", alex::toString(alex::DataType::Float), 0, 0, 0, 0},
