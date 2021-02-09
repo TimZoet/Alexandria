@@ -16,3 +16,6 @@
 [submodule "modules/bettertest"]
 	path = modules/bettertest
 	url = https://github.com/TimZoet/bettertest-module.git
+[submodule "cmake"]
+	path = cmake
+	url = https://github.com/TimZoet/cmake-module.git
