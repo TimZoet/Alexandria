@@ -11,6 +11,11 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria_test/create_library.h"
+#include "alexandria_test/create_property.h"
+#include "alexandria_test/create_property_blob.h"
+#include "alexandria_test/create_property_nested.h"
+#include "alexandria_test/create_property_primitive.h"
+#include "alexandria_test/create_type.h"
 #include "alexandria_test/create_type_blob.h"
 #include "alexandria_test/create_type_blob_array.h"
 #include "alexandria_test/create_type_nested.h"
@@ -19,6 +24,7 @@
 #include "alexandria_test/create_type_primitive.h"
 #include "alexandria_test/create_type_primitive_array.h"
 #include "alexandria_test/create_type_primitive_blob.h"
+#include "alexandria_test/type_add_property.h"
 
 #ifdef WIN32
 #include "Windows.h"
@@ -38,6 +44,11 @@ int main(int argc, char** argv)
 #endif
 
     bt::run<CreateLibrary,
+            CreateProperty,
+            CreatePropertyBlob,
+            CreatePropertyNested,
+            CreatePropertyPrimitive,
+            CreateType,
             CreateTypeBlob,
             CreateTypeBlobArray,
             CreateTypeNested,
@@ -45,6 +56,7 @@ int main(int argc, char** argv)
             CreateTypeNestedReference,
             CreateTypePrimitive,
             CreateTypePrimitiveArray,
-            CreateTypePrimitiveBlob>(argc, argv, "alexandria");
+            CreateTypePrimitiveBlob,
+            TypeAddProperty>(argc, argv, "alexandria");
     return 0;
 }

@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class CreateType : public utils::LibraryMember
+class CreatePropertyBlob : public utils::LibraryMember
 {
 public:
     void operator()() override;
