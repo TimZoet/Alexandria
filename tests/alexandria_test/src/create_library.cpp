@@ -15,8 +15,14 @@ void CreateLibrary::operator()()
     expectNoThrow([&file]() { alex::Library::create(file); });
     expectNoThrow([&file]() { alex::Library::open(file); });
     expectThrow([&file]() { alex::Library::create(file); });
-    expectNoThrow([&file]() { alex::Library::openOrCreate(file); });
+    expectNoThrow([&file, this]() {
+        auto [lib, created] = alex::Library::openOrCreate(file);
+        compareTrue(created);
+    });
     std::filesystem::remove(file);
-    expectNoThrow([&file]() { alex::Library::openOrCreate(file); });
+    expectNoThrow([&file, this]() {
+        auto [lib, created] = alex::Library::openOrCreate(file);
+        compareFalse(created);
+    });
     std::filesystem::remove(file);
 }
