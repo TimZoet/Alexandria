@@ -5,60 +5,57 @@
 
 #include "alexandria/library.h"
 
+
+#include "testapp/types.h"
+
 int main()
 {
     const auto dbPath = std::filesystem::current_path() / "file.db";
     std::filesystem::remove(dbPath);
 
+    auto [library, created] = alex::Library::openOrCreate(dbPath);
+    alex::Type *type0, *type1;
+    if (created)
     {
-        
-#if 1
-        auto library = alex::Library::create(dbPath);
-        auto& float3_t   = library->createType("float3");
-        auto& material_t = library->createType("material");
-        auto& mesh_t     = library->createType("mesh");
-        auto& mat3x3_t   = library->createType("mat3x3");
-        auto& node_t     = library->createType("node");
-
-        auto& prop_x         = library->createPrimitiveProperty("x", alex::DataType::Float);
-        auto& prop_y         = library->createPrimitiveProperty("y", alex::DataType::Float);
-        auto& prop_z         = library->createPrimitiveProperty("z", alex::DataType::Float);
-        auto& prop_name      = library->createPrimitiveProperty("name", alex::DataType::String);
-        auto& prop_albedo    = library->createNestedProperty("albedo", float3_t, false);
-        auto& prop_specular  = library->createPrimitiveProperty("specular", alex::DataType::Float);
-        auto& prop_vertices  = library->createBlobProperty("vertices", true);
-        auto& prop_r1        = library->createNestedProperty("r1", float3_t, false);
-        auto& prop_r2        = library->createNestedProperty("r2", float3_t, false);
-        auto& prop_r3        = library->createNestedProperty("r3", float3_t, false);
-        auto& prop_transform = library->createNestedProperty("transform", mat3x3_t, false);
-        auto& prop_children  = library->createNestedArrayProperty("children", node_t);
-        auto& prop_meshes    = library->createNestedArrayProperty("meshes", mesh_t);
-        auto& prop_material  = library->createNestedProperty("material", material_t, true);
-        
-        float3_t.addProperty(prop_x);
-        float3_t.addProperty(prop_y);
-        float3_t.addProperty(prop_z);
-        material_t.addProperty(prop_name);
-        material_t.addProperty(prop_albedo);
-        material_t.addProperty(prop_specular);
-        mesh_t.addProperty(prop_name);
-        mesh_t.addProperty(prop_vertices);
-        mat3x3_t.addProperty(prop_r1);
-        mat3x3_t.addProperty(prop_r2);
-        mat3x3_t.addProperty( prop_r3);
-        node_t.addProperty(prop_name);
-        node_t.addProperty(prop_transform);
-        node_t.addProperty(prop_children);
-        node_t.addProperty(prop_meshes);
-        node_t.addProperty(prop_material);
-
+        type0            = &library->createType("type0");
+        type1            = &library->createType("type1");
+        auto& propA      = library->createPrimitiveArrayProperty("array", alex::DataType::Float, true);
+        auto& propNested = library->createNestedProperty("propNested", *type0, true);
+        type0->addProperty(propA);
+        type1->addProperty(propNested);
         library->commitTypes();
-#else
-        auto library = alex::Library::open(dbPath);
-#endif
-        std::ofstream graph(std::filesystem::current_path() / "graph.dot");
-        library->writeGraph(graph);
+    }
+    else
+    {
+        type0 = &library->getType("type0");
+        type1 = &library->getType("type1");
     }
 
-    //std::filesystem::remove(dbPath);
+    auto t0 = library->createObjectHandler<Type0, &Type0::id, &Type0::array>(type0->getName());
+    auto t1 = library->createObjectHandler<Type1, &Type1::id, &Type1::type0>(type1->getName());
+
+
+
+    Type0 obj0;
+    Type0 obj1;
+    obj0.array.get().push_back(10);
+    obj0.array.get().push_back(20);
+    obj0.array.get().push_back(30);
+    obj1.array.get().push_back(16);
+    obj1.array.get().push_back(32);
+    obj1.array.get().push_back(64);
+
+    t0.insert(obj0);
+    t0.insert(obj1);
+
+    Type1 obj2;
+    Type1 obj3;
+    obj2.type0 = obj0;
+    obj3.type0 = obj2.type0;
+
+    t1.insert(obj2);
+    t1.insert(obj3);
+
+    auto x = t1.get(2);
+    std::cout << 'x';
 }

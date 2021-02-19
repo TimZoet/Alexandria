@@ -4,11 +4,12 @@ set(INCLUDE_DIR "include/testapp")
 set(SRC_DIR "src")
 
 set(HEADERS
-	${INCLUDE_DIR}/header.h
+	${INCLUDE_DIR}/types.h
 )
  
 set(SOURCES
 	${SRC_DIR}/main.cpp
+	${SRC_DIR}/types.cpp
 )
 
 set(DEPS_PUBLIC

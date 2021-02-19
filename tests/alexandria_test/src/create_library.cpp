@@ -17,12 +17,12 @@ void CreateLibrary::operator()()
     expectThrow([&file]() { alex::Library::create(file); });
     expectNoThrow([&file, this]() {
         auto [lib, created] = alex::Library::openOrCreate(file);
-        compareTrue(created);
+        compareFalse(created);
     });
     std::filesystem::remove(file);
     expectNoThrow([&file, this]() {
         auto [lib, created] = alex::Library::openOrCreate(file);
-        compareFalse(created);
+        compareTrue(created);
     });
     std::filesystem::remove(file);
 }
