@@ -25,6 +25,13 @@
 #include "alexandria_test/create_type_primitive_array.h"
 #include "alexandria_test/create_type_primitive_blob.h"
 #include "alexandria_test/type_add_property.h"
+#include "alexandria_test/insert/insert_blob.h"
+#include "alexandria_test/insert/insert_blob_array.h"
+#include "alexandria_test/insert/insert_primitive.h"
+#include "alexandria_test/insert/insert_primitive_array.h"
+#include "alexandria_test/insert/insert_primitive_blob.h"
+#include "alexandria_test/insert/insert_reference.h"
+#include "alexandria_test/insert/insert_reference_array.h"
 
 #ifdef WIN32
 #include "Windows.h"
@@ -57,6 +64,13 @@ int main(int argc, char** argv)
             CreateTypePrimitive,
             CreateTypePrimitiveArray,
             CreateTypePrimitiveBlob,
-            TypeAddProperty>(argc, argv, "alexandria");
+            TypeAddProperty,
+            InsertBlob,
+            InsertBlobArray,
+            InsertPrimitive,
+            InsertPrimitiveArray,
+            InsertPrimitiveBlob,
+            InsertReference,
+            InsertReferenceArray>(argc, argv, "alexandria");
     return 0;
 }

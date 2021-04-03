@@ -20,6 +20,14 @@ set(HEADERS
     ${INCLUDE_DIR}/create_type_primitive_blob.h
     ${INCLUDE_DIR}/type_add_property.h
     ${INCLUDE_DIR}/utils.h
+
+    ${INCLUDE_DIR}/insert/insert_blob.h
+	${INCLUDE_DIR}/insert/insert_blob_array.h
+	${INCLUDE_DIR}/insert/insert_primitive.h
+	${INCLUDE_DIR}/insert/insert_primitive_array.h
+	${INCLUDE_DIR}/insert/insert_primitive_blob.h
+	${INCLUDE_DIR}/insert/insert_reference.h
+	${INCLUDE_DIR}/insert/insert_reference_array.h
 )
 
 set(SOURCES
@@ -40,6 +48,14 @@ set(SOURCES
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/type_add_property.cpp
     ${SRC_DIR}/utils.cpp
+
+    ${SRC_DIR}/insert/insert_blob.cpp
+	${SRC_DIR}/insert/insert_blob_array.cpp
+	${SRC_DIR}/insert/insert_primitive.cpp
+	${SRC_DIR}/insert/insert_primitive_array.cpp
+	${SRC_DIR}/insert/insert_primitive_blob.cpp
+	${SRC_DIR}/insert/insert_reference.cpp
+	${SRC_DIR}/insert/insert_reference_array.cpp
 )
 
 set(DEPS_PRIVATE

@@ -5,7 +5,6 @@
 
 #include "alexandria/library.h"
 
-
 #include "testapp/types.h"
 
 int main()
@@ -22,7 +21,7 @@ int main()
 
         auto& floatProp = library->createPrimitiveProperty("float", alex::DataType::Float);
         auto& intProp   = library->createPrimitiveProperty("int", alex::DataType::Int32);
-        auto& blobProp   = library->createBlobProperty("blob", false);
+        auto& blobProp  = library->createBlobProperty("blob", false);
         auto& refProp   = library->createNestedArrayProperty("ref", *type0);
         type0->addProperty(floatProp);
         type0->addProperty(intProp);
