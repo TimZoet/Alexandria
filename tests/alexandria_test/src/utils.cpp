@@ -18,7 +18,7 @@ namespace utils
     LibraryMember::LibraryMember()
     {
         const auto cwd    = std::filesystem::current_path();
-        const auto dbPath = cwd / "lib";
+        const auto dbPath = cwd / "lib.db";
         if (std::filesystem::exists(dbPath)) std::filesystem::remove(dbPath);
         library = alex::Library::create(dbPath);
     }
@@ -29,7 +29,7 @@ namespace utils
         {
             library.reset();
             const auto cwd    = std::filesystem::current_path();
-            const auto dbPath = cwd / "lib";
+            const auto dbPath = cwd / "lib.db";
             std::filesystem::remove(dbPath);
         }
         catch (...)
@@ -41,7 +41,7 @@ namespace utils
     {
         library.reset();
         const auto cwd    = std::filesystem::current_path();
-        const auto dbPath = cwd / "lib";
+        const auto dbPath = cwd / "lib.db";
         library           = alex::Library::open(dbPath);
     }
 
