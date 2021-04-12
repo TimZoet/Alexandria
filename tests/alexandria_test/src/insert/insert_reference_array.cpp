@@ -51,7 +51,7 @@ void InsertReferenceArray::operator()()
     bazType.addProperty(barProp);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); });
+    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
     sql::ext::TypedTable<int64_t>                   barTable(library->getDatabase().getTable(barType.getName()));
@@ -72,57 +72,75 @@ void InsertReferenceArray::operator()()
     // TODO: Test insert of empty/null references.
 
     // Insert Foo.
+    //
+    // Create objects.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
-    fooHandler.insert(foo0);
-    fooHandler.insert(foo1);
+
+    // Try to insert.
+    expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
     // Insert Bar.
+    //
+    // Create objects.
     Bar bar0, bar1;
     bar0.foo.add(foo0);
     bar0.foo.add(foo1);
-    barHandler.insert(bar0);
-    barHandler.insert(bar1);
+
+    // Try to insert.
+    expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+
     // Check assigned IDs.
     compareEQ(bar0.id, static_cast<int64_t>(1));
     compareEQ(bar1.id, static_cast<int64_t>(2));
-    // Select inserted object using sql and compare.
-    auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id, true)(false);
-    auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id, true)(false);
-    compareEQ(bar0.id, std::get<0>(bar0_get));
-    compareEQ(bar1.id, std::get<0>(bar1_get));
+
+    // Select inserted object using sql.
+    auto bar0_get = barTable.selectOne<int64_t>(barTable.col<0>() == bar0.id, true)(false);
+    auto bar1_get = barTable.selectOne<int64_t>(barTable.col<0>() == bar1.id, true)(false);
+
+    // Compare objects.
+    compareEQ(bar0.id, bar0_get);
+    compareEQ(bar1.id, bar1_get);
+
     // Select references in separate table.
-    auto                             idparam    = bar0.id;
-    auto                             foo_select = barFooTable.select<2>(barFooTable.col<1>() == &idparam, true);
-    std::vector<std::tuple<int64_t>> foo_get(foo_select.begin(), foo_select.end());
-    compareEQ(*bar0.foo.begin(), std::get<0>(foo_get[0]));
-    compareEQ(*(bar0.foo.begin() + 1), std::get<0>(foo_get[1]));
+    auto                 idparam    = bar0.id;
+    auto                 foo_select = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == &idparam, true);
+    std::vector<int64_t> foo_get(foo_select.begin(), foo_select.end());
+    compareEQ(bar0.foo.get(), foo_get);
     idparam = bar1.id;
     foo_get.assign(foo_select(true).begin(), foo_select.end());
-    compareEQ(static_cast<uint64_t>(0), foo_get.size());
+    compareEQ(bar1.foo.get(), foo_get);
 
     // Insert Baz.
+    //
+    // Create objects.
     Baz baz;
     baz.foo.add(foo1);
     baz.foo.add(foo0);
     baz.bar.add(bar0);
     baz.bar.add(bar1);
     baz.bar.add(bar0);
-    bazHandler.insert(baz);
+
+    // Try to insert.
+    expectNoThrow([&] { bazHandler.insert(baz); }).fatal("Failed to insert object");
+
     // Check assigned IDs.
     compareEQ(baz.id, static_cast<int64_t>(1));
-    // Select inserted object using sql and compare.
-    auto baz_get = bazTable.selectOne(bazTable.col<0>() == baz.id, true)(false);
-    compareEQ(baz.id, std::get<0>(baz_get));
+
+    // Select inserted object using sql.
+    auto baz_get = bazTable.selectOne<int64_t>(bazTable.col<0>() == baz.id, true)(false);
+
+    // Compare objects.
+    compareEQ(baz.id, baz_get);
+
     // Select references in separate table.
     idparam          = baz.id;
-    auto foo_select2 = bazFooTable.select<2>(bazFooTable.col<1>() == &idparam, true);
-    auto bar_select  = bazBarTable.select<2>(bazBarTable.col<1>() == &idparam, true);
+    auto foo_select2 = bazFooTable.select<int64_t, 2>(bazFooTable.col<1>() == &idparam, true);
+    auto bar_select  = bazBarTable.select<int64_t, 2>(bazBarTable.col<1>() == &idparam, true);
     foo_get.assign(foo_select2.begin(), foo_select2.end());
-    compareEQ(*baz.foo.begin(), std::get<0>(foo_get[0]));
-    compareEQ(*(baz.foo.begin() + 1), std::get<0>(foo_get[1]));
+    compareEQ(baz.foo.get(), foo_get);
     foo_get.assign(bar_select.begin(), bar_select.end());
-    compareEQ(*baz.bar.begin(), std::get<0>(foo_get[0]));
-    compareEQ(*(baz.bar.begin() + 1), std::get<0>(foo_get[1]));
-    compareEQ(*(baz.bar.begin() + 2), std::get<0>(foo_get[2]));
+    compareEQ(baz.bar.get(), foo_get);
 }

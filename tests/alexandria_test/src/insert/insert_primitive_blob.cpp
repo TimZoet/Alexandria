@@ -67,7 +67,7 @@ void InsertPrimitiveBlob::operator()()
     bazType.addProperty(doublesProp);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); });
+    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
     sql::ext::TypedTable<int64_t, std::vector<float>>   fooTable(library->getDatabase().getTable(fooType.getName()));
@@ -80,95 +80,98 @@ void InsertPrimitiveBlob::operator()()
     auto barHandler = library->createObjectHandler<&Bar::id, &Bar::ints>(barType.getName());
     auto bazHandler = library->createObjectHandler<&Baz::id, &Baz::ints, &Baz::floats>(bazType.getName());
 
-    // TODO: Use vector comparison methods once supported.
-
     // Insert Foo.
-    Foo foo0;
-    foo0.floats.get().push_back(0.5f);
-    foo0.floats.get().push_back(1.5f);
-    Foo foo1;
-    foo1.floats.get().push_back(-2.5f);
-    foo1.floats.get().push_back(-3.5f);
-    foo1.floats.get().push_back(-4.5f);
-    fooHandler.insert(foo0);
-    fooHandler.insert(foo1);
-    // Check assigned IDs.
-    compareEQ(foo0.id, static_cast<int64_t>(1));
-    compareEQ(foo1.id, static_cast<int64_t>(2));
-    // Select inserted object using sql and compare.
-    Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id, true)(false);
-    Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id, true)(false);
-    compareEQ(foo0.id, foo0_get.id);
-    compareEQ(foo0.floats.get().size(), foo0_get.floats.get().size());
-    compareEQ(foo0.floats.get()[0], foo0_get.floats.get()[0]);
-    compareEQ(foo0.floats.get()[1], foo0_get.floats.get()[1]);
-    compareEQ(foo1.id, foo1_get.id);
-    compareEQ(foo1.floats.get().size(), foo1_get.floats.get().size());
-    compareEQ(foo1.floats.get()[0], foo1_get.floats.get()[0]);
-    compareEQ(foo1.floats.get()[1], foo1_get.floats.get()[1]);
-    compareEQ(foo1.floats.get()[2], foo1_get.floats.get()[2]);
+    {
+        // Create objects.
+        Foo foo0;
+        foo0.floats.get().push_back(0.5f);
+        foo0.floats.get().push_back(1.5f);
+        Foo foo1;
+        foo1.floats.get().push_back(-2.5f);
+        foo1.floats.get().push_back(-3.5f);
+        foo1.floats.get().push_back(-4.5f);
+
+        // Try to insert.
+        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+
+        // Check assigned IDs.
+        compareEQ(foo0.id, static_cast<int64_t>(1));
+        compareEQ(foo1.id, static_cast<int64_t>(2));
+
+        // Select inserted object using sql.
+        Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id, true)(false);
+        Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id, true)(false);
+
+        // Compare objects.
+        compareEQ(foo0.id, foo0_get.id);
+        compareEQ(foo0.floats.get(), foo0_get.floats.get());
+        compareEQ(foo1.id, foo1_get.id);
+        compareEQ(foo1.floats.get(), foo1_get.floats.get());
+    }
 
     // Insert Bar.
-    Bar bar0;
-    bar0.ints.get().push_back(10);
-    bar0.ints.get().push_back(100);
-    Bar bar1;
-    bar1.ints.get().push_back(-111);
-    bar1.ints.get().push_back(-2222);
-    bar1.ints.get().push_back(-33333);
-    barHandler.insert(bar0);
-    barHandler.insert(bar1);
-    // Check assigned IDs.
-    compareEQ(bar0.id, static_cast<int64_t>(1));
-    compareEQ(bar1.id, static_cast<int64_t>(2));
-    // Select inserted object using sql and compare.
-    Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id, true)(false);
-    Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id, true)(false);
-    compareEQ(bar0.id, bar0_get.id);
-    compareEQ(bar0.ints.get().size(), bar0_get.ints.get().size());
-    compareEQ(bar0.ints.get()[0], bar0_get.ints.get()[0]);
-    compareEQ(bar0.ints.get()[1], bar0_get.ints.get()[1]);
-    compareEQ(bar1.id, bar1_get.id);
-    compareEQ(bar1.ints.get().size(), bar1_get.ints.get().size());
-    compareEQ(bar1.ints.get()[0], bar1_get.ints.get()[0]);
-    compareEQ(bar1.ints.get()[1], bar1_get.ints.get()[1]);
-    compareEQ(bar1.ints.get()[2], bar1_get.ints.get()[2]);
+    {
+        // Create objects.
+        Bar bar0;
+        bar0.ints.get().push_back(10);
+        bar0.ints.get().push_back(100);
+        Bar bar1;
+        bar1.ints.get().push_back(-111);
+        bar1.ints.get().push_back(-2222);
+        bar1.ints.get().push_back(-33333);
+
+        // Try to insert.
+        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        // Check assigned IDs.
+        compareEQ(bar0.id, static_cast<int64_t>(1));
+        compareEQ(bar1.id, static_cast<int64_t>(2));
+
+        // Select inserted object using sql.
+        Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id, true)(false);
+        Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id, true)(false);
+
+        // Compare objects.
+        compareEQ(bar0.id, bar0_get.id);
+        compareEQ(bar0.ints.get(), bar0_get.ints.get());
+        compareEQ(bar1.id, bar1_get.id);
+        compareEQ(bar1.ints.get(), bar1_get.ints.get());
+    }
 
     // Insert Baz.
-    Baz baz0;
-    baz0.ints.get().push_back(10);
-    baz0.ints.get().push_back(100);
-    baz0.floats.get().push_back(0.5);
-    baz0.floats.get().push_back(1.5);
-    Baz baz1;
-    baz1.ints.get().push_back(-111);
-    baz1.ints.get().push_back(-2222);
-    baz1.ints.get().push_back(-33333);
-    baz1.floats.get().push_back(-2.5);
-    baz1.floats.get().push_back(-3.5);
-    baz1.floats.get().push_back(-4.5);
-    bazHandler.insert(baz0);
-    bazHandler.insert(baz1);
-    // Check assigned IDs.
-    compareEQ(baz0.id, static_cast<int64_t>(1));
-    compareEQ(baz1.id, static_cast<int64_t>(2));
-    // Select inserted object using sql and compare.
-    Baz baz0_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz0.id, true)(false);
-    Baz baz1_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz1.id, true)(false);
-    compareEQ(baz0.id, baz0_get.id);
-    compareEQ(baz0.ints.get().size(), baz0_get.ints.get().size());
-    compareEQ(baz0.ints.get()[0], baz0_get.ints.get()[0]);
-    compareEQ(baz0.ints.get()[1], baz0_get.ints.get()[1]);
-    compareEQ(baz0.floats.get().size(), baz0_get.floats.get().size());
-    compareEQ(baz0.floats.get()[0], baz0_get.floats.get()[0]);
-    compareEQ(baz0.floats.get()[1], baz0_get.floats.get()[1]);
-    compareEQ(baz1.id, baz1_get.id);
-    compareEQ(baz1.ints.get().size(), baz1_get.ints.get().size());
-    compareEQ(baz1.ints.get()[0], baz1_get.ints.get()[0]);
-    compareEQ(baz1.ints.get()[1], baz1_get.ints.get()[1]);
-    compareEQ(baz1.ints.get()[2], baz1_get.ints.get()[2]);
-    compareEQ(baz1.floats.get().size(), baz1_get.floats.get().size());
-    compareEQ(baz1.floats.get()[0], baz1_get.floats.get()[0]);
-    compareEQ(baz1.floats.get()[1], baz1_get.floats.get()[1]);
-    compareEQ(baz1.floats.get()[2], baz1_get.floats.get()[2]);
+    {
+        // Create objects.
+        Baz baz0;
+        baz0.ints.get().push_back(10);
+        baz0.ints.get().push_back(100);
+        baz0.floats.get().push_back(0.5);
+        baz0.floats.get().push_back(1.5);
+        Baz baz1;
+        baz1.ints.get().push_back(-111);
+        baz1.ints.get().push_back(-2222);
+        baz1.ints.get().push_back(-33333);
+        baz1.floats.get().push_back(-2.5);
+        baz1.floats.get().push_back(-3.5);
+        baz1.floats.get().push_back(-4.5);
+
+        // Try to insert.
+        expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
+        // Check assigned IDs.
+        compareEQ(baz0.id, static_cast<int64_t>(1));
+        compareEQ(baz1.id, static_cast<int64_t>(2));
+
+        // Select inserted object using sql.
+        Baz baz0_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz0.id, true)(false);
+        Baz baz1_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz1.id, true)(false);
+
+        // Compare objects.
+        compareEQ(baz0.id, baz0_get.id);
+        compareEQ(baz0.ints.get(), baz0_get.ints.get());
+        compareEQ(baz0.floats.get(), baz0_get.floats.get());
+        compareEQ(baz1.id, baz1_get.id);
+        compareEQ(baz1.ints.get(), baz1_get.ints.get());
+        compareEQ(baz1.floats.get(), baz1_get.floats.get());
+    }
 }

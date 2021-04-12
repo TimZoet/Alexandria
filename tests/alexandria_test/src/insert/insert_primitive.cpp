@@ -34,7 +34,7 @@ namespace
 void InsertPrimitive::operator()()
 {
     // TODO: Here, or somewhere else, insert object with non-zero ID.
-    
+
     // Create all property types.
     auto& floatProp  = library->createPrimitiveProperty("floatProp", alex::DataType::Float);
     auto& doubleProp = library->createPrimitiveProperty("doubleProp", alex::DataType::Double);
@@ -61,7 +61,7 @@ void InsertPrimitive::operator()()
     bazType.addProperty(stringProp);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); });
+    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
     sql::ext::TypedTable<int64_t, float, double> fooTable(library->getDatabase().getTable(fooType.getName()));
@@ -75,42 +75,60 @@ void InsertPrimitive::operator()()
     auto bazHandler = library->createObjectHandler<&Baz::id, &Baz::a>(bazType.getName());
 
     // Insert Foo.
-    Foo foo0{.a = 0.5f, .b = 1.5};
-    Foo foo1{.a = -0.5f, .b = -1.5};
-    fooHandler.insert(foo0);
-    fooHandler.insert(foo1);
-    // Check assigned IDs.
-    compareEQ(foo0.id, static_cast<int64_t>(1));
-    compareEQ(foo1.id, static_cast<int64_t>(2));
-    // Select inserted object using sql and compare.
-    Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id, true)(false);
-    Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id, true)(false);
-    compareEQ(foo0.id, foo0_get.id);
-    compareEQ(foo0.a, foo0_get.a);
-    compareEQ(foo0.b, foo0_get.b);
-    compareEQ(foo1.id, foo1_get.id);
-    compareEQ(foo1.a, foo1_get.a);
-    compareEQ(foo1.b, foo1_get.b);
+    {
+        // Create objects.
+        Foo foo0{.a = 0.5f, .b = 1.5};
+        Foo foo1{.a = -0.5f, .b = -1.5};
+
+        // Try to insert.
+        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+
+        // Check assigned IDs.
+        compareEQ(foo0.id, static_cast<int64_t>(1));
+        compareEQ(foo1.id, static_cast<int64_t>(2));
+
+        // Select inserted object using sql and compare.
+        Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id, true)(false);
+        Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id, true)(false);
+
+        // Compare objects.
+        compareEQ(foo0.id, foo0_get.id);
+        compareEQ(foo0.a, foo0_get.a);
+        compareEQ(foo0.b, foo0_get.b);
+        compareEQ(foo1.id, foo1_get.id);
+        compareEQ(foo1.a, foo1_get.a);
+        compareEQ(foo1.b, foo1_get.b);
+    }
 
     // Insert Bar.
-    Bar bar0{.a = 1, .b = 2, .c = 3, .d = 4};
-    Bar bar1{.a = -1, .b = -2, .c = 123456, .d = 1234567};
-    barHandler.insert(bar0);
-    barHandler.insert(bar1);
-    // Check assigned IDs.
-    compareEQ(bar0.id, static_cast<int64_t>(1));
-    compareEQ(bar1.id, static_cast<int64_t>(2));
-    // Select inserted object using sql and compare.
-    Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id, true)(false);
-    Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id, true)(false);
-    compareEQ(bar0.id, bar0_get.id);
-    compareEQ(bar0.a, bar0_get.a);
-    compareEQ(bar0.b, bar0_get.b);
-    compareEQ(bar0.c, bar0_get.c);
-    compareEQ(bar0.d, bar0_get.d);
-    compareEQ(bar1.id, bar1_get.id);
-    compareEQ(bar1.a, bar1_get.a);
-    compareEQ(bar1.b, bar1_get.b);
-    compareEQ(bar1.c, bar1_get.c);
-    compareEQ(bar1.d, bar1_get.d);
+    {
+        // Create objects.
+        Bar bar0{.a = 1, .b = 2, .c = 3, .d = 4};
+        Bar bar1{.a = -1, .b = -2, .c = 123456, .d = 1234567};
+
+        // Try to insert.
+        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+
+        // Check assigned IDs.
+        compareEQ(bar0.id, static_cast<int64_t>(1));
+        compareEQ(bar1.id, static_cast<int64_t>(2));
+
+        // Select inserted object using sql and compare.
+        Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id, true)(false);
+        Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id, true)(false);
+
+        // Compare objects.
+        compareEQ(bar0.id, bar0_get.id);
+        compareEQ(bar0.a, bar0_get.a);
+        compareEQ(bar0.b, bar0_get.b);
+        compareEQ(bar0.c, bar0_get.c);
+        compareEQ(bar0.d, bar0_get.d);
+        compareEQ(bar1.id, bar1_get.id);
+        compareEQ(bar1.a, bar1_get.a);
+        compareEQ(bar1.b, bar1_get.b);
+        compareEQ(bar1.c, bar1_get.c);
+        compareEQ(bar1.d, bar1_get.d);
+    }
 }
