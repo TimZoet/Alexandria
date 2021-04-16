@@ -1,4 +1,4 @@
-#include "alexandria_test/insert/insert_primitive.h"
+#include "alexandria_test/get/get_primitive.h"
 
 ////////////////////////////////////////////////////////////////
 // Module includes.
@@ -31,10 +31,8 @@ namespace
     };
 }  // namespace
 
-void InsertPrimitive::operator()()
+void GetPrimitive::operator()()
 {
-    // TODO: Here, or somewhere else, insert object with non-zero ID.
-
     // Create all property types.
     auto& floatProp  = library->createPrimitiveProperty("floatProp", alex::DataType::Float);
     auto& doubleProp = library->createPrimitiveProperty("doubleProp", alex::DataType::Double);
@@ -63,74 +61,81 @@ void InsertPrimitive::operator()()
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
-    // Get tables.
-    sql::ext::TypedTable<int64_t, float, double> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, int32_t, int64_t, uint32_t, uint64_t> barTable(
-      library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, std::string> bazTable(library->getDatabase().getTable(bazType.getName()));
-
     // Create object handlers.
     auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a, &Foo::b>(fooType.getName());
     auto barHandler = library->createObjectHandler<&Bar::id, &Bar::a, &Bar::b, &Bar::c, &Bar::d>(barType.getName());
     auto bazHandler = library->createObjectHandler<&Baz::id, &Baz::a>(bazType.getName());
 
-    // Insert Foo.
+    // Retrieve Foo.
     {
-        // Create objects.
+        // Create and insert objects.
         Foo foo0{.a = 0.5f, .b = 1.5};
         Foo foo1{.a = -0.5f, .b = -1.5};
-
-        // Try to insert.
         expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
         expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
-        // Check assigned IDs.
-        compareEQ(foo0.id, static_cast<int64_t>(1));
-        compareEQ(foo1.id, static_cast<int64_t>(2));
-
-        // Select inserted object using sql and compare.
-        Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id, true)(false);
-        Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id, true)(false);
+        // Try to retrieve objects.
+        std::unique_ptr<Foo> foo0_get, foo1_get;
+        expectNoThrow([&] { foo0_get = fooHandler.get(foo0.id); }).fatal("Failed to get object");
+        expectNoThrow([&] { foo1_get = fooHandler.get(foo1.id); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get.id);
-        compareEQ(foo0.a, foo0_get.a);
-        compareEQ(foo0.b, foo0_get.b);
-        compareEQ(foo1.id, foo1_get.id);
-        compareEQ(foo1.a, foo1_get.a);
-        compareEQ(foo1.b, foo1_get.b);
+        compareEQ(foo0.id, foo0_get->id);
+        compareEQ(foo0.a, foo0_get->a);
+        compareEQ(foo0.b, foo0_get->b);
+        compareEQ(foo1.id, foo1_get->id);
+        compareEQ(foo1.a, foo1_get->a);
+        compareEQ(foo1.b, foo1_get->b);
     }
 
-    // Insert Bar.
+    // Retrieve Bar.
     {
-        // Create objects.
+        // Create and insert objects.
         Bar bar0{.a = 1, .b = 2, .c = 3, .d = 4};
         Bar bar1{.a = -1, .b = -2, .c = 123456, .d = 1234567};
-
-        // Try to insert.
         expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
 
-        // Check assigned IDs.
-        compareEQ(bar0.id, static_cast<int64_t>(1));
-        compareEQ(bar1.id, static_cast<int64_t>(2));
-
-        // Select inserted object using sql and compare.
-        Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id, true)(false);
-        Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id, true)(false);
+        // Try to retrieve objects.
+        std::unique_ptr<Bar> bar0_get, bar1_get;
+        expectNoThrow([&] { bar0_get = barHandler.get(bar0.id); }).fatal("Failed to get object");
+        expectNoThrow([&] { bar1_get = barHandler.get(bar1.id); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get.id);
-        compareEQ(bar0.a, bar0_get.a);
-        compareEQ(bar0.b, bar0_get.b);
-        compareEQ(bar0.c, bar0_get.c);
-        compareEQ(bar0.d, bar0_get.d);
-        compareEQ(bar1.id, bar1_get.id);
-        compareEQ(bar1.a, bar1_get.a);
-        compareEQ(bar1.b, bar1_get.b);
-        compareEQ(bar1.c, bar1_get.c);
-        compareEQ(bar1.d, bar1_get.d);
+        compareEQ(bar0.id, bar0_get->id);
+        compareEQ(bar0.a, bar0_get->a);
+        compareEQ(bar0.b, bar0_get->b);
+        compareEQ(bar0.c, bar0_get->c);
+        compareEQ(bar0.d, bar0_get->d);
+        compareEQ(bar1.id, bar1_get->id);
+        compareEQ(bar1.a, bar1_get->a);
+        compareEQ(bar1.b, bar1_get->b);
+        compareEQ(bar1.c, bar1_get->c);
+        compareEQ(bar1.d, bar1_get->d);
     }
 
-    // TODO: Insert Baz missing?
+    // Retrieve Baz.
+    {
+        // Create and insert objects.
+        Baz baz0{.a = "abc"};
+        Baz baz1{.a = "defghi"};
+        Baz baz2{.a = ""};
+        expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { bazHandler.insert(baz2); }).fatal("Failed to insert object");
+
+        // Try to retrieve objects.
+        std::unique_ptr<Baz> baz0_get, baz1_get, baz2_get;
+        expectNoThrow([&] { baz0_get = bazHandler.get(baz0.id); }).fatal("Failed to get object");
+        expectNoThrow([&] { baz1_get = bazHandler.get(baz1.id); }).fatal("Failed to get object");
+        expectNoThrow([&] { baz2_get = bazHandler.get(baz2.id); }).fatal("Failed to get object");
+
+        // Compare objects.
+        compareEQ(baz0.id, baz0_get->id);
+        compareEQ(baz0.a, baz0_get->a);
+        compareEQ(baz1.id, baz1_get->id);
+        compareEQ(baz1.a, baz1_get->a);
+        compareEQ(baz2.id, baz2_get->id);
+        compareEQ(baz2.a, baz2_get->a);
+    }
 }

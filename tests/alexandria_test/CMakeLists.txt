@@ -21,6 +21,14 @@ set(HEADERS
     ${INCLUDE_DIR}/type_add_property.h
     ${INCLUDE_DIR}/utils.h
 
+    ${INCLUDE_DIR}/get/get_blob.h
+	${INCLUDE_DIR}/get/get_blob_array.h
+	${INCLUDE_DIR}/get/get_primitive.h
+	${INCLUDE_DIR}/get/get_primitive_array.h
+	${INCLUDE_DIR}/get/get_primitive_blob.h
+	${INCLUDE_DIR}/get/get_reference.h
+	${INCLUDE_DIR}/get/get_reference_array.h
+
     ${INCLUDE_DIR}/insert/insert_blob.h
 	${INCLUDE_DIR}/insert/insert_blob_array.h
 	${INCLUDE_DIR}/insert/insert_primitive.h
@@ -48,6 +56,14 @@ set(SOURCES
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/type_add_property.cpp
     ${SRC_DIR}/utils.cpp
+
+    ${SRC_DIR}/get/get_blob.cpp
+	${SRC_DIR}/get/get_blob_array.cpp
+	${SRC_DIR}/get/get_primitive.cpp
+	${SRC_DIR}/get/get_primitive_array.cpp
+	${SRC_DIR}/get/get_primitive_blob.cpp
+	${SRC_DIR}/get/get_reference.cpp
+	${SRC_DIR}/get/get_reference_array.cpp
 
     ${SRC_DIR}/insert/insert_blob.cpp
 	${SRC_DIR}/insert/insert_blob_array.cpp

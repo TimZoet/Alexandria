@@ -25,6 +25,13 @@
 #include "alexandria_test/create_type_primitive_array.h"
 #include "alexandria_test/create_type_primitive_blob.h"
 #include "alexandria_test/type_add_property.h"
+#include "alexandria_test/get/get_blob.h"
+#include "alexandria_test/get/get_blob_array.h"
+#include "alexandria_test/get/get_primitive.h"
+#include "alexandria_test/get/get_primitive_array.h"
+#include "alexandria_test/get/get_primitive_blob.h"
+#include "alexandria_test/get/get_reference.h"
+#include "alexandria_test/get/get_reference_array.h"
 #include "alexandria_test/insert/insert_blob.h"
 #include "alexandria_test/insert/insert_blob_array.h"
 #include "alexandria_test/insert/insert_primitive.h"
@@ -37,20 +44,8 @@
 #include "Windows.h"
 #endif
 
-template<typename T>
-concept is_primitive_array = requires(T array)
-{
-    T::element_t;
-    T::container_t;
-    {
-        array.get()
-    }
-    ->std::convertible_to<typename T::container_t>;
-};
-
 int main(int argc, char** argv)
 {
-    if constexpr (is_primitive_array<alex::PrimitiveArray<float>>) { std::cout << "yes" << std::endl; }
     // Set path next to executable.
 #ifdef WIN32
     {
@@ -77,6 +72,13 @@ int main(int argc, char** argv)
             CreateTypePrimitiveArray,
             CreateTypePrimitiveBlob,
             TypeAddProperty,
+            GetBlob,
+            GetBlobArray,
+            GetPrimitive,
+            GetPrimitiveArray,
+            GetPrimitiveBlob,
+            GetReference,
+            GetReferenceArray,
             InsertBlob,
             InsertBlobArray,
             InsertPrimitive,
