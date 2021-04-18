@@ -16,7 +16,7 @@ namespace
 
         Foo() = default;
 
-        Foo(int64_t iid, std::vector<float> ffloats) : id(iid) { floats.getPrimitiveArray() = std::move(ffloats); }
+        Foo(int64_t iid, std::vector<float> ffloats) : id(iid) { floats.get() = std::move(ffloats); }
     };
 
     struct Bar
@@ -26,7 +26,7 @@ namespace
 
         Bar() = default;
 
-        Bar(int64_t iid, std::vector<int32_t> iints) : id(iid) { ints.getPrimitiveArray() = std::move(iints); }
+        Bar(int64_t iid, std::vector<int32_t> iints) : id(iid) { ints.get() = std::move(iints); }
     };
 
     struct Baz
@@ -39,8 +39,8 @@ namespace
 
         Baz(int64_t iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
         {
-            ints.getPrimitiveArray()   = std::move(iints);
-            floats.getPrimitiveArray() = std::move(ffloats);
+            ints.get()   = std::move(iints);
+            floats.get() = std::move(ffloats);
         }
     };
 }  // namespace
@@ -91,12 +91,12 @@ void InsertPrimitiveArray::operator()()
     {
         // Create objects.
         Foo foo0;
-        foo0.floats.getPrimitiveArray().push_back(0.5f);
-        foo0.floats.getPrimitiveArray().push_back(1.5f);
+        foo0.floats.get().push_back(0.5f);
+        foo0.floats.get().push_back(1.5f);
         Foo foo1;
-        foo1.floats.getPrimitiveArray().push_back(-2.5f);
-        foo1.floats.getPrimitiveArray().push_back(-3.5f);
-        foo1.floats.getPrimitiveArray().push_back(-4.5f);
+        foo1.floats.get().push_back(-2.5f);
+        foo1.floats.get().push_back(-3.5f);
+        foo1.floats.get().push_back(-4.5f);
 
         // Try to insert.
         expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
@@ -118,22 +118,22 @@ void InsertPrimitiveArray::operator()()
         auto               idparam       = foo0.id;
         auto               floats_select = fooFloatsTable.select<float, 2>(fooFloatsTable.col<1>() == &idparam, true);
         std::vector<float> floats_get(floats_select.begin(), floats_select.end());
-        compareEQ(foo0.floats.getPrimitiveArray(), floats_get);
+        compareEQ(foo0.floats.get(), floats_get);
         idparam = foo1.id;
         floats_get.assign(floats_select(true).begin(), floats_select.end());
-        compareEQ(foo1.floats.getPrimitiveArray(), floats_get);
+        compareEQ(foo1.floats.get(), floats_get);
     }
 
     // Insert Bar.
     {
         // Create objects.
         Bar bar0;
-        bar0.ints.getPrimitiveArray().push_back(10);
-        bar0.ints.getPrimitiveArray().push_back(100);
+        bar0.ints.get().push_back(10);
+        bar0.ints.get().push_back(100);
         Bar bar1;
-        bar1.ints.getPrimitiveArray().push_back(-111);
-        bar1.ints.getPrimitiveArray().push_back(-2222);
-        bar1.ints.getPrimitiveArray().push_back(-33333);
+        bar1.ints.get().push_back(-111);
+        bar1.ints.get().push_back(-2222);
+        bar1.ints.get().push_back(-33333);
 
         // Try to insert.
         expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
@@ -155,27 +155,27 @@ void InsertPrimitiveArray::operator()()
         auto                 idparam     = bar0.id;
         auto                 ints_select = barIntsTable.select<int32_t, 2>(barIntsTable.col<1>() == &idparam, true);
         std::vector<int32_t> ints_get(ints_select.begin(), ints_select.end());
-        compareEQ(bar0.ints.getPrimitiveArray(), ints_get);
+        compareEQ(bar0.ints.get(), ints_get);
         idparam = bar1.id;
         ints_get.assign(ints_select(true).begin(), ints_select.end());
-        compareEQ(bar1.ints.getPrimitiveArray(), ints_get);
+        compareEQ(bar1.ints.get(), ints_get);
     }
 
     // Insert Baz.
     {
         // Create objects.
         Baz baz0;
-        baz0.ints.getPrimitiveArray().push_back(10);
-        baz0.ints.getPrimitiveArray().push_back(100);
-        baz0.floats.getPrimitiveArray().push_back(0.5);
-        baz0.floats.getPrimitiveArray().push_back(1.5);
+        baz0.ints.get().push_back(10);
+        baz0.ints.get().push_back(100);
+        baz0.floats.get().push_back(0.5);
+        baz0.floats.get().push_back(1.5);
         Baz baz1;
-        baz1.ints.getPrimitiveArray().push_back(-111);
-        baz1.ints.getPrimitiveArray().push_back(-2222);
-        baz1.ints.getPrimitiveArray().push_back(-33333);
-        baz1.floats.getPrimitiveArray().push_back(-2.5);
-        baz1.floats.getPrimitiveArray().push_back(-3.5);
-        baz1.floats.getPrimitiveArray().push_back(-4.5);
+        baz1.ints.get().push_back(-111);
+        baz1.ints.get().push_back(-2222);
+        baz1.ints.get().push_back(-33333);
+        baz1.floats.get().push_back(-2.5);
+        baz1.floats.get().push_back(-3.5);
+        baz1.floats.get().push_back(-4.5);
 
         // Try to insert.
         expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
@@ -199,12 +199,12 @@ void InsertPrimitiveArray::operator()()
         auto doubles_select = bazFloatsTable.select<float, 2>(bazFloatsTable.col<1>() == &idparam, true);
         std::vector<uint64_t> uints_get(uints_select.begin(), uints_select.end());
         std::vector<double>   doubles_get(doubles_select.begin(), doubles_select.end());
-        compareEQ(baz0.ints.getPrimitiveArray(), uints_get);
-        compareEQ(baz0.floats.getPrimitiveArray(), doubles_get);
+        compareEQ(baz0.ints.get(), uints_get);
+        compareEQ(baz0.floats.get(), doubles_get);
         idparam = baz1.id;
         uints_get.assign(uints_select(true).begin(), uints_select.end());
         doubles_get.assign(doubles_select(true).begin(), doubles_select.end());
-        compareEQ(baz1.ints.getPrimitiveArray(), uints_get);
-        compareEQ(baz1.floats.getPrimitiveArray(), doubles_get);
+        compareEQ(baz1.ints.get(), uints_get);
+        compareEQ(baz1.floats.get(), doubles_get);
     }
 }
