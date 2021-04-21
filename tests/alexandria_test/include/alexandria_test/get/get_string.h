@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class CreateTypeNestedReference : public utils::LibraryMember
+class GetString : public utils::LibraryMember
 {
 public:
     void operator()() override;

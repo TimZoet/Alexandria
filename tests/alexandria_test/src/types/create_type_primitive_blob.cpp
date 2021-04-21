@@ -1,21 +1,16 @@
-#include "alexandria_test/create_type_primitive_blob.h"
+#include "alexandria_test/types/create_type_primitive_blob.h"
 
 void CreateTypePrimitiveBlob::operator()()
 {
     // Create type and property.
     alex::Type*     type;
     alex::Property *prop0, *prop1, *prop2;
-    expectNoThrow([&type, this]() { type = &library->createType("type0"); });
-    expectNoThrow(
-      [&prop0, this]() { prop0 = &library->createPrimitiveArrayProperty("prop0", alex::DataType::Int32, true); });
-    expectNoThrow(
-      [&prop1, this]() { prop1 = &library->createPrimitiveArrayProperty("prop1", alex::DataType::Int64, true); });
-    expectNoThrow(
-      [&prop2, this]() { prop2 = &library->createPrimitiveArrayProperty("prop2", alex::DataType::Float, true); });
-    expectThrow([this]() { library->createPrimitiveArrayProperty("prop3", alex::DataType::String, true); });
-    expectNoThrow([&type, &prop0]() { type->addProperty(*prop0); });
-    expectNoThrow([&type, &prop1]() { type->addProperty(*prop1); });
-    expectNoThrow([&type, &prop2]() { type->addProperty(*prop2); });
+    expectNoThrow([&type, &prop0, &prop1, &prop2, this]() {
+        type  = &library->createType("type0");
+        prop0 = &type->createPrimitiveBlobProperty("prop0", alex::DataType::Int32);
+        prop1 = &type->createPrimitiveBlobProperty("prop1", alex::DataType::Int64);
+        prop2 = &type->createPrimitiveBlobProperty("prop2", alex::DataType::Float);
+    });
 
     // Commit.
     expectNoThrow([this]() { library->commitTypes(); });

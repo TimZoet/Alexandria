@@ -15,16 +15,8 @@
 #include "alexandria_test/create_property_blob.h"
 #include "alexandria_test/create_property_nested.h"
 #include "alexandria_test/create_property_primitive.h"
-#include "alexandria_test/create_type.h"
-#include "alexandria_test/create_type_blob.h"
-#include "alexandria_test/create_type_blob_array.h"
-#include "alexandria_test/create_type_nested.h"
-#include "alexandria_test/create_type_nested_array.h"
-#include "alexandria_test/create_type_nested_reference.h"
-#include "alexandria_test/create_type_primitive.h"
-#include "alexandria_test/create_type_primitive_array.h"
-#include "alexandria_test/create_type_primitive_blob.h"
 #include "alexandria_test/type_add_property.h"
+
 #include "alexandria_test/get/get_blob.h"
 #include "alexandria_test/get/get_blob_array.h"
 #include "alexandria_test/get/get_primitive.h"
@@ -32,6 +24,8 @@
 #include "alexandria_test/get/get_primitive_blob.h"
 #include "alexandria_test/get/get_reference.h"
 #include "alexandria_test/get/get_reference_array.h"
+#include "alexandria_test/get/get_string.h"
+#include "alexandria_test/get/get_string_array.h"
 #include "alexandria_test/insert/insert_blob.h"
 #include "alexandria_test/insert/insert_blob_array.h"
 #include "alexandria_test/insert/insert_primitive.h"
@@ -39,6 +33,19 @@
 #include "alexandria_test/insert/insert_primitive_blob.h"
 #include "alexandria_test/insert/insert_reference.h"
 #include "alexandria_test/insert/insert_reference_array.h"
+#include "alexandria_test/insert/insert_string.h"
+#include "alexandria_test/insert/insert_string_array.h"
+#include "alexandria_test/types/create_type.h"
+#include "alexandria_test/types/create_type_blob.h"
+#include "alexandria_test/types/create_type_blob_array.h"
+#include "alexandria_test/types/create_type_primitive.h"
+#include "alexandria_test/types/create_type_primitive_array.h"
+#include "alexandria_test/types/create_type_primitive_blob.h"
+#include "alexandria_test/types/create_type_reference.h"
+#include "alexandria_test/types/create_type_reference_array.h"
+#include "alexandria_test/types/create_type_string.h"
+#include "alexandria_test/types/create_type_string_array.h"
+#include "alexandria_test/types/create_type_type.h"
 
 #ifdef WIN32
 #include "Windows.h"
@@ -57,21 +64,14 @@ int main(int argc, char** argv)
     }
 #endif
 
-    bt::run<CreateLibrary,
+    bt::run</*CreateLibrary,
             CreateProperty,
             CreatePropertyBlob,
             CreatePropertyNested,
             CreatePropertyPrimitive,
-            CreateType,
-            CreateTypeBlob,
-            CreateTypeBlobArray,
-            CreateTypeNested,
-            CreateTypeNestedArray,
-            CreateTypeNestedReference,
-            CreateTypePrimitive,
-            CreateTypePrimitiveArray,
-            CreateTypePrimitiveBlob,
-            TypeAddProperty,
+            
+            TypeAddProperty,*/
+            // get
             GetBlob,
             GetBlobArray,
             GetPrimitive,
@@ -79,12 +79,30 @@ int main(int argc, char** argv)
             GetPrimitiveBlob,
             GetReference,
             GetReferenceArray,
+            GetString,
+            GetStringArray,
+            // insert
             InsertBlob,
             InsertBlobArray,
             InsertPrimitive,
             InsertPrimitiveArray,
             InsertPrimitiveBlob,
             InsertReference,
-            InsertReferenceArray>(argc, argv, "alexandria");
+            InsertReferenceArray,
+            InsertString,
+            InsertStringArray,
+            // types
+            CreateType,
+            CreateTypeBlob,
+            CreateTypeBlobArray,
+            //CreateTypeNested,
+            CreateTypePrimitive,
+            CreateTypePrimitiveArray,
+            CreateTypePrimitiveBlob,
+            CreateTypeReference,
+            CreateTypeReferenceArray,
+            CreateTypeString,
+            CreateTypeStringArray,
+            CreateTypeType>(argc, argv, "alexandria");
     return 0;
 }

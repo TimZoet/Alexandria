@@ -1,32 +1,27 @@
-#include "alexandria_test/create_type_nested.h"
+#include "alexandria_test/types/create_type_type.h"
 
-void CreateTypeNested::operator()()
+void CreateTypeType::operator()()
 {
     // Create types and properties.
     // type0 -> prop1(type1) -> prop2(type2)
     //       \
     //        -> prop3(type3)
     // type2 -> propA
-    // type3 -> propA
     // type3 -> propB
+    // type3 -> propC
     alex::Type *    type0, *type1, *type2, *type3;
-    alex::Property *prop1, *prop2, *prop3, *propA, *propB;
+    alex::Property *prop1, *prop2, *prop3, *propA, *propB, *propC;
     expectNoThrow([&type0, this]() { type0 = &library->createType("type0"); });
     expectNoThrow([&type1, this]() { type1 = &library->createType("type1"); });
     expectNoThrow([&type2, this]() { type2 = &library->createType("type2"); });
     expectNoThrow([&type3, this]() { type3 = &library->createType("type3"); });
 
-    expectNoThrow([&prop1, &type1, this]() { prop1 = &library->createNestedProperty("prop1", *type1, false); });
-    expectNoThrow([&prop2, &type2, this]() { prop2 = &library->createNestedProperty("prop2", *type2, false); });
-    expectNoThrow([&prop3, &type3, this]() { prop3 = &library->createNestedProperty("prop3", *type3, false); });
-    expectNoThrow([&propA, this]() { propA = &library->createPrimitiveProperty("propA", alex::DataType::Float); });
-    expectNoThrow([&propB, this]() { propB = &library->createPrimitiveProperty("propB", alex::DataType::Int32); });
-    expectNoThrow([&type0, &prop1]() { type0->addProperty(*prop1); });
-    expectNoThrow([&type0, &prop3]() { type0->addProperty(*prop3); });
-    expectNoThrow([&type1, &prop2]() { type1->addProperty(*prop2); });
-    expectNoThrow([&type2, &propA]() { type2->addProperty(*propA); });
-    expectNoThrow([&type3, &propA]() { type3->addProperty(*propA); });
-    expectNoThrow([&type3, &propB]() { type3->addProperty(*propB); });
+    expectNoThrow([&type0, &type1, &prop1]() { prop1 = &type0->createTypeProperty("prop1", *type1); });
+    expectNoThrow([&type0, &type3, &prop3]() { prop3 = &type0->createTypeProperty("prop3", *type3); });
+    expectNoThrow([&type1, &type2, &prop2]() { prop2 = &type1->createTypeProperty("prop2", *type2); });
+    expectNoThrow([&type2, &propA]() { propA = &type2->createPrimitiveProperty("propA", alex::DataType::Float); });
+    expectNoThrow([&type3, &propB]() { propB = &type3->createPrimitiveProperty("propB", alex::DataType::Double); });
+    expectNoThrow([&type3, &propC]() { propC = &type3->createPrimitiveProperty("propC", alex::DataType::Int32); });
 
     // Commit.
     expectNoThrow([this]() { library->commitTypes(); });
@@ -38,12 +33,13 @@ void CreateTypeNested::operator()()
       {0, "propA", alex::toString(alex::DataType::Float), 0, 0, 0, 0},
       {0, "prop2", alex::toString(alex::DataType::NestedType), type2->getId(), 0, 0, 0},
       {0, "prop1", alex::toString(alex::DataType::NestedType), type1->getId(), 0, 0, 0},
-      {0, "propB", alex::toString(alex::DataType::Int32), 0, 0, 0, 0},
+      {0, "propB", alex::toString(alex::DataType::Double), 0, 0, 0, 0},
+      {0, "propC", alex::toString(alex::DataType::Int32), 0, 0, 0, 0},
       {0, "prop3", alex::toString(alex::DataType::NestedType), type3->getId(), 0, 0, 0}};
     std::vector<utils::Member> members = {{0, type2->getId(), propA->getId()},
                                           {0, type1->getId(), prop2->getId()},
-                                          {0, type3->getId(), propA->getId()},
                                           {0, type3->getId(), propB->getId()},
+                                          {0, type3->getId(), propC->getId()},
                                           {0, type0->getId(), prop1->getId()},
                                           {0, type0->getId(), prop3->getId()}};
     checkTypeTables(std::move(types), std::move(properties), std::move(members));

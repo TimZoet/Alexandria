@@ -47,24 +47,18 @@ namespace
 
 void InsertPrimitiveBlob::operator()()
 {
-    // Create all property types.
-    auto& floatsProp  = library->createPrimitiveArrayProperty("floats", alex::DataType::Float, true);
-    auto& doublesProp = library->createPrimitiveArrayProperty("doubles", alex::DataType::Double, true);
-    auto& intsProp    = library->createPrimitiveArrayProperty("ints", alex::DataType::Int32, true);
-    auto& uintsProp   = library->createPrimitiveArrayProperty("uints", alex::DataType::Uint64, true);
-
     // Create type with floats.
     auto& fooType = library->createType("Foo");
-    fooType.addProperty(floatsProp);
+    fooType.createPrimitiveBlobProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
     auto& barType = library->createType("Bar");
-    barType.addProperty(intsProp);
+    barType.createPrimitiveBlobProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
     auto& bazType = library->createType("Baz");
-    bazType.addProperty(uintsProp);
-    bazType.addProperty(doublesProp);
+    bazType.createPrimitiveBlobProperty("uints", alex::DataType::Uint64);
+    bazType.createPrimitiveBlobProperty("doubles", alex::DataType::Double);
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");

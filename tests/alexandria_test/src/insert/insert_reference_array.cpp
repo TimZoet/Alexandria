@@ -37,18 +37,12 @@ void InsertReferenceArray::operator()()
     auto& barType = library->createType("Bar");
     auto& bazType = library->createType("Baz");
 
-    // Create all property types.
-    auto& floatProp = library->createPrimitiveProperty("floatProp", alex::DataType::Float);
-    auto& int32Prop = library->createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    auto& fooProp   = library->createNestedArrayProperty("fooProp", fooType);
-    auto& barProp   = library->createNestedArrayProperty("barProp", barType);
-
     // Add properties to types.
-    fooType.addProperty(floatProp);
-    fooType.addProperty(int32Prop);
-    barType.addProperty(fooProp);
-    bazType.addProperty(fooProp);
-    bazType.addProperty(barProp);
+    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
+    fooType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
+    barType.createReferenceArrayProperty("fooProp", fooType);
+    bazType.createReferenceArrayProperty("fooProp", fooType);
+    bazType.createReferenceArrayProperty("barProp", barType);
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");

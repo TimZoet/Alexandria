@@ -47,24 +47,18 @@ namespace
 
 void InsertPrimitiveArray::operator()()
 {
-    // Create all property types.
-    auto& floatsProp  = library->createPrimitiveArrayProperty("floats", alex::DataType::Float, false);
-    auto& doublesProp = library->createPrimitiveArrayProperty("doubles", alex::DataType::Double, false);
-    auto& intsProp    = library->createPrimitiveArrayProperty("ints", alex::DataType::Int32, false);
-    auto& uintsProp   = library->createPrimitiveArrayProperty("uints", alex::DataType::Uint64, false);
-
     // Create type with floats.
     auto& fooType = library->createType("Foo");
-    fooType.addProperty(floatsProp);
+    fooType.createPrimitiveArrayProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
     auto& barType = library->createType("Bar");
-    barType.addProperty(intsProp);
+    barType.createPrimitiveArrayProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
     auto& bazType = library->createType("Baz");
-    bazType.addProperty(uintsProp);
-    bazType.addProperty(doublesProp);
+    bazType.createPrimitiveArrayProperty("uints", alex::DataType::Uint64);
+    bazType.createPrimitiveArrayProperty("doubles", alex::DataType::Double);
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");

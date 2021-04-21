@@ -47,40 +47,21 @@ namespace
 
 void GetPrimitiveArray::operator()()
 {
-    // Create all property types.
-    auto& floatsProp  = library->createPrimitiveArrayProperty("floats", alex::DataType::Float, false);
-    auto& doublesProp = library->createPrimitiveArrayProperty("doubles", alex::DataType::Double, false);
-    auto& intsProp    = library->createPrimitiveArrayProperty("ints", alex::DataType::Int32, false);
-    auto& uintsProp   = library->createPrimitiveArrayProperty("uints", alex::DataType::Uint64, false);
-
     // Create type with floats.
     auto& fooType = library->createType("Foo");
-    fooType.addProperty(floatsProp);
+    fooType.createPrimitiveArrayProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
     auto& barType = library->createType("Bar");
-    barType.addProperty(intsProp);
+    barType.createPrimitiveArrayProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
     auto& bazType = library->createType("Baz");
-    bazType.addProperty(uintsProp);
-    bazType.addProperty(doublesProp);
+    bazType.createPrimitiveArrayProperty("uints", alex::DataType::Uint64);
+    bazType.createPrimitiveArrayProperty("doubles", alex::DataType::Double);
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::ext::TypedTable<int64_t>                 fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, float> fooFloatsTable(
-      library->getDatabase().getTable(fooType.getName() + "_floats"));
-    sql::ext::TypedTable<int64_t>                   barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, int32_t> barIntsTable(
-      library->getDatabase().getTable(barType.getName() + "_ints"));
-    sql::ext::TypedTable<int64_t>                    bazTable(library->getDatabase().getTable(bazType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, uint64_t> bazIntsTable(
-      library->getDatabase().getTable(bazType.getName() + "_uints"));
-    sql::ext::TypedTable<int64_t, int64_t, double> bazFloatsTable(
-      library->getDatabase().getTable(bazType.getName() + "_doubles"));
 
     // Create object handlers.
     auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::floats>(fooType.getName());

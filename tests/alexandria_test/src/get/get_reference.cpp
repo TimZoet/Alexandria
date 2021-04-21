@@ -37,25 +37,15 @@ void GetReference::operator()()
     auto& barType = library->createType("Bar");
     auto& bazType = library->createType("Baz");
 
-    // Create all property types.
-    auto& floatProp = library->createPrimitiveProperty("floatProp", alex::DataType::Float);
-    auto& int32Prop = library->createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    auto& fooProp   = library->createNestedProperty("fooProp", fooType, true);
-    auto& barProp   = library->createNestedProperty("barProp", barType, true);
-
     // Add properties to types.
-    fooType.addProperty(floatProp);
-    fooType.addProperty(int32Prop);
-    barType.addProperty(fooProp);
-    bazType.addProperty(fooProp);
-    bazType.addProperty(barProp);
+    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
+    fooType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
+    barType.createReferenceProperty("fooProp", fooType);
+    bazType.createReferenceProperty("fooProp", fooType);
+    bazType.createReferenceProperty("barProp", barType);
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::ext::TypedTable<int64_t, int64_t>          barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, int64_t> bazTable(library->getDatabase().getTable(bazType.getName()));
 
     // Create object handlers.
     auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a, &Foo::b>(fooType.getName());

@@ -38,18 +38,14 @@ namespace
 
 void InsertBlobArray::operator()()
 {
-    // Create all property types.
-    auto& blobProp1 = library->createBlobProperty("blob1", true);
-    auto& blobProp2 = library->createBlobProperty("blob2", true);
-
     // Create type with 1 blob.
     auto& fooType = library->createType("Foo");
-    fooType.addProperty(blobProp1);
+    fooType.createBlobArrayProperty("blob1");
 
     // Create type with 2 blobs.
     auto& barType = library->createType("Bar");
-    barType.addProperty(blobProp1);
-    barType.addProperty(blobProp2);
+    barType.createBlobArrayProperty("blob1");
+    barType.createBlobArrayProperty("blob2");
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");

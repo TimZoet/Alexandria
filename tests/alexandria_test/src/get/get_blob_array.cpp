@@ -38,31 +38,17 @@ namespace
 
 void GetBlobArray::operator()()
 {
-    // Create all property types.
-    auto& blobProp1 = library->createBlobProperty("blob1", true);
-    auto& blobProp2 = library->createBlobProperty("blob2", true);
-
     // Create type with 1 blob.
     auto& fooType = library->createType("Foo");
-    fooType.addProperty(blobProp1);
+    fooType.createBlobArrayProperty("blob1");
 
     // Create type with 2 blobs.
     auto& barType = library->createType("Bar");
-    barType.addProperty(blobProp1);
-    barType.addProperty(blobProp2);
+    barType.createBlobArrayProperty("blob1");
+    barType.createBlobArrayProperty("blob2");
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::ext::TypedTable<int64_t>               fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t>               barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, Baz> fooBlob1Table(
-      library->getDatabase().getTable(fooType.getName() + "_blob1"));
-    sql::ext::TypedTable<int64_t, int64_t, std::vector<Baz>> barBlob1Table(
-      library->getDatabase().getTable(barType.getName() + "_blob1"));
-    sql::ext::TypedTable<int64_t, int64_t, std::vector<float>> barBlob2Table(
-      library->getDatabase().getTable(barType.getName() + "_blob2"));
 
     // Create object handlers.
     auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a>(fooType.getName());

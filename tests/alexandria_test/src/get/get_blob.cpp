@@ -44,26 +44,17 @@ namespace
 
 void GetBlob::operator()()
 {
-    // Create all property types.
-    auto& blobProp1 = library->createBlobProperty("blobProp1", false);
-    auto& blobProp2 = library->createBlobProperty("blobProp2", false);
-
     // Create type with 1 blob.
     auto& fooType = library->createType("Foo");
-    fooType.addProperty(blobProp1);
+    fooType.createBlobProperty("blobProp1");
 
     // Create type with 2 blobs.
     auto& barType = library->createType("Bar");
-    barType.addProperty(blobProp1);
-    barType.addProperty(blobProp2);
+    barType.createBlobProperty("blobProp1");
+    barType.createBlobProperty("blobProp2");
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::ext::TypedTable<int64_t, Baz> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, std::vector<Baz>, std::vector<float>> barTable(
-      library->getDatabase().getTable(barType.getName()));
 
     // Create object handlers.
     auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a>(fooType.getName());

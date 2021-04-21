@@ -1,13 +1,14 @@
-#include "alexandria_test/create_type_blob_array.h"
+#include "alexandria_test/types/create_type_blob_array.h"
 
 void CreateTypeBlobArray::operator()()
 {
     // Create type and property.
     alex::Type*     type;
     alex::Property* prop;
-    expectNoThrow([&type, this]() { type = &library->createType("type0"); });
-    expectNoThrow([&prop, this]() { prop = &library->createBlobProperty("prop0", true); });
-    expectNoThrow([&type, &prop]() { type->addProperty(*prop); });
+    expectNoThrow([&type, &prop, this]() {
+        type = &library->createType("type0");
+        prop = &type->createBlobArrayProperty("prop0");
+    });
 
     // Commit.
     expectNoThrow([this]() { library->commitTypes(); });

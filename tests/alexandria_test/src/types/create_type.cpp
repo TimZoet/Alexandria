@@ -1,4 +1,4 @@
-#include "alexandria_test/create_type.h"
+#include "alexandria_test/types/create_type.h"
 
 void CreateType::operator()()
 {
@@ -12,6 +12,8 @@ void CreateType::operator()()
     expectThrow([this]() { library->createType("type0"); });
     expectThrow([this]() { library->createType("type1"); });
     expectThrow([this]() { library->createType("type2"); });
+    // TODO: Test creation of types with other forbidden names.
+    // Do the same for properties.
 
     // Check name and committed.
     compareEQ(type0->getName(), "type0");
