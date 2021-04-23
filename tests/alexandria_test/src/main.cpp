@@ -10,13 +10,6 @@
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria_test/create_library.h"
-#include "alexandria_test/create_property.h"
-#include "alexandria_test/create_property_blob.h"
-#include "alexandria_test/create_property_nested.h"
-#include "alexandria_test/create_property_primitive.h"
-#include "alexandria_test/type_add_property.h"
-
 #include "alexandria_test/get/get_blob.h"
 #include "alexandria_test/get/get_blob_array.h"
 #include "alexandria_test/get/get_primitive.h"
@@ -35,6 +28,7 @@
 #include "alexandria_test/insert/insert_reference_array.h"
 #include "alexandria_test/insert/insert_string.h"
 #include "alexandria_test/insert/insert_string_array.h"
+#include "alexandria_test/library/create_library.h"
 #include "alexandria_test/types/create_type.h"
 #include "alexandria_test/types/create_type_blob.h"
 #include "alexandria_test/types/create_type_blob_array.h"
@@ -64,14 +58,7 @@ int main(int argc, char** argv)
     }
 #endif
 
-    bt::run</*CreateLibrary,
-            CreateProperty,
-            CreatePropertyBlob,
-            CreatePropertyNested,
-            CreatePropertyPrimitive,
-            
-            TypeAddProperty,*/
-            // get
+    bt::run<// get
             GetBlob,
             GetBlobArray,
             GetPrimitive,
@@ -91,11 +78,12 @@ int main(int argc, char** argv)
             InsertReferenceArray,
             InsertString,
             InsertStringArray,
+            // library
+            CreateLibrary,
             // types
             CreateType,
             CreateTypeBlob,
             CreateTypeBlobArray,
-            //CreateTypeNested,
             CreateTypePrimitive,
             CreateTypePrimitiveArray,
             CreateTypePrimitiveBlob,

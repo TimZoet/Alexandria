@@ -1,4 +1,4 @@
-#include "alexandria_test/create_library.h"
+#include "alexandria_test/library/create_library.h"
 
 ////////////////////////////////////////////////////////////////
 // Module includes.

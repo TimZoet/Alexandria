@@ -30,10 +30,10 @@ void CreateTypeReference::operator()()
     // When types and properties are committed, their dependencies are committed first; hence the order here.
     std::vector<utils::Type>     types      = {{0, "type0"}, {0, "type1"}, {0, "type2"}, {0, "type3"}};
     std::vector<utils::Property> properties = {
-      {0, "prop1", alex::toString(alex::DataType::NestedType), type2->getId(), 1, 0, 0},
+      {0, "prop1", alex::toString(alex::DataType::Type), type2->getId(), 1, 0, 0},
       {0, "prop3", alex::toString(alex::DataType::Float), 0, 0, 0, 0},
-      {0, "prop2", alex::toString(alex::DataType::NestedType), type3->getId(), 1, 0, 0},
-      {0, "prop0", alex::toString(alex::DataType::NestedType), type1->getId(), 1, 0, 0},
+      {0, "prop2", alex::toString(alex::DataType::Type), type3->getId(), 1, 0, 0},
+      {0, "prop0", alex::toString(alex::DataType::Type), type1->getId(), 1, 0, 0},
     };
     std::vector<utils::Member> members = {{0, type3->getId(), prop3->getId()},
                                           {0, type1->getId(), prop1->getId()},

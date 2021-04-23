@@ -62,7 +62,7 @@ namespace utils
                            alex::PropertyTableIdIndex,
                            alex::PropertyTableNameIndex,
                            alex::PropertyTableDataTypeIndex,
-                           alex::PropertyTableNestedTypeIndex,
+                           alex::PropertyTableTypeIndex,
                            alex::PropertyTableReferenceIndex,
                            alex::PropertyTableArrayIndex,
                            alex::PropertyTableBlobIndex>(propTable.col<alex::PropertyTableIdIndex>() >= 0, true);

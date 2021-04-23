@@ -31,11 +31,11 @@ void CreateTypeType::operator()()
     std::vector<utils::Type>     types      = {{0, "type0"}, {0, "type1"}, {0, "type2"}, {0, "type3"}};
     std::vector<utils::Property> properties = {
       {0, "propA", alex::toString(alex::DataType::Float), 0, 0, 0, 0},
-      {0, "prop2", alex::toString(alex::DataType::NestedType), type2->getId(), 0, 0, 0},
-      {0, "prop1", alex::toString(alex::DataType::NestedType), type1->getId(), 0, 0, 0},
+      {0, "prop2", alex::toString(alex::DataType::Type), type2->getId(), 0, 0, 0},
+      {0, "prop1", alex::toString(alex::DataType::Type), type1->getId(), 0, 0, 0},
       {0, "propB", alex::toString(alex::DataType::Double), 0, 0, 0, 0},
       {0, "propC", alex::toString(alex::DataType::Int32), 0, 0, 0, 0},
-      {0, "prop3", alex::toString(alex::DataType::NestedType), type3->getId(), 0, 0, 0}};
+      {0, "prop3", alex::toString(alex::DataType::Type), type3->getId(), 0, 0, 0}};
     std::vector<utils::Member> members = {{0, type2->getId(), propA->getId()},
                                           {0, type1->getId(), prop2->getId()},
                                           {0, type3->getId(), propB->getId()},
