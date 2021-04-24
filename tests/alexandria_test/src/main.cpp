@@ -10,6 +10,8 @@
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
+#include "alexandria_test/create/create_primitive.h"
+#include "alexandria_test/create/create_string.h"
 #include "alexandria_test/get/get_blob.h"
 #include "alexandria_test/get/get_blob_array.h"
 #include "alexandria_test/get/get_primitive.h"
@@ -58,39 +60,43 @@ int main(int argc, char** argv)
     }
 #endif
 
-    bt::run<// get
-            GetBlob,
-            GetBlobArray,
-            GetPrimitive,
-            GetPrimitiveArray,
-            GetPrimitiveBlob,
-            GetReference,
-            GetReferenceArray,
-            GetString,
-            GetStringArray,
-            // insert
-            InsertBlob,
-            InsertBlobArray,
-            InsertPrimitive,
-            InsertPrimitiveArray,
-            InsertPrimitiveBlob,
-            InsertReference,
-            InsertReferenceArray,
-            InsertString,
-            InsertStringArray,
-            // library
-            CreateLibrary,
-            // types
-            CreateType,
-            CreateTypeBlob,
-            CreateTypeBlobArray,
-            CreateTypePrimitive,
-            CreateTypePrimitiveArray,
-            CreateTypePrimitiveBlob,
-            CreateTypeReference,
-            CreateTypeReferenceArray,
-            CreateTypeString,
-            CreateTypeStringArray,
-            CreateTypeType>(argc, argv, "alexandria");
+    bt::run<
+      // create
+      CreatePrimitive,
+      CreateString,
+      // get
+      GetBlob,
+      GetBlobArray,
+      GetPrimitive,
+      GetPrimitiveArray,
+      GetPrimitiveBlob,
+      GetReference,
+      GetReferenceArray,
+      GetString,
+      GetStringArray,
+      // insert
+      InsertBlob,
+      InsertBlobArray,
+      InsertPrimitive,
+      InsertPrimitiveArray,
+      InsertPrimitiveBlob,
+      InsertReference,
+      InsertReferenceArray,
+      InsertString,
+      InsertStringArray,
+      // library
+      CreateLibrary,
+      // types
+      CreateType,
+      CreateTypeBlob,
+      CreateTypeBlobArray,
+      CreateTypePrimitive,
+      CreateTypePrimitiveArray,
+      CreateTypePrimitiveBlob,
+      CreateTypeReference,
+      CreateTypeReferenceArray,
+      CreateTypeString,
+      CreateTypeStringArray,
+      CreateTypeType>(argc, argv, "alexandria");
     return 0;
 }

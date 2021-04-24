@@ -6,6 +6,9 @@ set(SRC_DIR "src")
 set(HEADERS
     ${INCLUDE_DIR}/utils.h
 
+    ${INCLUDE_DIR}/create/create_primitive.h
+    ${INCLUDE_DIR}/create/create_string.h
+
     ${INCLUDE_DIR}/get/get_blob.h
 	${INCLUDE_DIR}/get/get_blob_array.h
 	${INCLUDE_DIR}/get/get_primitive.h
@@ -44,6 +47,9 @@ set(HEADERS
 set(SOURCES
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/utils.cpp
+
+    ${SRC_DIR}/create/create_primitive.cpp
+    ${SRC_DIR}/create/create_string.cpp
 
     ${SRC_DIR}/get/get_blob.cpp
 	${SRC_DIR}/get/get_blob_array.cpp
