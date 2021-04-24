@@ -5,29 +5,29 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/library.h"
-#include "alexandria/member_types/primitive_array.h"
+#include "alexandria/member_types/string_array.h"
 
 namespace
 {
     struct Foo
     {
-        int64_t           id = 0;
+        alex::InstanceId  id;
         alex::StringArray strings;
 
         Foo() = default;
 
-        Foo(int64_t iid, std::vector<std::string> sstrings) : id(iid) { strings.get() = std::move(sstrings); }
+        Foo(alex::InstanceId iid, std::vector<std::string> sstrings) : id(iid) { strings.get() = std::move(sstrings); }
     };
 
     struct Bar
     {
-        int64_t           id = 0;
+        alex::InstanceId  id;
         alex::StringArray strings1;
         alex::StringArray strings2;
 
         Bar() = default;
 
-        Bar(int64_t iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) : id(iid)
+        Bar(alex::InstanceId iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) : id(iid)
         {
             strings1.get() = std::move(sstrings1);
             strings2.get() = std::move(sstrings2);

@@ -24,13 +24,13 @@ namespace
 
     struct Foo
     {
-        int64_t              id = 0;
+        alex::InstanceId     id;
         alex::BlobArray<Baz> a;
     };
 
     struct Bar
     {
-        int64_t                             id = 0;
+        alex::InstanceId                    id;
         alex::BlobArray<std::vector<Baz>>   a;
         alex::BlobArray<std::vector<float>> b;
     };
@@ -78,19 +78,19 @@ void InsertBlobArray::operator()()
         expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, static_cast<int64_t>(1));
-        compareEQ(foo1.id, static_cast<int64_t>(2));
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id, true)(false);
-        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id, true)(false);
+        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false);
+        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(foo0.id, std::get<0>(foo0_get));
         compareEQ(foo1.id, std::get<0>(foo1_get));
 
         // Select blobs in separate table and compare.
-        auto                         idparam      = foo0.id;
+        auto                         idparam      = foo0.id.get();
         auto                         blobs_select = fooBlob1Table.select<2>(fooBlob1Table.col<1>() == &idparam, true);
         std::vector<std::tuple<Baz>> blobs_get(blobs_select.begin(), blobs_select.end());
         compareEQ(foo0.a.get()[0], std::get<0>(blobs_get[0]));
@@ -128,19 +128,19 @@ void InsertBlobArray::operator()()
         expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, static_cast<int64_t>(1));
-        compareEQ(bar1.id, static_cast<int64_t>(2));
+        compareEQ(bar0.id, alex::InstanceId(1));
+        compareEQ(bar1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id, true)(false);
-        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id, true)(false);
+        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
+        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(bar0.id, std::get<0>(bar0_get));
         compareEQ(bar1.id, std::get<0>(bar1_get));
 
         // Select blobs in separate table and compare.
-        auto idparam       = bar0.id;
+        auto idparam       = bar0.id.get();
         auto blobs1_select = barBlob1Table.select<2>(barBlob1Table.col<1>() == &idparam, true);
         auto blobs2_select = barBlob2Table.select<2>(barBlob2Table.col<1>() == &idparam, true);
         std::vector<std::tuple<std::vector<Baz>>>   blobs1_get(blobs1_select.begin(), blobs1_select.end());

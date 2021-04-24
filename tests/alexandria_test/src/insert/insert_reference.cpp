@@ -11,20 +11,20 @@ namespace
 {
     struct Foo
     {
-        int64_t id = 0;
-        float   a;
-        int32_t b;
+        alex::InstanceId id;
+        float            a;
+        int32_t          b;
     };
 
     struct Bar
     {
-        int64_t              id = 0;
+        alex::InstanceId     id;
         alex::Reference<Foo> foo;
     };
 
     struct Baz
     {
-        int64_t              id = 0;
+        alex::InstanceId     id;
         alex::Reference<Foo> foo;
         alex::Reference<Bar> bar;
     };
@@ -58,7 +58,7 @@ void InsertReference::operator()()
 
     // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
     // TODO: Test insert of empty/null references.
-    
+
     // Insert Foo.
     //
     // Create objects.
@@ -81,14 +81,14 @@ void InsertReference::operator()()
     expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
 
     // Check assigned IDs.
-    compareEQ(bar0.id, static_cast<int64_t>(1));
-    compareEQ(bar1.id, static_cast<int64_t>(2));
+    compareEQ(bar0.id, alex::InstanceId(1));
+    compareEQ(bar1.id, alex::InstanceId(2));
 
     // Select inserted object using sql.
-    auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id, true)(false);
-    auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id, true)(false);
+    auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
+    auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
 
-     // Compare objects.
+    // Compare objects.
     compareEQ(bar0.id, std::get<0>(bar0_get));
     compareEQ(bar0.foo.getId(), std::get<1>(bar0_get));
     compareEQ(bar1.id, std::get<0>(bar1_get));
@@ -114,16 +114,16 @@ void InsertReference::operator()()
     expectNoThrow([&] { bazHandler.insert(baz3); }).fatal("Failed to insert object");
 
     // Check assigned IDs.
-    compareEQ(baz0.id, static_cast<int64_t>(1));
-    compareEQ(baz1.id, static_cast<int64_t>(2));
-    compareEQ(baz2.id, static_cast<int64_t>(3));
-    compareEQ(baz3.id, static_cast<int64_t>(4));
+    compareEQ(baz0.id, alex::InstanceId(1));
+    compareEQ(baz1.id, alex::InstanceId(2));
+    compareEQ(baz2.id, alex::InstanceId(3));
+    compareEQ(baz3.id, alex::InstanceId(4));
 
     // Select inserted object using sql.
-    auto baz0_get = bazTable.selectOne(bazTable.col<0>() == baz0.id, true)(false);
-    auto baz1_get = bazTable.selectOne(bazTable.col<0>() == baz1.id, true)(false);
-    auto baz2_get = bazTable.selectOne(bazTable.col<0>() == baz2.id, true)(false);
-    auto baz3_get = bazTable.selectOne(bazTable.col<0>() == baz3.id, true)(false);
+    auto baz0_get = bazTable.selectOne(bazTable.col<0>() == baz0.id.get(), true)(false);
+    auto baz1_get = bazTable.selectOne(bazTable.col<0>() == baz1.id.get(), true)(false);
+    auto baz2_get = bazTable.selectOne(bazTable.col<0>() == baz2.id.get(), true)(false);
+    auto baz3_get = bazTable.selectOne(bazTable.col<0>() == baz3.id.get(), true)(false);
 
     // Compare objects.
     compareEQ(baz0.id, std::get<0>(baz0_get));

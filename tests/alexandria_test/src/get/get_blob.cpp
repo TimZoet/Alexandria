@@ -30,13 +30,13 @@ namespace
 
     struct Foo
     {
-        int64_t         id = 0;
-        alex::Blob<Baz> a;
+        alex::InstanceId id;
+        alex::Blob<Baz>  a;
     };
 
     struct Bar
     {
-        int64_t                        id = 0;
+        alex::InstanceId               id;
         alex::Blob<std::vector<Baz>>   a;
         alex::Blob<std::vector<float>> b;
     };

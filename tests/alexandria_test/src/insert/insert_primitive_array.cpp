@@ -11,33 +11,33 @@ namespace
 {
     struct Foo
     {
-        int64_t                     id = 0;
+        alex::InstanceId            id;
         alex::PrimitiveArray<float> floats;
 
         Foo() = default;
 
-        Foo(int64_t iid, std::vector<float> ffloats) : id(iid) { floats.get() = std::move(ffloats); }
+        Foo(alex::InstanceId iid, std::vector<float> ffloats) : id(iid) { floats.get() = std::move(ffloats); }
     };
 
     struct Bar
     {
-        int64_t                       id = 0;
+        alex::InstanceId              id;
         alex::PrimitiveArray<int32_t> ints;
 
         Bar() = default;
 
-        Bar(int64_t iid, std::vector<int32_t> iints) : id(iid) { ints.get() = std::move(iints); }
+        Bar(alex::InstanceId iid, std::vector<int32_t> iints) : id(iid) { ints.get() = std::move(iints); }
     };
 
     struct Baz
     {
-        int64_t                        id = 0;
+        alex::InstanceId               id;
         alex::PrimitiveArray<uint64_t> ints;
         alex::PrimitiveArray<double>   floats;
 
         Baz() = default;
 
-        Baz(int64_t iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
+        Baz(alex::InstanceId iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
         {
             ints.get()   = std::move(iints);
             floats.get() = std::move(ffloats);
@@ -97,19 +97,19 @@ void InsertPrimitiveArray::operator()()
         expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, static_cast<int64_t>(1));
-        compareEQ(foo1.id, static_cast<int64_t>(2));
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id, true)(false);
-        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id, true)(false);
+        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false);
+        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(foo0.id, std::get<0>(foo0_get));
         compareEQ(foo1.id, std::get<0>(foo1_get));
 
         // Select floats in separate table.
-        auto               idparam       = foo0.id;
+        auto               idparam       = foo0.id.get();
         auto               floats_select = fooFloatsTable.select<float, 2>(fooFloatsTable.col<1>() == &idparam, true);
         std::vector<float> floats_get(floats_select.begin(), floats_select.end());
         compareEQ(foo0.floats.get(), floats_get);
@@ -134,19 +134,19 @@ void InsertPrimitiveArray::operator()()
         expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, static_cast<int64_t>(1));
-        compareEQ(bar1.id, static_cast<int64_t>(2));
+        compareEQ(bar0.id, alex::InstanceId(1));
+        compareEQ(bar1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id, true)(false);
-        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id, true)(false);
+        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
+        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(bar0.id, std::get<0>(bar0_get));
         compareEQ(bar1.id, std::get<0>(bar1_get));
 
         // Select ints in separate table.
-        auto                 idparam     = bar0.id;
+        auto                 idparam     = bar0.id.get();
         auto                 ints_select = barIntsTable.select<int32_t, 2>(barIntsTable.col<1>() == &idparam, true);
         std::vector<int32_t> ints_get(ints_select.begin(), ints_select.end());
         compareEQ(bar0.ints.get(), ints_get);
@@ -176,19 +176,19 @@ void InsertPrimitiveArray::operator()()
         expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(baz0.id, static_cast<int64_t>(1));
-        compareEQ(baz1.id, static_cast<int64_t>(2));
+        compareEQ(baz0.id, alex::InstanceId(1));
+        compareEQ(baz1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto baz0_get = bazTable.selectOne(bazTable.col<0>() == baz0.id, true)(false);
-        auto baz1_get = bazTable.selectOne(bazTable.col<0>() == baz1.id, true)(false);
+        auto baz0_get = bazTable.selectOne(bazTable.col<0>() == baz0.id.get(), true)(false);
+        auto baz1_get = bazTable.selectOne(bazTable.col<0>() == baz1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(baz0.id, std::get<0>(baz0_get));
         compareEQ(baz1.id, std::get<0>(baz1_get));
 
         // Select ints and floats in separate table.
-        auto idparam        = baz0.id;
+        auto idparam        = baz0.id.get();
         auto uints_select   = bazIntsTable.select<uint64_t, 2>(bazIntsTable.col<1>() == &idparam, true);
         auto doubles_select = bazFloatsTable.select<float, 2>(bazFloatsTable.col<1>() == &idparam, true);
         std::vector<uint64_t> uints_get(uints_select.begin(), uints_select.end());

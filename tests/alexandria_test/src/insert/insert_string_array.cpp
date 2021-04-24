@@ -11,23 +11,23 @@ namespace
 {
     struct Foo
     {
-        int64_t           id = 0;
+        alex::InstanceId  id;
         alex::StringArray strings;
 
         Foo() = default;
 
-        Foo(int64_t iid, std::vector<std::string> sstrings) : id(iid) { strings.get() = std::move(sstrings); }
+        Foo(alex::InstanceId iid, std::vector<std::string> sstrings) : id(iid) { strings.get() = std::move(sstrings); }
     };
 
     struct Bar
     {
-        int64_t           id = 0;
+        alex::InstanceId  id;
         alex::StringArray strings1;
         alex::StringArray strings2;
 
         Bar() = default;
 
-        Bar(int64_t iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) : id(iid)
+        Bar(alex::InstanceId iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) : id(iid)
         {
             strings1.get() = std::move(sstrings1);
             strings2.get() = std::move(sstrings2);
@@ -79,19 +79,19 @@ void InsertStringArray::operator()()
         expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, static_cast<int64_t>(1));
-        compareEQ(foo1.id, static_cast<int64_t>(2));
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id, true)(false);
-        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id, true)(false);
+        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false);
+        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(foo0.id, std::get<0>(foo0_get));
         compareEQ(foo1.id, std::get<0>(foo1_get));
 
         // Select floats in separate table.
-        auto idparam        = foo0.id;
+        auto idparam        = foo0.id.get();
         auto strings_select = fooStringsTable.select<std::string, 2>(fooStringsTable.col<1>() == &idparam, true);
         std::vector<std::string> strings_get(strings_select.begin(), strings_select.end());
         compareEQ(foo0.strings.get(), strings_get);
@@ -117,19 +117,19 @@ void InsertStringArray::operator()()
         expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, static_cast<int64_t>(1));
-        compareEQ(bar1.id, static_cast<int64_t>(2));
+        compareEQ(bar0.id, alex::InstanceId(1));
+        compareEQ(bar1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id, true)(false);
-        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id, true)(false);
+        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
+        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(bar0.id, std::get<0>(bar0_get));
         compareEQ(bar1.id, std::get<0>(bar1_get));
 
         // Select ints in separate table.
-        auto idparam         = bar0.id;
+        auto idparam         = bar0.id.get();
         auto strings1_select = barStrings1Table.select<std::string, 2>(barStrings1Table.col<1>() == &idparam, true);
         auto strings2_select = barStrings2Table.select<std::string, 2>(barStrings2Table.col<1>() == &idparam, true);
         std::vector<std::string> strings1_get(strings1_select.begin(), strings1_select.end());

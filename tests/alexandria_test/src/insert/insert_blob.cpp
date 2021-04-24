@@ -30,13 +30,13 @@ namespace
 
     struct Foo
     {
-        int64_t         id = 0;
-        alex::Blob<Baz> a;
+        alex::InstanceId id;
+        alex::Blob<Baz>  a;
     };
 
     struct Bar
     {
-        int64_t                        id = 0;
+        alex::InstanceId               id;
         alex::Blob<std::vector<Baz>>   a;
         alex::Blob<std::vector<float>> b;
     };
@@ -80,12 +80,12 @@ void InsertBlob::operator()()
         expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, static_cast<int64_t>(1));
-        compareEQ(foo1.id, static_cast<int64_t>(2));
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id, true)(false);
-        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id, true)(false);
+        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false);
+        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(foo0.id, std::get<0>(foo0_get));
@@ -113,12 +113,12 @@ void InsertBlob::operator()()
         expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, static_cast<int64_t>(1));
-        compareEQ(bar1.id, static_cast<int64_t>(2));
+        compareEQ(bar0.id, alex::InstanceId(1));
+        compareEQ(bar1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id, true)(false);
-        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id, true)(false);
+        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
+        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(bar0.id, std::get<0>(bar0_get));

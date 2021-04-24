@@ -24,13 +24,13 @@ namespace
 
     struct Foo
     {
-        int64_t              id = 0;
+        alex::InstanceId     id;
         alex::BlobArray<Baz> a;
     };
 
     struct Bar
     {
-        int64_t                             id = 0;
+        alex::InstanceId                    id;
         alex::BlobArray<std::vector<Baz>>   a;
         alex::BlobArray<std::vector<float>> b;
     };

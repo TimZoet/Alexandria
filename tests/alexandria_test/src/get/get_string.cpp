@@ -10,15 +10,15 @@ namespace
 {
     struct Foo
     {
-        int64_t     id = 0;
-        std::string a;
+        alex::InstanceId id;
+        std::string      a;
     };
 
     struct Bar
     {
-        int64_t     id = 0;
-        std::string a;
-        std::string b;
+        alex::InstanceId id;
+        std::string      a;
+        std::string      b;
     };
 }  // namespace
 

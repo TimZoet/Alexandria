@@ -10,18 +10,18 @@ namespace
 {
     struct Foo
     {
-        int64_t id = 0;
-        float   a  = 0;
-        double  b  = 0;
+        alex::InstanceId id;
+        float            a = 0;
+        double           b = 0;
     };
 
     struct Bar
     {
-        int64_t  id = 0;
-        int32_t  a  = 0;
-        int64_t  b  = 0;
-        uint32_t c  = 0;
-        uint64_t d  = 0;
+        alex::InstanceId id;
+        int32_t          a = 0;
+        int64_t          b = 0;
+        uint32_t         c = 0;
+        uint64_t         d = 0;
     };
 }  // namespace
 

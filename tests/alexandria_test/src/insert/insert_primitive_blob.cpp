@@ -11,33 +11,33 @@ namespace
 {
     struct Foo
     {
-        int64_t                    id = 0;
+        alex::InstanceId           id;
         alex::PrimitiveBlob<float> floats;
 
         Foo() = default;
 
-        Foo(int64_t iid, std::vector<float> ffloats) : id(iid) { floats.get() = std::move(ffloats); }
+        Foo(alex::InstanceId iid, std::vector<float> ffloats) : id(iid) { floats.get() = std::move(ffloats); }
     };
 
     struct Bar
     {
-        int64_t                      id = 0;
+        alex::InstanceId             id;
         alex::PrimitiveBlob<int32_t> ints;
 
         Bar() = default;
 
-        Bar(int64_t iid, std::vector<int32_t> iints) : id(iid) { ints.get() = std::move(iints); }
+        Bar(alex::InstanceId iid, std::vector<int32_t> iints) : id(iid) { ints.get() = std::move(iints); }
     };
 
     struct Baz
     {
-        int64_t                       id = 0;
+        alex::InstanceId              id;
         alex::PrimitiveBlob<uint64_t> ints;
         alex::PrimitiveBlob<double>   floats;
 
         Baz() = default;
 
-        Baz(int64_t iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
+        Baz(alex::InstanceId iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
         {
             ints.get()   = std::move(iints);
             floats.get() = std::move(ffloats);
@@ -90,12 +90,12 @@ void InsertPrimitiveBlob::operator()()
         expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, static_cast<int64_t>(1));
-        compareEQ(foo1.id, static_cast<int64_t>(2));
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id, true)(false);
-        Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id, true)(false);
+        Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id.get(), true)(false);
+        Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(foo0.id, foo0_get.id);
@@ -119,12 +119,12 @@ void InsertPrimitiveBlob::operator()()
         expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
         // Check assigned IDs.
-        compareEQ(bar0.id, static_cast<int64_t>(1));
-        compareEQ(bar1.id, static_cast<int64_t>(2));
+        compareEQ(bar0.id, alex::InstanceId(1));
+        compareEQ(bar1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id, true)(false);
-        Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id, true)(false);
+        Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id.get(), true)(false);
+        Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(bar0.id, bar0_get.id);
@@ -153,12 +153,12 @@ void InsertPrimitiveBlob::operator()()
         expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
         expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
         // Check assigned IDs.
-        compareEQ(baz0.id, static_cast<int64_t>(1));
-        compareEQ(baz1.id, static_cast<int64_t>(2));
+        compareEQ(baz0.id, alex::InstanceId(1));
+        compareEQ(baz1.id, alex::InstanceId(2));
 
         // Select inserted object using sql.
-        Baz baz0_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz0.id, true)(false);
-        Baz baz1_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz1.id, true)(false);
+        Baz baz0_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz0.id.get(), true)(false);
+        Baz baz1_get = bazTable.selectOne<Baz>(bazTable.col<0>() == baz1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(baz0.id, baz0_get.id);

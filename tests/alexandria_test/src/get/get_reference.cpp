@@ -11,20 +11,20 @@ namespace
 {
     struct Foo
     {
-        int64_t id = 0;
-        float   a;
-        int32_t b;
+        alex::InstanceId id;
+        float            a;
+        int32_t          b;
     };
 
     struct Bar
     {
-        int64_t              id = 0;
+        alex::InstanceId     id;
         alex::Reference<Foo> foo;
     };
 
     struct Baz
     {
-        int64_t              id = 0;
+        alex::InstanceId     id;
         alex::Reference<Foo> foo;
         alex::Reference<Bar> bar;
     };
@@ -54,7 +54,7 @@ void GetReference::operator()()
 
     // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
     // TODO: Test insert of empty/null references.
-    
+
     // Retrieve Foo.
     //
     // Create and insert objects.
@@ -77,7 +77,7 @@ void GetReference::operator()()
     expectNoThrow([&] { bar0_get = barHandler.get(bar0.id); }).fatal("Failed to get object");
     expectNoThrow([&] { bar1_get = barHandler.get(bar1.id); }).fatal("Failed to get object");
 
-     // Compare objects.
+    // Compare objects.
     compareEQ(bar0.id, bar0_get->id);
     compareEQ(bar0.foo.getId(), bar0_get->foo.getId());
     compareEQ(bar1.id, bar1_get->id);
@@ -100,7 +100,7 @@ void GetReference::operator()()
     expectNoThrow([&] { bazHandler.insert(baz2); }).fatal("Failed to insert object");
     expectNoThrow([&] { bazHandler.insert(baz3); }).fatal("Failed to insert object");
 
-     // Try to retrieve objects.
+    // Try to retrieve objects.
     std::unique_ptr<Baz> baz0_get, baz1_get, baz2_get, baz3_get;
     expectNoThrow([&] { baz0_get = bazHandler.get(baz0.id); }).fatal("Failed to get object");
     expectNoThrow([&] { baz1_get = bazHandler.get(baz1.id); }).fatal("Failed to get object");

@@ -10,15 +10,15 @@ namespace
 {
     struct Foo
     {
-        int64_t     id = 0;
-        std::string a;
+        alex::InstanceId id;
+        std::string      a;
     };
 
     struct Bar
     {
-        int64_t     id = 0;
-        std::string a;
-        std::string b;
+        alex::InstanceId id;
+        std::string      a;
+        std::string      b;
     };
 }  // namespace
 
@@ -56,12 +56,12 @@ void InsertString::operator()()
         expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, static_cast<int64_t>(1));
-        compareEQ(foo1.id, static_cast<int64_t>(2));
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo1.id, alex::InstanceId(2));
 
         // Select inserted object using sql and compare.
-        Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id, true)(false);
-        Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id, true)(false);
+        Foo foo0_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo0.id.get(), true)(false);
+        Foo foo1_get = fooTable.selectOne<Foo>(fooTable.col<0>() == foo1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(foo0.id, foo0_get.id);
@@ -81,12 +81,12 @@ void InsertString::operator()()
         expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, static_cast<int64_t>(1));
-        compareEQ(bar1.id, static_cast<int64_t>(2));
+        compareEQ(bar0.id, alex::InstanceId(1));
+        compareEQ(bar1.id, alex::InstanceId(2));
 
         // Select inserted object using sql and compare.
-        Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id, true)(false);
-        Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id, true)(false);
+        Bar bar0_get = barTable.selectOne<Bar>(barTable.col<0>() == bar0.id.get(), true)(false);
+        Bar bar1_get = barTable.selectOne<Bar>(barTable.col<0>() == bar1.id.get(), true)(false);
 
         // Compare objects.
         compareEQ(bar0.id, bar0_get.id);

@@ -11,20 +11,20 @@ namespace
 {
     struct Foo
     {
-        int64_t id = 0;
-        float   a;
-        int32_t b;
+        alex::InstanceId id;
+        float            a;
+        int32_t          b;
     };
 
     struct Bar
     {
-        int64_t                   id = 0;
+        alex::InstanceId          id;
         alex::ReferenceArray<Foo> foo;
     };
 
     struct Baz
     {
-        int64_t                   id = 0;
+        alex::InstanceId          id;
         alex::ReferenceArray<Foo> foo;
         alex::ReferenceArray<Bar> bar;
     };
@@ -94,7 +94,7 @@ void GetReferenceArray::operator()()
     baz.bar.add(bar0);
     expectNoThrow([&] { bazHandler.insert(baz); }).fatal("Failed to insert object");
 
-     // Try to retrieve objects.
+    // Try to retrieve objects.
     std::unique_ptr<Baz> baz_get;
     expectNoThrow([&] { baz_get = bazHandler.get(baz.id); }).fatal("Failed to get object");
 

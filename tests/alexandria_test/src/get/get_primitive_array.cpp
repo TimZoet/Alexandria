@@ -11,33 +11,33 @@ namespace
 {
     struct Foo
     {
-        int64_t                     id = 0;
+        alex::InstanceId            id;
         alex::PrimitiveArray<float> floats;
 
         Foo() = default;
 
-        Foo(int64_t iid, std::vector<float> ffloats) : id(iid) { floats.get() = std::move(ffloats); }
+        Foo(alex::InstanceId iid, std::vector<float> ffloats) : id(iid) { floats.get() = std::move(ffloats); }
     };
 
     struct Bar
     {
-        int64_t                       id = 0;
+        alex::InstanceId              id;
         alex::PrimitiveArray<int32_t> ints;
 
         Bar() = default;
 
-        Bar(int64_t iid, std::vector<int32_t> iints) : id(iid) { ints.get() = std::move(iints); }
+        Bar(alex::InstanceId iid, std::vector<int32_t> iints) : id(iid) { ints.get() = std::move(iints); }
     };
 
     struct Baz
     {
-        int64_t                        id = 0;
+        alex::InstanceId               id;
         alex::PrimitiveArray<uint64_t> ints;
         alex::PrimitiveArray<double>   floats;
 
         Baz() = default;
 
-        Baz(int64_t iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
+        Baz(alex::InstanceId iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
         {
             ints.get()   = std::move(iints);
             floats.get() = std::move(ffloats);
