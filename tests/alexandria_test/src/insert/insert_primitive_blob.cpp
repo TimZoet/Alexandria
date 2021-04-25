@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/library.h"
+#include "alexandria/member_types/member.h"
 #include "alexandria/member_types/primitive_blob.h"
 
 namespace
@@ -70,9 +71,12 @@ void InsertPrimitiveBlob::operator()()
       library->getDatabase().getTable(bazType.getName()));
 
     // Create object handlers.
-    auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::floats>(fooType.getName());
-    auto barHandler = library->createObjectHandler<&Bar::id, &Bar::ints>(barType.getName());
-    auto bazHandler = library->createObjectHandler<&Baz::id, &Baz::ints, &Baz::floats>(bazType.getName());
+    auto fooHandler =
+      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>(fooType.getName());
+    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>(barType.getName());
+    auto bazHandler =
+      library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>(
+        bazType.getName());
 
     // Insert Foo.
     {

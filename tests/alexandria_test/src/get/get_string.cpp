@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/library.h"
+#include "alexandria/member_types/member.h"
 
 namespace
 {
@@ -37,8 +38,10 @@ void GetString::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Create object handlers.
-    auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a>(fooType.getName());
-    auto barHandler = library->createObjectHandler<&Bar::id, &Bar::a, &Bar::b>(barType.getName());
+    auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>>(fooType.getName());
+    auto barHandler =
+      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>(
+        barType.getName());
 
     // Retrieve Foo.
     {

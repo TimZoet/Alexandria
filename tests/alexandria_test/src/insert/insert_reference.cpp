@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/library.h"
+#include "alexandria/member_types/member.h"
 #include "alexandria/member_types/reference.h"
 
 namespace
@@ -52,9 +53,13 @@ void InsertReference::operator()()
     sql::ext::TypedTable<int64_t, int64_t, int64_t> bazTable(library->getDatabase().getTable(bazType.getName()));
 
     // Create object handlers.
-    auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a, &Foo::b>(fooType.getName());
-    auto barHandler = library->createObjectHandler<&Bar::id, &Bar::foo>(barType.getName());
-    auto bazHandler = library->createObjectHandler<&Baz::id, &Baz::foo, &Baz::bar>(bazType.getName());
+    auto fooHandler =
+      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(
+        fooType.getName());
+    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::foo>>(barType.getName());
+    auto bazHandler =
+      library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>(
+        bazType.getName());
 
     // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
     // TODO: Test insert of empty/null references.

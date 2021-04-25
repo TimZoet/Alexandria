@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/library.h"
+#include "alexandria/member_types/member.h"
 #include "alexandria/member_types/string_array.h"
 
 namespace
@@ -50,8 +51,11 @@ void GetStringArray::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Create object handlers.
-    auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::strings>(fooType.getName());
-    auto barHandler = library->createObjectHandler<&Bar::id, &Bar::strings1, &Bar::strings2>(barType.getName());
+    auto fooHandler =
+      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>(fooType.getName());
+    auto barHandler =
+      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>(
+        barType.getName());
 
     // Retrieve Foo.
     {

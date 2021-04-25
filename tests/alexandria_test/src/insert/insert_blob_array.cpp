@@ -6,6 +6,7 @@
 
 #include "alexandria/library.h"
 #include "alexandria/member_types/blob_array.h"
+#include "alexandria/member_types/member.h"
 
 namespace
 {
@@ -61,8 +62,10 @@ void InsertBlobArray::operator()()
       library->getDatabase().getTable(barType.getName() + "_blob2"));
 
     // Create object handlers.
-    auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a>(fooType.getName());
-    auto barHandler = library->createObjectHandler<&Bar::id, &Bar::a, &Bar::b>(barType.getName());
+    auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>>(fooType.getName());
+    auto barHandler =
+      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>(
+        barType.getName());
 
     // Insert Foo.
     {

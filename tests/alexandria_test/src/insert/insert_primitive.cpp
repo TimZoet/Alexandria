@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/library.h"
+#include "alexandria/member_types/member.h"
 
 namespace
 {
@@ -27,6 +28,7 @@ namespace
 
 void InsertPrimitive::operator()()
 {
+    //using t = member_pointer_class_t<std::decay_t<decltype(alex::Member<&Foo::id>::mp)>>;
     // TODO: Here, or somewhere else, insert object with non-zero ID.
     // Create type with floats.
     auto& fooType = library->createType("Foo");
@@ -49,8 +51,14 @@ void InsertPrimitive::operator()()
       library->getDatabase().getTable(barType.getName()));
 
     // Create object handlers.
-    auto fooHandler = library->createObjectHandler<&Foo::id, &Foo::a, &Foo::b>(fooType.getName());
-    auto barHandler = library->createObjectHandler<&Bar::id, &Bar::a, &Bar::b, &Bar::c, &Bar::d>(barType.getName());
+    auto fooHandler =
+      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(
+        fooType.getName());
+    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>,
+                                                   alex::Member<&Bar::a>,
+                                                   alex::Member<&Bar::b>,
+                                                   alex::Member<&Bar::c>,
+                                                   alex::Member<&Bar::d>>(barType.getName());
 
     // Insert Foo.
     {
