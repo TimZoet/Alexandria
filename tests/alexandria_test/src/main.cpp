@@ -14,6 +14,7 @@
 #include "alexandria_test/create/create_string.h"
 #include "alexandria_test/delete/delete_primitive.h"
 #include "alexandria_test/delete/delete_reference.h"
+#include "alexandria_test/delete/delete_reference_array.h"
 #include "alexandria_test/get/get_blob.h"
 #include "alexandria_test/get/get_blob_array.h"
 #include "alexandria_test/get/get_primitive.h"
@@ -69,6 +70,7 @@ int main(int argc, char** argv)
       // delete
       DeletePrimitive,
       DeleteReference,
+      DeleteReferenceArray,
       // get
       GetBlob,
       GetBlobArray,

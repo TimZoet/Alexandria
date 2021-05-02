@@ -59,6 +59,7 @@ set(SOURCES
 
     ${SRC_DIR}/delete/delete_primitive.cpp
     ${SRC_DIR}/delete/delete_reference.cpp
+    ${SRC_DIR}/delete/delete_reference_array.cpp
 
     ${SRC_DIR}/get/get_blob.cpp
 	${SRC_DIR}/get/get_blob_array.cpp
