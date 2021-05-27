@@ -45,49 +45,48 @@ void CreatePrimitive::operator()()
 
     // Create object handlers.
     auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(
-        fooType.getName());
+      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(fooType);
     auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>,
                                                    alex::Member<&Bar::a>,
                                                    alex::Member<&Bar::b>,
                                                    alex::Member<&Bar::c>,
                                                    alex::Member<&Bar::d>>(barType.getName());
 
-    // Insert Foo.
+    // Create Foo.
     {
-        std::unique_ptr<Foo> foo0, foo1;
+        Foo foo0, foo1;
 
         // Try to create with default values.
-        expectNoThrow([&] { foo0 = fooHandler.create(); }).fatal("Failed to create object");
-        expectNoThrow([&] { foo1 = fooHandler.create(); }).fatal("Failed to create object");
+        expectNoThrow([&] { fooHandler->create(&foo0); }).fatal("Failed to create object");
+        expectNoThrow([&] { fooHandler->create(&foo1); }).fatal("Failed to create object");
 
         // Compare objects.
-        compareEQ(foo0->id, alex::InstanceId(1));
-        compareEQ(foo0->a, 5.0f);
-        compareEQ(foo0->b, 10.0);
-        compareEQ(foo1->id, alex::InstanceId(2));
-        compareEQ(foo1->a, 5.0f);
-        compareEQ(foo1->b, 10.0);
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo0.a, 5.0f);
+        compareEQ(foo0.b, 10.0);
+        compareEQ(foo1.id, alex::InstanceId(2));
+        compareEQ(foo1.a, 5.0f);
+        compareEQ(foo1.b, 10.0);
     }
 
-    // Insert Bar.
+    // Create Bar.
     {
-        std::unique_ptr<Bar> bar0, bar1;
+        Bar bar0, bar1;
 
         // Try to create with default values.
-        expectNoThrow([&] { bar0 = barHandler.create(); }).fatal("Failed to create object");
-        expectNoThrow([&] { bar1 = barHandler.create(); }).fatal("Failed to create object");
+        expectNoThrow([&] { barHandler->create(&bar0); }).fatal("Failed to create object");
+        expectNoThrow([&] { barHandler->create(&bar1); }).fatal("Failed to create object");
 
         // Compare objects.
-        compareEQ(bar0->id, alex::InstanceId(1));
-        compareEQ(bar0->a, static_cast<int32_t>(-10));
-        compareEQ(bar0->b, static_cast<int64_t>(-20));
-        compareEQ(bar0->c, static_cast<uint32_t>(30));
-        compareEQ(bar0->d, static_cast<uint64_t>(40));
-        compareEQ(bar1->id, alex::InstanceId(2));
-        compareEQ(bar1->a, static_cast<int32_t>(-10));
-        compareEQ(bar1->b, static_cast<int64_t>(-20));
-        compareEQ(bar1->c, static_cast<uint32_t>(30));
-        compareEQ(bar1->d, static_cast<uint64_t>(40));
+        compareEQ(bar0.id, alex::InstanceId(1));
+        compareEQ(bar0.a, static_cast<int32_t>(-10));
+        compareEQ(bar0.b, static_cast<int64_t>(-20));
+        compareEQ(bar0.c, static_cast<uint32_t>(30));
+        compareEQ(bar0.d, static_cast<uint64_t>(40));
+        compareEQ(bar1.id, alex::InstanceId(2));
+        compareEQ(bar1.a, static_cast<int32_t>(-10));
+        compareEQ(bar1.b, static_cast<int64_t>(-20));
+        compareEQ(bar1.c, static_cast<uint32_t>(30));
+        compareEQ(bar1.d, static_cast<uint64_t>(40));
     }
 }

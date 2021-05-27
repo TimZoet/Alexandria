@@ -61,54 +61,54 @@ void DeletePrimitive::operator()()
     // Delete Foo.
     {
         // Create objects.
-        std::unique_ptr<Foo> foo0, foo1;
-        expectNoThrow([&] { foo0 = fooHandler.create(); }).fatal("Failed to create object");
-        expectNoThrow([&] { foo1 = fooHandler.create(); }).fatal("Failed to create object");
+        Foo foo0, foo1;
+        expectNoThrow([&] { fooHandler->create(&foo0); }).fatal("Failed to create object");
+        expectNoThrow([&] { fooHandler->create(&foo1); }).fatal("Failed to create object");
 
         // Delete objects one by one and check if they this exist in database.
         // Test using the exists method and by directly querying the database.
-        compareTrue(fooHandler.exists(foo0->id));
-        compareTrue(fooHandler.exists(foo1->id));
-        expectNoThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo0->id.get(), true)(false)); });
-        expectNoThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo1->id.get(), true)(false)); });
+        compareTrue(fooHandler->exists(foo0.id));
+        compareTrue(fooHandler->exists(foo1.id));
+        expectNoThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false)); });
+        expectNoThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false)); });
 
-        expectNoThrow([&] { fooHandler.del(*foo0); });
-        compareFalse(fooHandler.exists(foo0->id));
-        compareTrue(fooHandler.exists(foo1->id));
-        expectThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo0->id.get(), true)(false)); });
-        expectNoThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo1->id.get(), true)(false)); });
+        expectNoThrow([&] { fooHandler->del(foo0.id); });
+        compareFalse(fooHandler->exists(foo0.id));
+        compareTrue(fooHandler->exists(foo1.id));
+        expectThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false)); });
+        expectNoThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false)); });
 
-        expectNoThrow([&] { fooHandler.del(*foo1); });
-        compareFalse(fooHandler.exists(foo0->id));
-        compareFalse(fooHandler.exists(foo1->id));
-        expectThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo0->id.get(), true)(false)); });
-        expectThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo1->id.get(), true)(false)); });
+        expectNoThrow([&] { fooHandler->del(foo1.id); });
+        compareFalse(fooHandler->exists(foo0.id));
+        compareFalse(fooHandler->exists(foo1.id));
+        expectThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false)); });
+        expectThrow([&] { static_cast<void>(fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false)); });
     }
 
     // Delete Bar.
     {
         // Create objects.
-        std::unique_ptr<Bar> bar0, bar1;
-        expectNoThrow([&] { bar0 = barHandler.create(); }).fatal("Failed to create object");
-        expectNoThrow([&] { bar1 = barHandler.create(); }).fatal("Failed to create object");
+        Bar bar0, bar1;
+        expectNoThrow([&] { barHandler->create(&bar0); }).fatal("Failed to create object");
+        expectNoThrow([&] { barHandler->create(&bar1); }).fatal("Failed to create object");
 
         // Delete objects one by one and check if they this exist in database.
         // Test using the exists method and by directly querying the database.
-        compareTrue(barHandler.exists(bar0->id));
-        compareTrue(barHandler.exists(bar1->id));
-        expectNoThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar0->id.get(), true)(false)); });
-        expectNoThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar1->id.get(), true)(false)); });
+        compareTrue(barHandler->exists(bar0.id));
+        compareTrue(barHandler->exists(bar1.id));
+        expectNoThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false)); });
+        expectNoThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false)); });
 
-        expectNoThrow([&] { barHandler.del(*bar0); });
-        compareFalse(barHandler.exists(bar0->id));
-        compareTrue(barHandler.exists(bar1->id));
-        expectThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar0->id.get(), true)(false)); });
-        expectNoThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar1->id.get(), true)(false)); });
+        expectNoThrow([&] { barHandler->del(bar0.id); });
+        compareFalse(barHandler->exists(bar0.id));
+        compareTrue(barHandler->exists(bar1.id));
+        expectThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false)); });
+        expectNoThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false)); });
 
-        expectNoThrow([&] { barHandler.del(*bar1); });
-        compareFalse(barHandler.exists(bar0->id));
-        compareFalse(barHandler.exists(bar1->id));
-        expectThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar0->id.get(), true)(false)); });
-        expectThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar1->id.get(), true)(false)); });
+        expectNoThrow([&] { barHandler->del(bar1.id); });
+        compareFalse(barHandler->exists(bar0.id));
+        compareFalse(barHandler->exists(bar1.id));
+        expectThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false)); });
+        expectThrow([&] { static_cast<void>(barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false)); });
     }
 }

@@ -70,20 +70,20 @@ void DeleteReferenceArray::operator()()
     // Insert a bunch of objects.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
-    expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
     Bar bar0, bar1;
     bar0.foo.add(foo0);
     bar0.foo.add(foo1);
-    expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
     Baz baz;
     baz.foo.add(foo1);
     baz.foo.add(foo0);
     baz.bar.add(bar0);
     baz.bar.add(bar1);
     baz.bar.add(bar0);
-    expectNoThrow([&] { bazHandler.insert(baz); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz); }).fatal("Failed to insert object");
 
     // Check bar's foo references.
     {
@@ -112,7 +112,7 @@ void DeleteReferenceArray::operator()()
     // Delete foo0.
     expectNoThrow([&]
     {
-        fooHandler.del(foo0);
+        fooHandler->del(foo0.id);
     });
 
     // Check bar's foo references.
@@ -137,7 +137,7 @@ void DeleteReferenceArray::operator()()
     }
 
     // Delete foo1.
-    expectNoThrow([&] { fooHandler.del(foo1); });
+    expectNoThrow([&] { fooHandler->del(foo1.id); });
 
     // Check bar's foo references.
     {
@@ -170,7 +170,7 @@ void DeleteReferenceArray::operator()()
     }
 
     // Delete bar0.
-    expectNoThrow([&] { barHandler.del(bar0); });
+    expectNoThrow([&] { barHandler->del(bar0.id); });
 
     // Check baz's bar references.
     {
@@ -182,7 +182,7 @@ void DeleteReferenceArray::operator()()
     }
 
     // Delete bar1.
-    expectNoThrow([&] { barHandler.del(bar1); });
+    expectNoThrow([&] { barHandler->del(bar1.id); });
 
     // Check baz's bar references.
     {

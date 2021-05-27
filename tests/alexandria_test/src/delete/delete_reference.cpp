@@ -64,13 +64,13 @@ void DeleteReference::operator()()
     // Insert a bunch of objects.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
-    expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
     Bar bar0, bar1;
     bar0.foo = foo0;
     bar1.foo = foo1;
-    expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
     Baz baz0, baz1, baz2, baz3;
     baz0.foo = foo0;
     baz0.bar = bar0;
@@ -80,10 +80,10 @@ void DeleteReference::operator()()
     baz2.bar = bar0;
     baz3.foo = foo1;
     baz3.bar = bar1;
-    expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler.insert(baz2); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler.insert(baz3); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz2); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz3); }).fatal("Failed to insert object");
 
     // Delete foos one by one and check other objects' references.
     compareEQ(foo0.id.get(), barTable.selectOne<int64_t, 1>(barTable.col<0>() == bar0.id.get(), true)(true));
@@ -92,14 +92,14 @@ void DeleteReference::operator()()
     compareEQ(foo0.id.get(), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz1.id.get(), true)(true));
     compareEQ(foo1.id.get(), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz2.id.get(), true)(true));
     compareEQ(foo1.id.get(), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz3.id.get(), true)(true));
-    expectNoThrow([&] { fooHandler.del(foo0); });
+    expectNoThrow([&] { fooHandler->del(foo0.id); });
     compareEQ(static_cast<int64_t>(0), barTable.selectOne<int64_t, 1>(barTable.col<0>() == bar0.id.get(), true)(true));
     compareEQ(foo1.id.get(), barTable.selectOne<int64_t, 1>(barTable.col<0>() == bar1.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz0.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz1.id.get(), true)(true));
     compareEQ(foo1.id.get(), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz2.id.get(), true)(true));
     compareEQ(foo1.id.get(), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz3.id.get(), true)(true));
-    expectNoThrow([&] { fooHandler.del(foo1); });
+    expectNoThrow([&] { fooHandler->del(foo1.id); });
     compareEQ(static_cast<int64_t>(0), barTable.selectOne<int64_t, 1>(barTable.col<0>() == bar0.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), barTable.selectOne<int64_t, 1>(barTable.col<0>() == bar1.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 1>(bazTable.col<0>() == baz0.id.get(), true)(true));
@@ -112,12 +112,12 @@ void DeleteReference::operator()()
     compareEQ(bar1.id.get(), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == bar1.id.get(), true)(true));
     compareEQ(bar0.id.get(), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz2.id.get(), true)(true));
     compareEQ(bar1.id.get(), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz3.id.get(), true)(true));
-    expectNoThrow([&] { barHandler.del(bar1); });
+    expectNoThrow([&] { barHandler->del(bar1.id); });
     compareEQ(bar0.id.get(), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz0.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz1.id.get(), true)(true));
     compareEQ(bar0.id.get(), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz2.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz3.id.get(), true)(true));
-    expectNoThrow([&] { barHandler.del(bar0); });
+    expectNoThrow([&] { barHandler->del(bar0.id); });
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz0.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz1.id.get(), true)(true));
     compareEQ(static_cast<int64_t>(0), bazTable.selectOne<int64_t, 2>(bazTable.col<0>() == baz2.id.get(), true)(true));

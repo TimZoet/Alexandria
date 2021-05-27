@@ -29,23 +29,22 @@ void CreateString::operator()()
 
     // Create object handlers.
     auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(
-        fooType.getName());
+      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(fooType);
 
-    // Insert Foo.
+    // Create Foo.
     {
-        std::unique_ptr<Foo> foo0, foo1;
+        Foo foo0, foo1;
 
         // Try to create with default values.
-        expectNoThrow([&] { foo0 = fooHandler.create(); }).fatal("Failed to create object");
-        expectNoThrow([&] { foo1 = fooHandler.create(); }).fatal("Failed to create object");
+        expectNoThrow([&] { fooHandler->create(&foo0); }).fatal("Failed to create object");
+        expectNoThrow([&] { fooHandler->create(&foo1); }).fatal("Failed to create object");
 
         // Compare objects.
-        compareEQ(foo0->id, alex::InstanceId(1));
-        compareEQ(foo0->a, std::string("abc"));
-        compareEQ(foo0->b, std::string("def"));
-        compareEQ(foo1->id, alex::InstanceId(2));
-        compareEQ(foo1->a, std::string("abc"));
-        compareEQ(foo1->b, std::string("def"));
+        compareEQ(foo0.id, alex::InstanceId(1));
+        compareEQ(foo0.a, std::string("abc"));
+        compareEQ(foo0.b, std::string("def"));
+        compareEQ(foo1.id, alex::InstanceId(2));
+        compareEQ(foo1.a, std::string("abc"));
+        compareEQ(foo1.b, std::string("def"));
     }
 }
