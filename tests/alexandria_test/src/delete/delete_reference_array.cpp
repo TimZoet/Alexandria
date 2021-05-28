@@ -67,7 +67,7 @@ void DeleteReferenceArray::operator()()
       library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>(
         bazType.getName());
 
-    // Insert a bunch of objects.
+    // Create and insert objects.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
     expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
@@ -85,110 +85,21 @@ void DeleteReferenceArray::operator()()
     baz.bar.add(bar0);
     expectNoThrow([&] { bazHandler->insert(baz); }).fatal("Failed to insert object");
 
-    // Check bar's foo references.
-    {
-        auto                 s = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == bar0.id.get(), true);
-        std::vector<int64_t> bar0_foos(s.begin(), s.end());
+    // Delete objects one by one and check tables.
+    compareEQ(static_cast<size_t>(1), bazTable.countAll()(true));
+    compareEQ(static_cast<size_t>(2), bazFooTable.countAll()(true));
+    compareEQ(static_cast<size_t>(3), bazBarTable.countAll()(true));
+    expectNoThrow([&] { bazHandler->del(baz.id); });
+    compareEQ(static_cast<size_t>(0), bazTable.countAll()(true));
+    compareEQ(static_cast<size_t>(0), bazFooTable.countAll()(true));
+    compareEQ(static_cast<size_t>(0), bazBarTable.countAll()(true));
 
-        compareEQ(bar0_foos.size(), 2).fatal("");
-        compareEQ(bar0_foos[0], foo0.id.get());
-        compareEQ(bar0_foos[1], foo1.id.get());
-
-        s = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == bar1.id.get(), true);
-        std::vector<int64_t> bar1_foos(s.begin(), s.end());
-        compareEQ(bar1_foos.size(), 0).fatal("");
-    }
-
-    // Check baz's foo references.
-    {
-        auto                 s = bazFooTable.select<int64_t, 2>(bazFooTable.col<1>() == baz.id.get(), true);
-        std::vector<int64_t> baz_foos(s.begin(), s.end());
-
-        compareEQ(baz_foos.size(), 2).fatal("");
-        compareEQ(baz_foos[0], foo1.id.get());
-        compareEQ(baz_foos[1], foo0.id.get());
-    }
-
-    // Delete foo0.
-    expectNoThrow([&]
-    {
-        fooHandler->del(foo0.id);
-    });
-
-    // Check bar's foo references.
-    {
-        auto                 s = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == bar0.id.get(), true);
-        std::vector<int64_t> bar0_foos(s.begin(), s.end());
-
-        compareEQ(bar0_foos.size(), 1).fatal("");
-        compareEQ(bar0_foos[0], foo1.id.get());
-
-        s = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == bar1.id.get(), true);
-        std::vector<int64_t> bar1_foos(s.begin(), s.end());
-        compareEQ(bar1_foos.size(), 0).fatal("");
-    }
-
-    // Check baz's foo references.
-    {
-        auto                 s = bazFooTable.select<int64_t, 2>(bazFooTable.col<1>() == baz.id.get(), true);
-        std::vector<int64_t> baz_foos(s.begin(), s.end());
-        compareEQ(baz_foos.size(), 1).fatal("");
-        compareEQ(baz_foos[0], foo1.id.get());
-    }
-
-    // Delete foo1.
-    expectNoThrow([&] { fooHandler->del(foo1.id); });
-
-    // Check bar's foo references.
-    {
-        auto                 s = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == bar0.id.get(), true);
-        std::vector<int64_t> bar0_foos(s.begin(), s.end());
-        compareEQ(bar0_foos.size(), 0).fatal("");
-
-        s = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == bar1.id.get(), true);
-        std::vector<int64_t> bar1_foos(s.begin(), s.end());
-        compareEQ(bar1_foos.size(), 0).fatal("");
-    }
-
-    // Check baz's foo references.
-    {
-        auto                 s = bazFooTable.select<int64_t, 2>(bazFooTable.col<1>() == baz.id.get(), true);
-        std::vector<int64_t> baz_foos(s.begin(), s.end());
-
-        compareEQ(baz_foos.size(), 0).fatal("");
-    }
-
-    // Check baz's bar references.
-    {
-        auto                 s = bazBarTable.select<int64_t, 2>(bazBarTable.col<1>() == baz.id.get(), true);
-        std::vector<int64_t> baz_bars(s.begin(), s.end());
-
-        compareEQ(baz_bars.size(), 3).fatal("");
-        compareEQ(baz_bars[0], bar0.id.get());
-        compareEQ(baz_bars[1], bar1.id.get());
-        compareEQ(baz_bars[2], bar0.id.get());
-    }
-
-    // Delete bar0.
+    compareEQ(static_cast<size_t>(2), barTable.countAll()(true));
+    compareEQ(static_cast<size_t>(2 + 0), barFooTable.countAll()(true));
     expectNoThrow([&] { barHandler->del(bar0.id); });
-
-    // Check baz's bar references.
-    {
-        auto                 s = bazBarTable.select<int64_t, 2>(bazBarTable.col<1>() == baz.id.get(), true);
-        std::vector<int64_t> baz_bars(s.begin(), s.end());
-
-        compareEQ(baz_bars.size(), 1).fatal("");
-        compareEQ(baz_bars[0], bar1.id.get());
-    }
-
-    // Delete bar1.
+    compareEQ(static_cast<size_t>(1), barTable.countAll()(true));
+    compareEQ(static_cast<size_t>(0), barFooTable.countAll()(true));
     expectNoThrow([&] { barHandler->del(bar1.id); });
-
-    // Check baz's bar references.
-    {
-        auto                 s = bazBarTable.select<int64_t, 2>(bazBarTable.col<1>() == baz.id.get(), true);
-        std::vector<int64_t> baz_bars(s.begin(), s.end());
-
-        compareEQ(baz_bars.size(), 0).fatal("");
-    }
+    compareEQ(static_cast<size_t>(0), barTable.countAll()(true));
+    compareEQ(static_cast<size_t>(0), barFooTable.countAll()(true));
 }

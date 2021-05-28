@@ -1,4 +1,4 @@
-#include "alexandria_test/delete/delete_primitive.h"
+#include "alexandria_test/delete/delete_string.h"
 
 ////////////////////////////////////////////////////////////////
 // Module includes.
@@ -12,57 +12,47 @@ namespace
     struct Foo
     {
         alex::InstanceId id;
-        float            a = 0;
-        double           b = 0;
+        std::string      a;
     };
 
     struct Bar
     {
         alex::InstanceId id;
-        int32_t          a = 0;
-        int64_t          b = 0;
-        uint32_t         c = 0;
-        uint64_t         d = 0;
+        std::string      a;
+        std::string      b;
     };
 }  // namespace
 
-void DeletePrimitive::operator()()
+void DeleteString::operator()()
 {
-    // Create type with floats.
+    // Create type with 1 string.
     auto& fooType = library->createType("Foo");
-    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
-    fooType.createPrimitiveProperty("doubleProp", alex::DataType::Double);
+    fooType.createStringProperty("prop1");
 
-    // Create type with integers.
+    // Create type with 2 strings.
     auto& barType = library->createType("Bar");
-    barType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    barType.createPrimitiveProperty("int64Prop", alex::DataType::Int64);
-    barType.createPrimitiveProperty("uint32Prop", alex::DataType::Uint32);
-    barType.createPrimitiveProperty("uint64Prop", alex::DataType::Uint64);
+    barType.createStringProperty("prop1");
+    barType.createStringProperty("prop2");
 
     // Commit types.
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t, float, double> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, int32_t, int64_t, uint32_t, uint64_t> barTable(
+    sql::ext::TypedTable<int64_t, std::string> fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::ext::TypedTable<int64_t, std::string, std::string> barTable(
       library->getDatabase().getTable(barType.getName()));
 
     // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(
-        fooType.getName());
-    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>,
-                                                   alex::Member<&Bar::a>,
-                                                   alex::Member<&Bar::b>,
-                                                   alex::Member<&Bar::c>,
-                                                   alex::Member<&Bar::d>>(barType.getName());
+    auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>>(fooType.getName());
+    auto barHandler =
+      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>(
+        barType.getName());
 
     // Delete Foo.
     {
         // Create and insert objects.
-        Foo foo0{.a = 0.5f, .b = 1.5};
-        Foo foo1{.a = -0.5f, .b = -1.5};
+        Foo foo0{.a = "abc"};
+        Foo foo1{.a = "def"};
         expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
         expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
@@ -77,8 +67,8 @@ void DeletePrimitive::operator()()
     // Delete Bar.
     {
         // Create and insert objects.
-        Bar bar0{.a = 1, .b = 2, .c = 3, .d = 4};
-        Bar bar1{.a = -1, .b = -2, .c = 123456, .d = 1234567};
+        Bar bar0{.a = "hijkl", .b = "aaaa"};
+        Bar bar1{.a = "^%*&", .b = ""};
         expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 

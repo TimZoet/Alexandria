@@ -11,17 +11,17 @@ set(HEADERS
     ${INCLUDE_DIR}/create/create_primitive.h
     ${INCLUDE_DIR}/create/create_string.h
 
-    #${INCLUDE_DIR}/delete/delete_blob.h
-    #${INCLUDE_DIR}/delete/delete_blob_array.h
+    ${INCLUDE_DIR}/delete/delete_blob.h
+    ${INCLUDE_DIR}/delete/delete_blob_array.h
     ${INCLUDE_DIR}/delete/delete_direct.h
     ${INCLUDE_DIR}/delete/delete_managed.h
     ${INCLUDE_DIR}/delete/delete_primitive.h
-    #${INCLUDE_DIR}/delete/delete_primitive_array.h
-    #${INCLUDE_DIR}/delete/delete_primitive_blob.h
+    ${INCLUDE_DIR}/delete/delete_primitive_array.h
+    ${INCLUDE_DIR}/delete/delete_primitive_blob.h
     ${INCLUDE_DIR}/delete/delete_reference.h
     ${INCLUDE_DIR}/delete/delete_reference_array.h
-    #${INCLUDE_DIR}/delete/delete_string.h
-    #${INCLUDE_DIR}/delete/delete_string_array.h
+    ${INCLUDE_DIR}/delete/delete_string.h
+    ${INCLUDE_DIR}/delete/delete_string_array.h
 
     #${INCLUDE_DIR}/get/get_blob.h
 	#${INCLUDE_DIR}/get/get_blob_array.h
@@ -74,11 +74,17 @@ set(SOURCES
     ${SRC_DIR}/create/create_primitive.cpp
     ${SRC_DIR}/create/create_string.cpp
 
+    ${SRC_DIR}/delete/delete_blob.cpp
+    ${SRC_DIR}/delete/delete_blob_array.cpp
     ${SRC_DIR}/delete/delete_direct.cpp
     ${SRC_DIR}/delete/delete_managed.cpp
     ${SRC_DIR}/delete/delete_primitive.cpp
+    ${SRC_DIR}/delete/delete_primitive_array.cpp
+    ${SRC_DIR}/delete/delete_primitive_blob.cpp
     ${SRC_DIR}/delete/delete_reference.cpp
     ${SRC_DIR}/delete/delete_reference_array.cpp
+    ${SRC_DIR}/delete/delete_string.cpp
+    ${SRC_DIR}/delete/delete_string_array.cpp
 
     #${SRC_DIR}/get/get_blob.cpp
 	#${SRC_DIR}/get/get_blob_array.cpp
