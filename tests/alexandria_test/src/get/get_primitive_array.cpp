@@ -82,19 +82,19 @@ void GetPrimitiveArray::operator()()
         foo1.floats.get().push_back(-2.5f);
         foo1.floats.get().push_back(-3.5f);
         foo1.floats.get().push_back(-4.5f);
-        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
         // Try to retrieve objects.
-        std::unique_ptr<Foo> foo0_get, foo1_get;
-        expectNoThrow([&] { foo0_get = fooHandler.get(foo0.id); }).fatal("Failed to get object");
-        expectNoThrow([&] { foo1_get = fooHandler.get(foo1.id); }).fatal("Failed to get object");
+        Foo foo0_get, foo1_get;
+        expectNoThrow([&] { fooHandler->get(foo0.id, foo0_get); }).fatal("Failed to get object");
+        expectNoThrow([&] { fooHandler->get(foo1.id, foo1_get); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get->id);
-        compareEQ(foo0.floats.get(), foo0_get->floats.get());
-        compareEQ(foo1.id, foo1_get->id);
-        compareEQ(foo1.floats.get(), foo1_get->floats.get());
+        compareEQ(foo0.id, foo0_get.id);
+        compareEQ(foo0.floats.get(), foo0_get.floats.get());
+        compareEQ(foo1.id, foo1_get.id);
+        compareEQ(foo1.floats.get(), foo1_get.floats.get());
     }
 
     // Retrieve Bar.
@@ -107,19 +107,19 @@ void GetPrimitiveArray::operator()()
         bar1.ints.get().push_back(-111);
         bar1.ints.get().push_back(-2222);
         bar1.ints.get().push_back(-33333);
-        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
         // Try to retrieve objects.
-        std::unique_ptr<Bar> bar0_get, bar1_get;
-        expectNoThrow([&] { bar0_get = barHandler.get(bar0.id); }).fatal("Failed to get object");
-        expectNoThrow([&] { bar1_get = barHandler.get(bar1.id); }).fatal("Failed to get object");
+        Bar bar0_get, bar1_get;
+        expectNoThrow([&] { barHandler->get(bar0.id, bar0_get); }).fatal("Failed to get object");
+        expectNoThrow([&] { barHandler->get(bar1.id, bar1_get); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get->id);
-        compareEQ(bar0.ints.get(), bar0_get->ints.get());
-        compareEQ(bar1.id, bar1_get->id);
-        compareEQ(bar1.ints.get(), bar1_get->ints.get());
+        compareEQ(bar0.id, bar0_get.id);
+        compareEQ(bar0.ints.get(), bar0_get.ints.get());
+        compareEQ(bar1.id, bar1_get.id);
+        compareEQ(bar1.ints.get(), bar1_get.ints.get());
     }
 
     // Retrieve Baz.
@@ -137,20 +137,20 @@ void GetPrimitiveArray::operator()()
         baz1.floats.get().push_back(-2.5);
         baz1.floats.get().push_back(-3.5);
         baz1.floats.get().push_back(-4.5);
-        expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
 
         // Try to retrieve objects.
-        std::unique_ptr<Baz> baz0_get, baz1_get;
-        expectNoThrow([&] { baz0_get = bazHandler.get(baz0.id); }).fatal("Failed to get object");
-        expectNoThrow([&] { baz1_get = bazHandler.get(baz1.id); }).fatal("Failed to get object");
+        Baz baz0_get, baz1_get;
+        expectNoThrow([&] { bazHandler->get(baz0.id, baz0_get); }).fatal("Failed to get object");
+        expectNoThrow([&] { bazHandler->get(baz1.id, baz1_get); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(baz0.id, baz0_get->id);
-        compareEQ(baz0.ints.get(), baz0_get->ints.get());
-        compareEQ(baz0.floats.get(), baz0_get->floats.get());
-        compareEQ(baz1.id, baz1_get->id);
-        compareEQ(baz1.ints.get(), baz1_get->ints.get());
-        compareEQ(baz1.floats.get(), baz1_get->floats.get());
+        compareEQ(baz0.id, baz0_get.id);
+        compareEQ(baz0.ints.get(), baz0_get.ints.get());
+        compareEQ(baz0.floats.get(), baz0_get.floats.get());
+        compareEQ(baz1.id, baz1_get.id);
+        compareEQ(baz1.ints.get(), baz1_get.ints.get());
+        compareEQ(baz1.floats.get(), baz1_get.floats.get());
     }
 }

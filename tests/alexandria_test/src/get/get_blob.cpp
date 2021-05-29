@@ -72,19 +72,19 @@ void GetBlob::operator()()
         Foo foo1;
         foo1.a.get().x = -0.5f;
         foo1.a.get().y = -10;
-        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
         // Try to retrieve objects.
-        std::unique_ptr<Foo> foo0_get, foo1_get;
-        expectNoThrow([&] { foo0_get = fooHandler.get(foo0.id); }).fatal("Failed to get object");
-        expectNoThrow([&] { foo1_get = fooHandler.get(foo1.id); }).fatal("Failed to get object");
+        Foo foo0_get, foo1_get;
+        expectNoThrow([&] { fooHandler->get(foo0.id, foo0_get); }).fatal("Failed to get object");
+        expectNoThrow([&] { fooHandler->get(foo1.id, foo1_get); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get->id);
-        compareEQ(foo0.a.get(), foo0_get->a.get());
-        compareEQ(foo1.id, foo1_get->id);
-        compareEQ(foo1.a.get(), foo1_get->a.get());
+        compareEQ(foo0.id, foo0_get.id);
+        compareEQ(foo0.a.get(), foo0_get.a.get());
+        compareEQ(foo1.id, foo1_get.id);
+        compareEQ(foo1.a.get(), foo1_get.a.get());
     }
 
     // Retrieve Bar.
@@ -100,20 +100,20 @@ void GetBlob::operator()()
         bar1.b.get().push_back(-10.0f);
         bar1.b.get().push_back(-20.0f);
         bar1.b.get().push_back(-30.0f);
-        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
         // Try to retrieve objects.
-        std::unique_ptr<Bar> bar0_get, bar1_get;
-        expectNoThrow([&] { bar0_get = barHandler.get(bar0.id); }).fatal("Failed to get object");
-        expectNoThrow([&] { bar1_get = barHandler.get(bar1.id); }).fatal("Failed to get object");
+        Bar bar0_get, bar1_get;
+        expectNoThrow([&] { barHandler->get(bar0.id, bar0_get); }).fatal("Failed to get object");
+        expectNoThrow([&] { barHandler->get(bar1.id, bar1_get); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get->id);
-        compareEQ(bar0.a.get(), bar0_get->a.get());
-        compareEQ(bar0.b.get(), bar0_get->b.get());
-        compareEQ(bar1.id, bar1_get->id);
-        compareEQ(bar1.a.get(), bar1_get->a.get());
-        compareEQ(bar1.b.get(), bar1_get->b.get());
+        compareEQ(bar0.id, bar0_get.id);
+        compareEQ(bar0.a.get(), bar0_get.a.get());
+        compareEQ(bar0.b.get(), bar0_get.b.get());
+        compareEQ(bar1.id, bar1_get.id);
+        compareEQ(bar1.a.get(), bar1_get.a.get());
+        compareEQ(bar1.b.get(), bar1_get.b.get());
     }
 }

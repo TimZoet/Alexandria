@@ -79,8 +79,8 @@ void InsertBlob::operator()()
         foo1.a.get().y = -10;
 
         // Try to insert.
-        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareEQ(foo0.id, alex::InstanceId(1));
@@ -112,8 +112,8 @@ void InsertBlob::operator()()
         bar1.b.get().push_back(-30.0f);
 
         // Try to insert.
-        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareEQ(bar0.id, alex::InstanceId(1));

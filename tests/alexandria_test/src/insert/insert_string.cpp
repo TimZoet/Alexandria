@@ -55,8 +55,8 @@ void InsertString::operator()()
         Foo foo1{.a = "def"};
 
         // Try to insert.
-        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareEQ(foo0.id, alex::InstanceId(1));
@@ -80,8 +80,8 @@ void InsertString::operator()()
         Bar bar1{.a = "^%*&", .b = ""};
 
         // Try to insert.
-        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareEQ(bar0.id, alex::InstanceId(1));

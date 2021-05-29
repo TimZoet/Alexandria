@@ -90,8 +90,8 @@ void InsertPrimitiveBlob::operator()()
         foo1.floats.get().push_back(-4.5f);
 
         // Try to insert.
-        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareEQ(foo0.id, alex::InstanceId(1));
@@ -120,8 +120,8 @@ void InsertPrimitiveBlob::operator()()
         bar1.ints.get().push_back(-33333);
 
         // Try to insert.
-        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
         // Check assigned IDs.
         compareEQ(bar0.id, alex::InstanceId(1));
         compareEQ(bar1.id, alex::InstanceId(2));
@@ -154,8 +154,8 @@ void InsertPrimitiveBlob::operator()()
         baz1.floats.get().push_back(-4.5);
 
         // Try to insert.
-        expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
         // Check assigned IDs.
         compareEQ(baz0.id, alex::InstanceId(1));
         compareEQ(baz1.id, alex::InstanceId(2));

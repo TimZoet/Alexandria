@@ -67,8 +67,8 @@ void InsertPrimitive::operator()()
         Foo foo1{.a = -0.5f, .b = -1.5};
 
         // Try to insert.
-        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareEQ(foo0.id, alex::InstanceId(1));
@@ -94,8 +94,8 @@ void InsertPrimitive::operator()()
         Bar bar1{.a = -1, .b = -2, .c = 123456, .d = 1234567};
 
         // Try to insert.
-        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareEQ(bar0.id, alex::InstanceId(1));

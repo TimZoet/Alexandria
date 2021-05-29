@@ -71,8 +71,8 @@ void InsertReference::operator()()
     Foo foo1{.a = -0.5f, .b = -10};
 
     // Try to insert.
-    expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
     // Insert Bar.
     //
@@ -82,8 +82,8 @@ void InsertReference::operator()()
     bar1.foo = foo1;
 
     // Try to insert.
-    expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
     // Check assigned IDs.
     compareEQ(bar0.id, alex::InstanceId(1));
@@ -113,10 +113,10 @@ void InsertReference::operator()()
     baz3.bar = bar1;
 
     // Try to insert.
-    expectNoThrow([&] { bazHandler.insert(baz0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler.insert(baz1); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler.insert(baz2); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler.insert(baz3); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz2); }).fatal("Failed to insert object");
+    expectNoThrow([&] { bazHandler->insert(baz3); }).fatal("Failed to insert object");
 
     // Check assigned IDs.
     compareEQ(baz0.id, alex::InstanceId(1));

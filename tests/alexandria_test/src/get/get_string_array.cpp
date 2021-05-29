@@ -67,19 +67,19 @@ void GetStringArray::operator()()
         foo1.strings.get().push_back("10");
         foo1.strings.get().push_back("1111");
         foo1.strings.get().push_back("%^&*&(*U");
-        expectNoThrow([&] { fooHandler.insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler.insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
         // Try to retrieve objects.
-        std::unique_ptr<Foo> foo0_get, foo1_get;
-        expectNoThrow([&] { foo0_get = fooHandler.get(foo0.id); }).fatal("Failed to get object");
-        expectNoThrow([&] { foo1_get = fooHandler.get(foo1.id); }).fatal("Failed to get object");
+        Foo foo0_get, foo1_get;
+        expectNoThrow([&] { fooHandler->get(foo0.id, foo0_get); }).fatal("Failed to get object");
+        expectNoThrow([&] { fooHandler->get(foo1.id, foo1_get); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get->id);
-        compareEQ(foo0.strings.get(), foo0_get->strings.get());
-        compareEQ(foo1.id, foo1_get->id);
-        compareEQ(foo1.strings.get(), foo1_get->strings.get());
+        compareEQ(foo0.id, foo0_get.id);
+        compareEQ(foo0.strings.get(), foo0_get.strings.get());
+        compareEQ(foo1.id, foo1_get.id);
+        compareEQ(foo1.strings.get(), foo1_get.strings.get());
     }
 
     // Retrieve Bar.
@@ -93,20 +93,20 @@ void GetStringArray::operator()()
         bar1.strings2.get().push_back("dbsfdcesw");
         bar1.strings2.get().push_back("utikrt");
         bar1.strings2.get().push_back("hntfdrgtef");
-        expectNoThrow([&] { barHandler.insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler.insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
         // Try to retrieve objects.
-        std::unique_ptr<Bar> bar0_get, bar1_get;
-        expectNoThrow([&] { bar0_get = barHandler.get(bar0.id); }).fatal("Failed to get object");
-        expectNoThrow([&] { bar1_get = barHandler.get(bar1.id); }).fatal("Failed to get object");
+        Bar bar0_get, bar1_get;
+        expectNoThrow([&] { barHandler->get(bar0.id, bar0_get); }).fatal("Failed to get object");
+        expectNoThrow([&] { barHandler->get(bar1.id, bar1_get); }).fatal("Failed to get object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get->id);
-        compareEQ(bar0.strings1.get(), bar0_get->strings1.get());
-        compareEQ(bar0.strings2.get(), bar0_get->strings2.get());
-        compareEQ(bar1.id, bar1_get->id);
-        compareEQ(bar1.strings1.get(), bar1_get->strings1.get());
-        compareEQ(bar1.strings2.get(), bar1_get->strings2.get());
+        compareEQ(bar0.id, bar0_get.id);
+        compareEQ(bar0.strings1.get(), bar0_get.strings1.get());
+        compareEQ(bar0.strings2.get(), bar0_get.strings2.get());
+        compareEQ(bar1.id, bar1_get.id);
+        compareEQ(bar1.strings1.get(), bar1_get.strings1.get());
+        compareEQ(bar1.strings2.get(), bar1_get.strings2.get());
     }
 }
