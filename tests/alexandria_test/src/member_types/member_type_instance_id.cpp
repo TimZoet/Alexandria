@@ -1,0 +1,9 @@
+#include "alexandria_test/member_types/member_type_instance_id.h"
+
+////////////////////////////////////////////////////////////////
+// Module includes.
+////////////////////////////////////////////////////////////////
+
+#include "alexandria/member_types/instance_id.h"
+
+void MemberTypeInstanceId::operator()() {}

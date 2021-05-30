@@ -48,6 +48,14 @@
 #include "alexandria_test/insert/insert_string.h"
 #include "alexandria_test/insert/insert_string_array.h"
 #include "alexandria_test/library/create_library.h"
+#include "alexandria_test/member_types/member_type_blob.h"
+#include "alexandria_test/member_types/member_type_blob_array.h"
+#include "alexandria_test/member_types/member_type_instance_id.h"
+#include "alexandria_test/member_types/member_type_primitive_array.h"
+#include "alexandria_test/member_types/member_type_primitive_blob.h"
+#include "alexandria_test/member_types/member_type_reference.h"
+#include "alexandria_test/member_types/member_type_reference_array.h"
+#include "alexandria_test/member_types/member_type_string_array.h"
 #include "alexandria_test/types/create_type.h"
 #include "alexandria_test/types/create_type_blob.h"
 #include "alexandria_test/types/create_type_blob_array.h"
@@ -123,6 +131,15 @@ int main(int argc, char** argv)
       InsertStringArray,
       // library
       CreateLibrary,
+      // member_types
+      MemberTypeBlob,
+      MemberTypeBlobArray,
+      MemberTypeInstanceId,
+      MemberTypePrimitiveArray,
+      MemberTypePrimitiveBlob,
+      MemberTypeReference,
+      MemberTypeReferenceArray,
+      MemberTypeStringArray,
       // types
       CreateType,
       CreateTypeBlob,
