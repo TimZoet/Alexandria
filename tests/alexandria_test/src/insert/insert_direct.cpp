@@ -53,6 +53,6 @@ void InsertDirect::operator()()
     compareEQ(foo1->id, foo1_get.id);
 
     // Make sure instance isn't accidentally being cached.
-    compareEQ(fooHandler->getCache(foo0), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo1), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo0->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo1->id), alex::CacheMethod::None);
 }

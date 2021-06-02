@@ -50,9 +50,9 @@ void DeleteManaged::operator()()
     });
 
     // Check cache state.
-    compareEQ(fooHandler->getCache(foo0), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo1), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo2), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo0->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo1->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo2->id), alex::CacheMethod::None);
 
     // Retrieval should fail.
     fooHandler->setDefaultCacheMethod(alex::CacheMethod::None);
@@ -61,7 +61,7 @@ void DeleteManaged::operator()()
     expectThrow([&] { static_cast<void>(fooHandler->get(foo2->id)); });
 
     // Check cache state.
-    compareEQ(fooHandler->getCache(foo0), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo1), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo2), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo0->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo1->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo2->id), alex::CacheMethod::None);
 }

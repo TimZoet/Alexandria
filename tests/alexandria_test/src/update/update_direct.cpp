@@ -54,7 +54,7 @@ void UpdateDirect::operator()()
     });
 
     // Make sure instance isn't accidentally being cached.
-    compareEQ(fooHandler->getCache(foo0), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo1), alex::CacheMethod::Weak);
-    compareEQ(fooHandler->getCache(foo2), alex::CacheMethod::Strong);
+    compareEQ(fooHandler->getCacheMethod(foo0->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo1->id), alex::CacheMethod::Weak);
+    compareEQ(fooHandler->getCacheMethod(foo2->id), alex::CacheMethod::Strong);
 }

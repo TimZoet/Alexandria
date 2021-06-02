@@ -51,9 +51,9 @@ void UpdateManaged::operator()()
     });
 
     // Make sure objects are being appropriately cached.
-    compareEQ(fooHandler->getCache(foo0), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo1), alex::CacheMethod::Weak);
-    compareEQ(fooHandler->getCache(foo2), alex::CacheMethod::Strong);
+    compareEQ(fooHandler->getCacheMethod(foo0->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo1->id), alex::CacheMethod::Weak);
+    compareEQ(fooHandler->getCacheMethod(foo2->id), alex::CacheMethod::Strong);
 
     // Update with nullptr.
     expectThrow([&] { fooHandler->update(nullptr); });

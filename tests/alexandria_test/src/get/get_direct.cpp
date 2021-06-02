@@ -62,7 +62,7 @@ void GetDirect::operator()()
     compareEQ(foo0.use_count(), static_cast<long>(1));
     compareEQ(foo1.use_count(), static_cast<long>(1));
     compareEQ(foo2.use_count(), static_cast<long>(2));
-    compareEQ(fooHandler->getCache(foo0), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo1), alex::CacheMethod::Weak);
-    compareEQ(fooHandler->getCache(foo2), alex::CacheMethod::Strong);
+    compareEQ(fooHandler->getCacheMethod(foo0->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo1->id), alex::CacheMethod::Weak);
+    compareEQ(fooHandler->getCacheMethod(foo2->id), alex::CacheMethod::Strong);
 }

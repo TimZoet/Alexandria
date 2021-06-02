@@ -53,6 +53,6 @@ void CreateDirect::operator()()
     // Make sure instance isn't accidentally being cached.
     compareEQ(foo0.use_count(), static_cast<long>(1));
     compareEQ(foo1.use_count(), static_cast<long>(1));
-    compareEQ(fooHandler->getCache(foo0), alex::CacheMethod::None);
-    compareEQ(fooHandler->getCache(foo1), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo0->id), alex::CacheMethod::None);
+    compareEQ(fooHandler->getCacheMethod(foo1->id), alex::CacheMethod::None);
 }
