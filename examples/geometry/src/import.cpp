@@ -17,13 +17,13 @@ bool importModel(const std::filesystem::path&                          path,
                  const std::function<void(std::shared_ptr<Material>)>& insertMaterialFunc)
 {
     // Try to load obj file.
-    std::string                      inputfile = path.string();
+    auto                             inputfile = path.string();
     tinyobj::attrib_t                attrib;
     std::vector<tinyobj::shape_t>    shapes;
     std::vector<tinyobj::material_t> materials;
     std::string                      warn;
     std::string                      err;
-    bool                             ret = LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
+    auto                             ret = LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
 
     //
     if (!warn.empty()) { std::cout << warn << std::endl; }

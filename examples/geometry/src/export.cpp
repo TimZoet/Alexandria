@@ -25,6 +25,8 @@ bool exportModel(std::filesystem::path path, const Mesh& mesh, const Material& m
             return false;
         }
 
+        std::cout << "Writing mesh " << mesh.name << " to " << path << std::endl;
+
         // Write material filename.
         file << "mtllib " << path.replace_extension(".mtl").string() << "\n";
 
@@ -50,7 +52,7 @@ bool exportModel(std::filesystem::path path, const Mesh& mesh, const Material& m
         for (size_t i = 0; i < mesh.vertices.get().size() / 3; i++)
         {
             file << "f ";
-            for (size_t j = 1; j < 4; j++) file << (i * 3 + j) << "/" << (i * 3 + j) << "/" << (i * 3 + j) << "/ ";
+            for (size_t j = 1; j < 4; j++) file << i * 3 + j << "/" << i * 3 + j << "/" << i * 3 + j << "/ ";
             file << "\n";
         }
     }
@@ -63,6 +65,8 @@ bool exportModel(std::filesystem::path path, const Mesh& mesh, const Material& m
             std::cout << "Could not open " << path << std::endl;
             return false;
         }
+
+        std::cout << "Writing material " << mtl.name << " to " << path << std::endl;
 
         // Write properties.
         file << "newmtl " << mtl.name << "\n";

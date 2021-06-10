@@ -13,6 +13,10 @@
 
 #include "alexandria/library.h"
 
+////////////////////////////////////////////////////////////////
+// Types.
+////////////////////////////////////////////////////////////////
+
 struct float2
 {
     float x = 0;
@@ -48,3 +52,38 @@ struct Mesh
     alex::Blob<std::vector<Vertex>> vertices;
     alex::Reference<Material>       material;
 };
+
+////////////////////////////////////////////////////////////////
+// Utility functions.
+////////////////////////////////////////////////////////////////
+
+float2 average(const float2& lhs, const float2& rhs);
+
+float3 average(const float3& lhs, const float3& rhs);
+
+Vertex average(const Vertex& lhs, const Vertex& rhs);
+
+////////////////////////////////////////////////////////////////
+// Typedefs.
+////////////////////////////////////////////////////////////////
+
+using float2_t = alex::MemberList<alex::Member<&float2::x>, alex::Member<&float2::y>>;
+using float3_t = alex::MemberList<alex::Member<&float3::x>, alex::Member<&float3::y>, alex::Member<&float3::z>>;
+using vertex_t = alex::MemberList<alex::NestedMember<float3_t, &Vertex::position>,
+                                  alex::NestedMember<float3_t, &Vertex::normal>,
+                                  alex::NestedMember<float2_t, &Vertex::uv>>;
+
+// TODO: Create utility function in Alexandria to get an ObjectHandler type.
+
+using MaterialHandler =
+  decltype(std::declval<alex::LibraryPtr>()
+             ->createObjectHandler<alex::Member<&Material::id>,
+                                   alex::Member<&Material::name>,
+                                   alex::NestedMember<float3_t, &Material::color>,
+                                   alex::Member<&Material::specular>>(std::declval<std::string>()));
+
+using MeshHandler = decltype(std::declval<alex::LibraryPtr>()
+                               ->createObjectHandler<alex::Member<&Mesh::id>,
+                                                     alex::Member<&Mesh::name>,
+                                                     alex::Member<&Mesh::vertices>,
+                                                     alex::Member<&Mesh::material>>(std::declval<std::string>()));

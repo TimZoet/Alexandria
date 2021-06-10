@@ -4,6 +4,7 @@ set(INCLUDE_DIR "include/geometry")
 set(SRC_DIR "src")
 
 set(HEADERS
+	${INCLUDE_DIR}/actions.h
 	${INCLUDE_DIR}/export.h
 	${INCLUDE_DIR}/import.h
 	${INCLUDE_DIR}/tiny_obj_loader.h
@@ -12,6 +13,7 @@ set(HEADERS
 )
  
 set(SOURCES
+	${SRC_DIR}/actions.cpp
 	${SRC_DIR}/export.cpp
 	${SRC_DIR}/import.cpp
 	${SRC_DIR}/main.cpp
