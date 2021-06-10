@@ -11,6 +11,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/library.h"
+#include "alexandria/queries/query.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.
@@ -61,6 +62,7 @@ int main(int, char**)
     {
         std::getline(std::cin, line);
 
+        if (line.empty()) continue;
         if (line == "exit") return 0;
 
         if (line.starts_with("open "))
@@ -111,13 +113,11 @@ int main(int, char**)
                                                                alex::Member<&Material::name>,
                                                                alex::NestedMember<float3_t, &Material::color>,
                                                                alex::Member<&Material::specular>>("material");
-                materialHandler->setDefaultCacheMethod(alex::CacheMethod::Strong);
 
                 meshHandler = library->createObjectHandler<alex::Member<&Mesh::id>,
                                                            alex::Member<&Mesh::name>,
                                                            alex::Member<&Mesh::vertices>,
                                                            alex::Member<&Mesh::material>>("mesh");
-                meshHandler->setDefaultCacheMethod(alex::CacheMethod::Strong);
             }
             catch (const std::exception& e)
             {
@@ -127,24 +127,109 @@ int main(int, char**)
         }
         else if (line == "list")
         {
+            std::cout << "---- Meshes ----\n";
+            for (const auto id : meshHandler->list())
+            {
+                const auto mesh = meshHandler->get(id);
+                std::cout << mesh->id.get() << " " << mesh->name << "\n";
+            }
+
+            std::cout << "---- Materials ----\n";
+            for (const auto id : materialHandler->list())
+            {
+                const auto material = materialHandler->get(id);
+                std::cout << material->id.get() << " " << material->name << "\n";
+            }
         }
         else if (line.starts_with("import "))
         {
             line.erase(0, 7);
 
+            // Import OBJ file.
             importModel(
               line,
-              [&meshHandler]() -> std::shared_ptr<Mesh> { return meshHandler->create(); },
-              [&materialHandler]() -> std::shared_ptr<Material> { return materialHandler->create(); });
+              [&meshHandler](std::shared_ptr<Mesh> m) { meshHandler->insert(std::move(m)); },
+              [&materialHandler](std::shared_ptr<Material> m) { materialHandler->insert(std::move(m)); });
         }
         else if (line.starts_with("export "))
         {
             line.erase(0, 7);
+
+            // Find all meshes whose name matches parameter.
+            auto colName = meshHandler->getPrimitiveColumn<1>();
+            auto query   = meshHandler->find(colName == line);
+            for (const auto id : query())
+            {
+                // Get mesh and material.
+                const auto mesh     = meshHandler->get(id);
+                const auto material = mesh->material.get(*materialHandler);
+
+                // Generate unique filename.
+                auto   filename = line + ".obj";
+                size_t i        = 0;
+                while (std::filesystem::exists(filename)) filename = line + "_" + std::to_string(i++) + ".obj";
+
+                // Export mesh and material to OBJ file.
+                exportModel(filename, *mesh, *material);
+            }
+        }
+        else if (line.starts_with("link "))
+        {
+            line.erase(0, 5);
+
+            // Split line into two identifiers.
+            const auto pos = line.find(' ');
+            if (pos == std::string::npos)
+            {
+                std::cout << "Failed to parse parameters\n";
+                continue;
+            }
+            const auto materialID = std::stoull(line.substr(0, pos));
+            const auto meshID     = std::stoull(line.substr(pos + 1));
+
+            // Retrieve mesh and material.
+            auto mesh = meshHandler->get(meshID);
+            auto mat  = materialHandler->get(materialID);
+
+            // Link material to mesh and update.
+            std::cout << "Linking material " << mat->name << " to mesh " << mesh->name << std::endl;
+            mesh->material = *mat;
+            meshHandler->update(mesh);
+        }
+        else if (line.starts_with("cache "))
+        {
+            line.erase(0, 6);
+            if (line == "on" || line == "1" || line == "true")
+            {
+                meshHandler->setDefaultCacheMethod(alex::CacheMethod::Strong);
+                std::cout << "Enabling caching\n";
+            }
+            else if (line == "off" || line == "0" || line == "false")
+            {
+                meshHandler->setDefaultCacheMethod(alex::CacheMethod::Strong);
+                std::cout << "Disabling caching\n";
+            }
+            else
+            {
+                std::cout << "Unknown caching parameter\n";
+            }
+        }
+        else if (line.starts_with("release "))
+        {
+            std::cout << "Releasing all cached objects\n";
+            meshHandler->releaseAll();
+            materialHandler->releaseAll();
+        }
+        else if (line.starts_with("clear "))
+        {
+            std::cout << "Clearing all cached objects\n";
+            meshHandler->clearAll();
         }
         else
         {
             std::cout << "Unknown command" << std::endl;
         }
     }
+
     return 0;
 }

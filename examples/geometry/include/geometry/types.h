@@ -38,7 +38,7 @@ struct Material
     alex::InstanceId id;
     std::string      name;
     float3           color;
-    float            specular;
+    float            specular = 0;
 };
 
 struct Mesh

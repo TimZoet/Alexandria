@@ -12,9 +12,9 @@
 
 #include "geometry/tiny_obj_loader.h"
 
-bool importModel(const std::filesystem::path&                      path,
-                 const std::function<std::shared_ptr<Mesh>()>&     createMeshFunc,
-                 const std::function<std::shared_ptr<Material>()>& createMaterialFunc)
+bool importModel(const std::filesystem::path&                          path,
+                 const std::function<void(std::shared_ptr<Mesh>)>&     insertMeshFunc,
+                 const std::function<void(std::shared_ptr<Material>)>& insertMaterialFunc)
 {
     // Try to load obj file.
     std::string                      inputfile = path.string();
@@ -35,10 +35,12 @@ bool importModel(const std::filesystem::path&                      path,
     for (const auto& mat : materials)
     {
         // Create new material.
-        auto material      = createMaterialFunc();
+        auto material      = std::make_shared<Material>();
         material->name     = mat.name;
         material->color    = float3{.x = mat.diffuse[0], .y = mat.diffuse[1], .z = mat.diffuse[2]};
         material->specular = mat.specular[0];
+
+        insertMaterialFunc(material);
 
         materialList.push_back(material->id);
     }
@@ -47,7 +49,7 @@ bool importModel(const std::filesystem::path&                      path,
     for (const auto& shape : shapes)
     {
         // Create new mesh.
-        auto mesh  = createMeshFunc();
+        auto mesh  = std::make_shared<Mesh>();
         mesh->name = shape.name;
 
         // Get material from first triangle.
@@ -81,6 +83,8 @@ bool importModel(const std::filesystem::path&                      path,
 
             vertices.push_back(v);
         }
+
+        insertMeshFunc(std::move(mesh));
     }
 
     return true;

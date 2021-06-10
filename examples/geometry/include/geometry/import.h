@@ -13,6 +13,6 @@
 
 #include "geometry/types.h"
 
-bool importModel(const std::filesystem::path&                      path,
-                 const std::function<std::shared_ptr<Mesh>()>&     createMeshFunc,
-                 const std::function<std::shared_ptr<Material>()>& createMaterialFunc);
+bool importModel(const std::filesystem::path&                          path,
+                 const std::function<void(std::shared_ptr<Mesh>)>&     insertMeshFunc,
+                 const std::function<void(std::shared_ptr<Material>)>& insertMaterialFunc);
