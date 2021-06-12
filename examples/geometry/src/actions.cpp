@@ -30,8 +30,8 @@ void actionCache(const std::string& param, MaterialHandler& materialHandler, Mes
     }
     else if (param == "off" || param == "0" || param == "false")
     {
-        materialHandler->setDefaultCacheMethod(alex::CacheMethod::Strong);
-        meshHandler->setDefaultCacheMethod(alex::CacheMethod::Strong);
+        materialHandler->setDefaultCacheMethod(alex::CacheMethod::None);
+        meshHandler->setDefaultCacheMethod(alex::CacheMethod::None);
         std::cout << "Disabling caching\n";
     }
     else

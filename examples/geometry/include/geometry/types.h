@@ -73,17 +73,12 @@ using vertex_t = alex::MemberList<alex::NestedMember<float3_t, &Vertex::position
                                   alex::NestedMember<float3_t, &Vertex::normal>,
                                   alex::NestedMember<float2_t, &Vertex::uv>>;
 
-// TODO: Create utility function in Alexandria to get an ObjectHandler type.
+using MaterialHandler = alex::object_handler_t<alex::Member<&Material::id>,
+                                               alex::Member<&Material::name>,
+                                               alex::NestedMember<float3_t, &Material::color>,
+                                               alex::Member<&Material::specular>>;
 
-using MaterialHandler =
-  decltype(std::declval<alex::LibraryPtr>()
-             ->createObjectHandler<alex::Member<&Material::id>,
-                                   alex::Member<&Material::name>,
-                                   alex::NestedMember<float3_t, &Material::color>,
-                                   alex::Member<&Material::specular>>(std::declval<std::string>()));
-
-using MeshHandler = decltype(std::declval<alex::LibraryPtr>()
-                               ->createObjectHandler<alex::Member<&Mesh::id>,
-                                                     alex::Member<&Mesh::name>,
-                                                     alex::Member<&Mesh::vertices>,
-                                                     alex::Member<&Mesh::material>>(std::declval<std::string>()));
+using MeshHandler = alex::object_handler_t<alex::Member<&Mesh::id>,
+                                           alex::Member<&Mesh::name>,
+                                           alex::Member<&Mesh::vertices>,
+                                           alex::Member<&Mesh::material>>;
