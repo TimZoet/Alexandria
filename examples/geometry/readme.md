@@ -2,6 +2,8 @@
 
 The `geometry` example application contains a Wavefront OBJ importer and exporter. It showcases a few features of `Alexandria`. Note that it is in no way intended to be a complete, robust application. Models are simplified upon import, and you will definitely be able to crash the application when passing in invalid parameters. Extending and improving the application might be a good way to get more familiar with the library.
 
+This example comes with 3 ready to use .obj files inside of the `models` subfolder. Placing them next to the executable would allow you to run the following commands:
+
 ```
 open geometry.db
 Creating new library file geometry.db
