@@ -1,21 +1,6 @@
-[submodule "modules/parsertongue"]
-	path = modules/parsertongue
-	url = https://github.com/TimZoet/parsertongue-module
-[submodule "modules/cppql"]
-	path = modules/cppql
-	url = https://github.com/TimZoet/cppql-module
 [submodule "modules/alexandria"]
 	path = modules/alexandria
 	url = https://github.com/TimZoet/alexandria-module
-[submodule "modules/dot"]
-	path = modules/dot
-	url = https://github.com/TimZoet/dot-module
-[submodule "modules/common"]
-	path = modules/common
-	url = https://github.com/TimZoet/common-module.git
-[submodule "modules/bettertest"]
-	path = modules/bettertest
-	url = https://github.com/TimZoet/bettertest-module.git
 [submodule "cmake"]
 	path = cmake
 	url = https://github.com/TimZoet/cmake-module.git

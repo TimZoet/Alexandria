@@ -1,3 +1,5 @@
+find_package(bettertest REQUIRED)
+
 set(NAME alexandria_test)
 set(TYPE test)
 set(INCLUDE_DIR "include/alexandria_test")
@@ -148,7 +150,7 @@ set(SOURCES
 
 set(DEPS_PRIVATE
     alexandria
-	bettertest
+	bettertest::bettertest
 )
 
 make_target(
