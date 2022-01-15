@@ -42,6 +42,7 @@ class AlexandriaConan(ConanFile):
         self.copy("CMakeLists.txt")
         self.copy("license")
         self.copy("readme.md")
+        self.copy("applications/*")
         self.copy("cmake/*")
         self.copy("modules/CMakeLists.txt")
         self.copy("modules/alexandria/*")
@@ -58,7 +59,7 @@ class AlexandriaConan(ConanFile):
         self.requires("common/1.0.0@timzoet/stable")
         self.requires("cppql/1.0.0@timzoet/stable")
         self.requires("dot/1.0.0@timzoet/stable")
-        self.requires("fmt/7.0.3")
+        self.requires("parsertongue/1.1.0@timzoet/stable")
 
         if self.options.build_tests:
             self.requires("bettertest/1.0.0@timzoet/stable")
