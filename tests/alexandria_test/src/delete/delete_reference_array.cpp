@@ -49,13 +49,13 @@ void DeleteReferenceArray::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t>                   barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t>                   bazTable(library->getDatabase().getTable(bazType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, int64_t> barFooTable(
+    sql::TypedTable<int64_t>                   barTable(library->getDatabase().getTable(barType.getName()));
+    sql::TypedTable<int64_t>                   bazTable(library->getDatabase().getTable(bazType.getName()));
+    sql::TypedTable<int64_t, int64_t, int64_t> barFooTable(
       library->getDatabase().getTable(barType.getName() + "_fooProp"));
-    sql::ext::TypedTable<int64_t, int64_t, int64_t> bazFooTable(
+    sql::TypedTable<int64_t, int64_t, int64_t> bazFooTable(
       library->getDatabase().getTable(bazType.getName() + "_fooProp"));
-    sql::ext::TypedTable<int64_t, int64_t, int64_t> bazBarTable(
+    sql::TypedTable<int64_t, int64_t, int64_t> bazBarTable(
       library->getDatabase().getTable(bazType.getName() + "_barProp"));
 
     // Create object handlers.

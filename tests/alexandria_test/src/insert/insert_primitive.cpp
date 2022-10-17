@@ -46,8 +46,8 @@ void InsertPrimitive::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t, float, double> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, int32_t, int64_t, uint32_t, uint64_t> barTable(
+    sql::TypedTable<int64_t, float, double> fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t, int32_t, int64_t, uint32_t, uint64_t> barTable(
       library->getDatabase().getTable(barType.getName()));
 
     // Create object handlers.

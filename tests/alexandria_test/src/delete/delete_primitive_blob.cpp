@@ -65,9 +65,9 @@ void DeletePrimitiveBlob::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t, std::vector<float>>   fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, std::vector<int32_t>> barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, std::vector<uint64_t>, std::vector<double>> bazTable(
+    sql::TypedTable<int64_t, std::vector<float>>   fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t, std::vector<int32_t>> barTable(library->getDatabase().getTable(barType.getName()));
+    sql::TypedTable<int64_t, std::vector<uint64_t>, std::vector<double>> bazTable(
       library->getDatabase().getTable(bazType.getName()));
 
     // Create object handlers.

@@ -52,13 +52,13 @@ void InsertBlobArray::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t>               fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t>               barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, Baz> fooBlob1Table(
+    sql::TypedTable<int64_t>               fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t>               barTable(library->getDatabase().getTable(barType.getName()));
+    sql::TypedTable<int64_t, int64_t, Baz> fooBlob1Table(
       library->getDatabase().getTable(fooType.getName() + "_blob1"));
-    sql::ext::TypedTable<int64_t, int64_t, std::vector<Baz>> barBlob1Table(
+    sql::TypedTable<int64_t, int64_t, std::vector<Baz>> barBlob1Table(
       library->getDatabase().getTable(barType.getName() + "_blob1"));
-    sql::ext::TypedTable<int64_t, int64_t, std::vector<float>> barBlob2Table(
+    sql::TypedTable<int64_t, int64_t, std::vector<float>> barBlob2Table(
       library->getDatabase().getTable(barType.getName() + "_blob2"));
 
     // Create object handlers.

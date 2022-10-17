@@ -65,16 +65,16 @@ void InsertPrimitiveArray::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t>                 fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, float> fooFloatsTable(
+    sql::TypedTable<int64_t>                 fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t, int64_t, float> fooFloatsTable(
       library->getDatabase().getTable(fooType.getName() + "_floats"));
-    sql::ext::TypedTable<int64_t>                   barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, int32_t> barIntsTable(
+    sql::TypedTable<int64_t>                   barTable(library->getDatabase().getTable(barType.getName()));
+    sql::TypedTable<int64_t, int64_t, int32_t> barIntsTable(
       library->getDatabase().getTable(barType.getName() + "_ints"));
-    sql::ext::TypedTable<int64_t>                    bazTable(library->getDatabase().getTable(bazType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, uint64_t> bazIntsTable(
+    sql::TypedTable<int64_t>                    bazTable(library->getDatabase().getTable(bazType.getName()));
+    sql::TypedTable<int64_t, int64_t, uint64_t> bazIntsTable(
       library->getDatabase().getTable(bazType.getName() + "_uints"));
-    sql::ext::TypedTable<int64_t, int64_t, double> bazFloatsTable(
+    sql::TypedTable<int64_t, int64_t, double> bazFloatsTable(
       library->getDatabase().getTable(bazType.getName() + "_doubles"));
 
     // Create object handlers.

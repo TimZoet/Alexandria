@@ -51,13 +51,13 @@ void DeleteStringArray::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t>                       fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, std::string> fooStringsTable(
+    sql::TypedTable<int64_t>                       fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t, int64_t, std::string> fooStringsTable(
       library->getDatabase().getTable(fooType.getName() + "_strings"));
-    sql::ext::TypedTable<int64_t>                       barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, std::string> barStrings1Table(
+    sql::TypedTable<int64_t>                       barTable(library->getDatabase().getTable(barType.getName()));
+    sql::TypedTable<int64_t, int64_t, std::string> barStrings1Table(
       library->getDatabase().getTable(barType.getName() + "_strings1"));
-    sql::ext::TypedTable<int64_t, int64_t, std::string> barStrings2Table(
+    sql::TypedTable<int64_t, int64_t, std::string> barStrings2Table(
       library->getDatabase().getTable(barType.getName() + "_strings2"));
 
     // Create object handlers.

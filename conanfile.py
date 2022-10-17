@@ -52,6 +52,9 @@ class AlexandriaConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
     
+    def configure(self):
+        self.options["bettertest"].build_alexandria = False
+    
     def requirements(self):
         base = self.python_requires["pyreq"].module.BaseConan
         base.requirements(self)
@@ -63,9 +66,10 @@ class AlexandriaConan(ConanFile):
 
         if self.options.build_tests:
             self.requires("bettertest/1.0.0@timzoet/stable")
-    
+
     def package_info(self):
-        self.cpp_info.libs = ["alexandria"]
+        self.cpp_info.components["alexandria"].libs = ["alexandria"]
+        self.cpp_info.components["alexandria"].requires = ["common::common", "cppql::core", "cppql::typed", "dot::dot"]
     
     def generate(self):
         base = self.python_requires["pyreq"].module.BaseConan

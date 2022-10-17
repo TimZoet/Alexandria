@@ -10,8 +10,8 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "cppql/ext/typed_table.h"
-#include "cppql/ext/queries/select.h"
+#include "cppql-typed/typed_table.h"
+#include "cppql-typed/queries/select.h"
 
 namespace utils
 {

@@ -49,8 +49,8 @@ void InsertReference::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t, int64_t>          barTable(library->getDatabase().getTable(barType.getName()));
-    sql::ext::TypedTable<int64_t, int64_t, int64_t> bazTable(library->getDatabase().getTable(bazType.getName()));
+    sql::TypedTable<int64_t, int64_t>          barTable(library->getDatabase().getTable(barType.getName()));
+    sql::TypedTable<int64_t, int64_t, int64_t> bazTable(library->getDatabase().getTable(bazType.getName()));
 
     // Create object handlers.
     auto fooHandler =

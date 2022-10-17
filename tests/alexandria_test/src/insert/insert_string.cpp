@@ -38,8 +38,8 @@ void InsertString::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t, std::string> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, std::string, std::string> barTable(
+    sql::TypedTable<int64_t, std::string> fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t, std::string, std::string> barTable(
       library->getDatabase().getTable(barType.getName()));
 
     // Create object handlers.

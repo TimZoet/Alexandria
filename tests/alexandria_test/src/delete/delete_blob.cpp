@@ -58,8 +58,8 @@ void DeleteBlob::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get tables.
-    sql::ext::TypedTable<int64_t, Baz> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::ext::TypedTable<int64_t, std::vector<Baz>, std::vector<float>> barTable(
+    sql::TypedTable<int64_t, Baz> fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t, std::vector<Baz>, std::vector<float>> barTable(
       library->getDatabase().getTable(barType.getName()));
 
     // Create object handlers.

@@ -24,7 +24,7 @@ void CreateDirect::operator()()
     expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
 
     // Get table.
-    sql::ext::TypedTable<int64_t> fooTable(library->getDatabase().getTable(fooType.getName()));
+    sql::TypedTable<int64_t> fooTable(library->getDatabase().getTable(fooType.getName()));
 
     // Create object handler.
     auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>>(fooType);
