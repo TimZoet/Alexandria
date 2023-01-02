@@ -19,6 +19,7 @@ namespace alex
     {
     public:
         using element_t = std::string;
+        using value_t   = std::vector<element_t>;
 
         StringArray() = default;
 
@@ -32,20 +33,14 @@ namespace alex
 
         StringArray& operator=(StringArray&&) = default;
 
-        /**
-         * \brief Get vector.
-         * \return Vector.
-         */
-        [[nodiscard]] std::vector<std::string>& get() noexcept { return container; }
-
-        /**
-         * \brief Get const vector.
-         * \return Const vector.
-         */
-        [[nodiscard]] const std::vector<std::string>& get() const noexcept { return container; }
+        template<typename Self>
+        auto get(this Self&& self)
+        {
+            return std::forward<Self>(self).value;
+        }
 
     private:
-        std::vector<std::string> container;
+        value_t container;
     };
 
     ////////////////////////////////////////////////////////////////

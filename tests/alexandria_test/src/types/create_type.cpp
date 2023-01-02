@@ -3,15 +3,15 @@
 void CreateType::operator()()
 {
     // Create several types.
-    alex::Type *type0, *type1, *type2;
-    expectNoThrow([&type0, this]() { type0 = &library->createType("type0"); });
-    expectNoThrow([&type1, this]() { type1 = &library->createType("type1"); });
-    expectNoThrow([&type2, this]() { type2 = &library->createType("type2"); });
+    alex::Type *type0 = nullptr, *type1 = nullptr, *type2 = nullptr;
+    expectNoThrow([&] { type0 = &nameSpace->createType("type0"); });
+    expectNoThrow([&] { type1 = &nameSpace->createType("type1"); });
+    expectNoThrow([&] { type2 = &nameSpace->createType("type2"); });
 
     // Recreating types with same name should throw.
-    expectThrow([this]() { library->createType("type0"); });
-    expectThrow([this]() { library->createType("type1"); });
-    expectThrow([this]() { library->createType("type2"); });
+    expectThrow([&] { nameSpace->createType("type0"); });
+    expectThrow([&] { nameSpace->createType("type1"); });
+    expectThrow([&] { nameSpace->createType("type2"); });
     // TODO: Test creation of types with other forbidden names.
     // Do the same for properties.
 
@@ -23,13 +23,30 @@ void CreateType::operator()()
     compareFalse(type1->isCommitted());
     compareFalse(type2->isCommitted());
 
+    // Commit without props should throw.
+    expectThrow([&] { type0->commit(); });
+    expectThrow([&] { type1->commit(); });
+    expectThrow([&] { type2->commit(); });
+
+    expectNoThrow([&] { type0->createPrimitiveProperty("a", alex::DataType::Float); });
+    expectNoThrow([&] { type1->createPrimitiveProperty("b", alex::DataType::Float); });
+    expectNoThrow([&] { type2->createPrimitiveProperty("c", alex::DataType::Float); });
+
     // Commit.
-    expectNoThrow([&type0, this]() { library->commitType(*type0); });
-    expectNoThrow([&type1, this]() { library->commitType(*type1); });
-    expectNoThrow([&type2, this]() { library->commitType(*type2); });
+    expectNoThrow([&] { type0->commit(); });
+    expectNoThrow([&] { type1->commit(); });
+    expectNoThrow([&] { type2->commit(); });
 
     // Check committed.
     compareTrue(type0->isCommitted());
     compareTrue(type1->isCommitted());
     compareTrue(type2->isCommitted());
+
+    // Commit again should throw.
+    expectThrow([&] { type0->commit(); });
+    expectThrow([&] { type1->commit(); });
+    expectThrow([&] { type2->commit(); });
+
+    // Adding another property should throw.
+    expectThrow([&] { type0->createPrimitiveProperty("d", alex::DataType::Float); });
 }

@@ -10,7 +10,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "cppql-core/column.h"
+#include "cppql/core/column.h"
 
 namespace alex
 {
@@ -23,15 +23,32 @@ namespace alex
         Float,
         Double,
         String,
-        Type,
-        Blob
+        Blob,
+        Reference,
+        Nested
     };
 
-    bool isPrimitiveDataType(DataType dataType) noexcept;
+    /*
+     * float
+     * float[]
+     * float*
+     * int32
+     * int32[]
+     * int32*
+     * string
+     * string[]
+     * blob
+     * blob[]
+     * nested
+     * reference
+     * reference[]
+     */
 
-    sql::Column::Type toColumnType(DataType dataType) noexcept;
+    [[nodiscard]] bool isPrimitiveDataType(DataType dataType) noexcept;
 
-    std::string toString(DataType dataType);
+    [[nodiscard]] sql::Column::Type toColumnType(DataType dataType) noexcept;
+
+    [[nodiscard]] std::string toString(DataType dataType);
 
     void fromString(const std::string& s, DataType& dataType);
 }  // namespace alex

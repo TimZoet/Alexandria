@@ -13,13 +13,13 @@
 ////////////////////////////////////////////////////////////////
 
 #include "common/type_traits.h"
-#include "cppql-core/database.h"
+#include "cppql/include_all.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/type.h"
+#include "alexandria/core/type.h"
 #include "alexandria/member_types/member.h"
 #include "alexandria/object_handler/blob_array_handler.h"
 #include "alexandria/object_handler/primitive_array_handler.h"
@@ -253,7 +253,7 @@ namespace alex
 
         prim_handler_t& getPrimitiveHandler() noexcept { return primHandler; }
 
-        const prim_handler_t& getPrimitiveHandler() const noexcept { return primHandler; }
+        [[nodiscard]] const prim_handler_t& getPrimitiveHandler() const noexcept { return primHandler; }
 
     private:
         void createDefaultCacheElement(const std::shared_ptr<object_t>& instance);

@@ -14,18 +14,17 @@
 
 #include "common/static_assert.h"
 #include "common/type_traits.h"
-#include "cppql-core/binding.h"
+#include "cppql/core/binding.h"
 
 namespace alex
 {
-    template<typename E>
-    requires(std::floating_point<E> || std::integral<E>) class PrimitiveBlob
+    template<typename T>
+        requires(std::floating_point<T> || std::integral<T>)
+    class PrimitiveBlob
     {
     public:
-        template<typename IdMember, typename... Members>
-        friend class PrimitiveHandler;
-
-        using blob_t = std::vector<E>;
+        using element_t = T;
+        using value_t   = std::vector<element_t>;
 
         PrimitiveBlob() = default;
 
@@ -39,36 +38,26 @@ namespace alex
 
         PrimitiveBlob& operator=(PrimitiveBlob&&) = default;
 
-        /**
-         * \brief Get vector.
-         * \return Vector.
-         */
-        [[nodiscard]] std::vector<E>& get() noexcept { return value; }
-
-        /**
-         * \brief Get const vector.
-         * \return Const vector.
-         */
-        [[nodiscard]] const std::vector<E>& get() const noexcept { return value; }
-
-        void set(blob_t& v)
+        template<typename Self>
+        auto get(this Self&& self)
         {
-            // Move, copy, or generate static assertion failure.
-            if constexpr (std::is_move_assignable_v<blob_t>)
-                value = std::move(v);
-            else if constexpr (std::is_copy_assignable_v<blob_t>)
-                value = v;
-            else
-                constexpr_static_assert();
+            return std::forward<Self>(self).container;
+        }
+
+        template<typename U>
+            requires(std::same_as<value_t, std::remove_cvref_t<U>>)
+        void set(U&& v)
+        {
+            value = std::forward<U>(v);
         }
 
         [[nodiscard]] sql::StaticBlob getStaticBlob() const noexcept
         {
-            return sql::StaticBlob{.data = value.data(), .size = value.size() * sizeof(E)};
+            return sql::StaticBlob{.data = value.data(), .size = value.size() * sizeof element_t};
         }
 
     private:
-        std::vector<E> value;
+        value_t value;
     };
 
     ////////////////////////////////////////////////////////////////

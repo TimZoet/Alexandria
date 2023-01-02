@@ -15,11 +15,13 @@
 
 namespace alex
 {
-    template<typename E>
-    requires(std::floating_point<E> || std::integral<E>) class PrimitiveArray
+    template<typename T>
+        requires(std::floating_point<T> || std::integral<T>)
+    class PrimitiveArray
     {
     public:
-        using element_t = E;
+        using element_t = T;
+        using value_t   = std::vector<element_t>;
 
         PrimitiveArray() = default;
 
@@ -31,22 +33,16 @@ namespace alex
 
         PrimitiveArray& operator=(const PrimitiveArray&) = default;
 
-        PrimitiveArray& operator=(PrimitiveArray&&) = default;
+        PrimitiveArray& operator=(PrimitiveArray&&) noexcept = default;
 
-        /**
-         * \brief Get vector.
-         * \return Vector.
-         */
-        [[nodiscard]] std::vector<E>& get() noexcept { return container; }
-
-        /**
-         * \brief Get const vector.
-         * \return Const vector.
-         */
-        [[nodiscard]] const std::vector<E>& get() const noexcept { return container; }
+        template<typename Self>
+        auto get(this Self&& self)
+        {
+            return std::forward<Self>(self).container;
+        }
 
     private:
-        std::vector<E> container;
+        value_t container;
     };
 
     ////////////////////////////////////////////////////////////////

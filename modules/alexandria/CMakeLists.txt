@@ -1,6 +1,7 @@
 find_package(common REQUIRED)
 find_package(cppql REQUIRED)
 find_package(dot REQUIRED)
+find_package(stduuid REQUIRED)
 
 include(alexandriaVersionString)
 
@@ -10,14 +11,20 @@ set(INCLUDE_DIR "include/alexandria")
 set(SRC_DIR "src")
 
 set(HEADERS
-    ${INCLUDE_DIR}/data_type.h
-    ${INCLUDE_DIR}/library.h
-    ${INCLUDE_DIR}/property.h
-    ${INCLUDE_DIR}/type.h
+    ${INCLUDE_DIR}/core/data_type.h
+    ${INCLUDE_DIR}/core/fwd.h
+    ${INCLUDE_DIR}/core/library.h
+    ${INCLUDE_DIR}/core/member.h
+    ${INCLUDE_DIR}/core/member_chain.h
+    ${INCLUDE_DIR}/core/member_list.h
+    ${INCLUDE_DIR}/core/member_nested.h
+    ${INCLUDE_DIR}/core/namespace.h
+    ${INCLUDE_DIR}/core/property.h
+    ${INCLUDE_DIR}/core/type.h
+    ${INCLUDE_DIR}/core/type_descriptor.h
     ${INCLUDE_DIR}/member_types/blob.h
     ${INCLUDE_DIR}/member_types/blob_array.h
     ${INCLUDE_DIR}/member_types/instance_id.h
-    ${INCLUDE_DIR}/member_types/member.h
     ${INCLUDE_DIR}/member_types/primitive.h
     ${INCLUDE_DIR}/member_types/primitive_array.h
     ${INCLUDE_DIR}/member_types/primitive_blob.h
@@ -25,26 +32,33 @@ set(HEADERS
     ${INCLUDE_DIR}/member_types/reference_array.h
     ${INCLUDE_DIR}/member_types/string.h
     ${INCLUDE_DIR}/member_types/string_array.h
-    ${INCLUDE_DIR}/object_handler/blob_array_handler.h
-    ${INCLUDE_DIR}/object_handler/object_handler.h
-    ${INCLUDE_DIR}/object_handler/primitive_array_handler.h
-    ${INCLUDE_DIR}/object_handler/primitive_handler.h
-    ${INCLUDE_DIR}/object_handler/reference_array_handler.h
-    ${INCLUDE_DIR}/object_handler/type_traits.h
-    ${INCLUDE_DIR}/queries/query.h
+    #${INCLUDE_DIR}/object_handler/blob_array_handler.h
+    #${INCLUDE_DIR}/object_handler/object_handler.h
+    #${INCLUDE_DIR}/object_handler/primitive_array_handler.h
+    #${INCLUDE_DIR}/object_handler/primitive_handler.h
+    #${INCLUDE_DIR}/object_handler/reference_array_handler.h
+    #${INCLUDE_DIR}/object_handler/type_traits.h
+    ${INCLUDE_DIR}/queries/insert_query.h
+    ${INCLUDE_DIR}/queries/utils.h
+    ${INCLUDE_DIR}/queries/inserters/blob_array_inserter.h
+    ${INCLUDE_DIR}/queries/inserters/primitive_array_inserter.h
+    ${INCLUDE_DIR}/queries/inserters/primitive_inserter.h
+    ${INCLUDE_DIR}/queries/inserters/reference_array_inserter.h
 )
- 
+
 set(SOURCES
-    ${SRC_DIR}/data_type.cpp
-    ${SRC_DIR}/library.cpp
-    ${SRC_DIR}/property.cpp
-    ${SRC_DIR}/type.cpp
+    ${SRC_DIR}/core/data_type.cpp
+    ${SRC_DIR}/core/library.cpp
+    ${SRC_DIR}/core/namespace.cpp
+    ${SRC_DIR}/core/property.cpp
+    ${SRC_DIR}/core/type.cpp
+    ${SRC_DIR}/member_types/instance_id.cpp
 )
 
 set(DEPS_PUBLIC
     common::common
-    cppql::core
-    cppql::typed
+    cppql::cppql
+    stduuid::stduuid
 )
 
 set(DEPS_PRIVATE

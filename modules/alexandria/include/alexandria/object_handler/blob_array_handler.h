@@ -11,10 +11,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "common/type_traits.h"
-#include "cppql-core/database.h"
-#include "cppql-typed/queries/delete.h"
-#include "cppql-typed/queries/insert.h"
-#include "cppql-typed/queries/select.h"
+#include "cppql/include_all.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.

@@ -25,7 +25,7 @@ class AlexandriaConan(ConanFile):
     
     def set_version(self):
         base = self.python_requires["pyreq"].module.BaseConan
-        base.set_version(self, "modules/alexandria/alexandriaVersionString.cmake", "ALEXANDRIA_VERSION")
+        base.set_version(self, "alexandriaVersionString.cmake", "ALEXANDRIA_VERSION")
     
     def init(self):
         base = self.python_requires["pyreq"].module.BaseConan
@@ -39,13 +39,13 @@ class AlexandriaConan(ConanFile):
     ############################################################################
     
     def export_sources(self):
+        self.copy("alexandriaVersionString.cmake")
         self.copy("CMakeLists.txt")
         self.copy("license")
         self.copy("readme.md")
         self.copy("applications/*")
         self.copy("cmake/*")
-        self.copy("modules/CMakeLists.txt")
-        self.copy("modules/alexandria/*")
+        self.copy("modules/*")
     
     def config_options(self):
         base = self.python_requires["pyreq"].module.BaseConan
@@ -60,16 +60,17 @@ class AlexandriaConan(ConanFile):
         base.requirements(self)
         
         self.requires("common/1.0.0@timzoet/stable")
-        self.requires("cppql/1.0.0@timzoet/stable")
+        self.requires("cppql/0.1.0@timzoet/stable")
         self.requires("dot/1.0.0@timzoet/stable")
         self.requires("parsertongue/1.1.0@timzoet/stable")
+        self.requires("stduuid/1.0.0@timzoet/stable")
 
         if self.options.build_tests:
             self.requires("bettertest/1.0.0@timzoet/stable")
 
     def package_info(self):
         self.cpp_info.components["alexandria"].libs = ["alexandria"]
-        self.cpp_info.components["alexandria"].requires = ["common::common", "cppql::core", "cppql::typed", "dot::dot"]
+        self.cpp_info.components["alexandria"].requires = ["common::common", "cppql::cppql", "dot::dot"]
     
     def generate(self):
         base = self.python_requires["pyreq"].module.BaseConan

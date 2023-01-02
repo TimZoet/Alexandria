@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "common/type_traits.h"
-#include "cppql-core/binding.h"
+#include "cppql/core/binding.h"
 
 namespace alex
 {
@@ -24,16 +24,15 @@ namespace alex
 
     /**
      * \brief BlobArray specialization for single objects.
-     * \tparam E Object type.
+     * \tparam T Object type.
      */
-    template<typename E>
-    class BlobArray<E>
+    template<typename T>
+        requires(std::is_trivially_copyable_v<T>)
+    class BlobArray<T>
     {
     public:
-        template<typename IdMember, typename... Members>
-        friend class BlobArrayHandler;
-
-        using blob_t = E;
+        using element_t = T;
+        using value_t   = std::vector<element_t>;
 
         BlobArray() = default;
 
@@ -47,17 +46,11 @@ namespace alex
 
         BlobArray& operator=(BlobArray&&) = default;
 
-        /**
-         * \brief Get values.
-         * \return Values.
-         */
-        [[nodiscard]] std::vector<E>& get() noexcept { return values; }
-
-        /**
-         * \brief Get const values.
-         * \return Const values.
-         */
-        [[nodiscard]] const std::vector<E>& get() const noexcept { return values; }
+        template<typename Self>
+        auto get(this Self&& self)
+        {
+            return std::forward<Self>(self).values;
+        }
 
         /**
          * \brief Get number of elements.
@@ -67,25 +60,24 @@ namespace alex
 
         [[nodiscard]] sql::StaticBlob getStaticBlob(const size_t index) const noexcept
         {
-            return sql::StaticBlob{.data = &values[index], .size = sizeof(E)};
+            return sql::StaticBlob{.data = &values[index], .size = sizeof element_t};
         }
 
     private:
-        std::vector<E> values;
+        value_t values;
     };
 
     /**
      * \brief BlobArray specialization for std::vector.
-     * \tparam E Vector element type.
+     * \tparam T Vector element type.
      */
-    template<typename E>
-    class BlobArray<std::vector<E>>
+    template<typename T>
+        requires(std::is_trivially_copyable_v<T>)
+    class BlobArray<std::vector<T>>
     {
     public:
-        template<typename IdMember, typename... Members>
-        friend class BlobArrayHandler;
-
-        using blob_t = std::vector<E>;
+        using element_t = T;
+        using value_t   = std::vector<std::vector<element_t>>;
 
         BlobArray() = default;
 
@@ -99,17 +91,11 @@ namespace alex
 
         BlobArray& operator=(BlobArray&&) = default;
 
-        /**
-         * \brief Get values.
-         * \return Values.
-         */
-        [[nodiscard]] std::vector<std::vector<E>>& get() noexcept { return values; }
-
-        /**
-         * \brief Get const values.
-         * \return Const values.
-         */
-        [[nodiscard]] const std::vector<std::vector<E>>& get() const noexcept { return values; }
+        template<typename Self>
+        auto get(this Self&& self)
+        {
+            return std::forward<Self>(self).values;
+        }
 
         /**
          * \brief Get number of elements.
@@ -119,11 +105,11 @@ namespace alex
 
         [[nodiscard]] sql::StaticBlob getStaticBlob(const size_t index) const noexcept
         {
-            return sql::StaticBlob{.data = values[index].data(), .size = values[index].size() * sizeof(E)};
+            return sql::StaticBlob{.data = values[index].data(), .size = values[index].size() * sizeof element_t};
         }
 
     private:
-        std::vector<std::vector<E>> values;
+        value_t values;
     };
 
     ////////////////////////////////////////////////////////////////

@@ -5,24 +5,27 @@
 ////////////////////////////////////////////////////////////////
 
 #include <concepts>
-#include <cstdint>
 #include <functional>
+
+////////////////////////////////////////////////////////////////
+// External includes.
+////////////////////////////////////////////////////////////////
+
+#include "uuid.h"
 
 ////////////////////////////////////////////////////////////////
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
 #include "common/type_traits.h"
-#include "cppql-core/database.h"
+#include "cppql/core/database.h"
 
 namespace alex
 {
     class InstanceId
     {
     public:
-        using type = sql::row_id;
-
-        static constexpr type invalid_id = 0;
+        static constexpr uuids::uuid invalid_id = uuids::uuid{};
 
         InstanceId() = default;
 
@@ -30,7 +33,9 @@ namespace alex
 
         InstanceId(InstanceId&&) = default;
 
-        InstanceId(const type iid) : id(iid) {}
+        InstanceId(const uuids::uuid iid) : id(iid) {}
+
+        InstanceId(std::string iid) : id(*uuids::uuid::from_string(iid)) {}
 
         ~InstanceId() = default;
 
@@ -42,11 +47,15 @@ namespace alex
 
         InstanceId& operator=(InstanceId&&) = default;
 
-        InstanceId& operator=(const type iid) noexcept
+        InstanceId& operator=(const uuids::uuid iid) noexcept
         {
             id = iid;
             return *this;
         }
+
+        void regenerate();
+
+        void clear() noexcept { id = invalid_id; }
 
         ////////////////////////////////////////////////////////////////
         // Comparison operators.
@@ -54,38 +63,39 @@ namespace alex
 
         [[nodiscard]] bool operator==(const InstanceId& rhs) const noexcept { return id == rhs.id; }
 
-        [[nodiscard]] bool operator==(const type rhs) const noexcept { return id == rhs; }
+        [[nodiscard]] bool operator==(const uuids::uuid rhs) const noexcept { return id == rhs; }
 
         ////////////////////////////////////////////////////////////////
         // Conversion operators.
         ////////////////////////////////////////////////////////////////
 
-        [[nodiscard]] operator type() const noexcept { return id; }
+        [[nodiscard]] operator uuids::uuid() const noexcept { return id; }
+
+        [[nodiscard]] operator std::string() const { return getAsString(); }
 
         ////////////////////////////////////////////////////////////////
         // Getters.
         ////////////////////////////////////////////////////////////////
 
-        [[nodiscard]] type get() const noexcept { return id; }
+        [[nodiscard]] uuids::uuid get() const noexcept { return id; }
+
+        [[nodiscard]] std::string getAsString() const noexcept { return to_string(id); }
 
         [[nodiscard]] bool valid() const noexcept { return id != invalid_id; }
 
     private:
-        type id = 0;
+        uuids::uuid id = invalid_id;
     };
+
+    template<typename T>
+    concept is_instance_id = std::same_as<InstanceId, T>;
 
     template<auto M>
-    concept is_instance_id_mp = std::same_as<InstanceId, member_pointer_value_t<decltype(M)>>;
+    concept is_instance_id_mp = is_instance_id<member_pointer_value_t<decltype(M)>>;
 }  // namespace alex
 
-namespace std
+template<>
+struct std::hash<alex::InstanceId>
 {
-    template<>
-    struct hash<alex::InstanceId>
-    {
-        std::size_t operator()(const alex::InstanceId& id) const noexcept
-        {
-            return std::hash<alex::InstanceId::type>{}(id.get());
-        }
-    };
-}  // namespace std
+    std::size_t operator()(const alex::InstanceId& id) const noexcept { return std::hash<uuids::uuid>{}(id.get()); }
+};  // namespace std

@@ -13,7 +13,7 @@
 
 #include "common/static_assert.h"
 #include "common/type_traits.h"
-#include "cppql-core/binding.h"
+#include "cppql/core/binding.h"
 
 namespace alex
 {
@@ -25,13 +25,14 @@ namespace alex
 
     /**
      * \brief Blob specialization for single objects.
-     * \tparam E Object type.
+     * \tparam T Object type.
      */
-    template<typename E>
-    class Blob<E>
+    template<typename T>
+        requires(std::is_trivially_copyable_v<T>)
+    class Blob<T>
     {
     public:
-        using blob_t = E;
+        using value_t = T;
 
         Blob() = default;
 
@@ -45,47 +46,41 @@ namespace alex
 
         Blob& operator=(Blob&&) = default;
 
-        /**
-         * \brief Get value.
-         * \return Value.
-         */
-        [[nodiscard]] E& get() noexcept { return value; }
-
-        /**
-         * \brief Get const value.
-         * \return Const value.
-         */
-        [[nodiscard]] const E& get() const noexcept { return value; }
-
-        void set(blob_t& v)
+        template<typename Self>
+        auto get(this Self&& self)
         {
-            // Move, copy, or generate static assertion failure.
-            if constexpr (std::is_move_assignable_v<blob_t>)
-                value = std::move(v);
-            else if constexpr (std::is_copy_assignable_v<blob_t>)
-                value = v;
-            else
-                constexpr_static_assert();
+            return std::forward<Self>(self).value;
         }
 
+        template<typename U>
+            requires(std::same_as<value_t, std::remove_cvref_t<U>>)
+        void set(U&& v)
+        {
+            value = std::forward<U>(v);
+        }
+
+        // TODO: If this is an rvalue, the staticblob will refer deleted memory. Return TransientBlob instead?
+        // Same issues for other specializations and for BlobArray type.
         [[nodiscard]] sql::StaticBlob getStaticBlob() const noexcept
         {
-            return sql::StaticBlob{.data = &value, .size = sizeof(E)};
+            return sql::StaticBlob{.data = &value, .size = sizeof value_t};
         }
 
     private:
-        E value;
+        value_t value;
     };
 
     /**
      * \brief Blob specialization for std::vector.
-     * \tparam E Vector element type.
+     * \tparam T Vector element type.
      */
-    template<typename E>
-    class Blob<std::vector<E>>
+    template<typename T>
+        requires(std::is_trivially_copyable_v<T>)
+    class Blob<std::vector<T>>
     {
     public:
-        using blob_t = std::vector<E>;
+        using element_t = T;
+        using value_t   = std::vector<element_t>;
 
         Blob() = default;
 
@@ -99,36 +94,26 @@ namespace alex
 
         Blob& operator=(Blob&&) = default;
 
-        /**
-         * \brief Get vector.
-         * \return Vector.
-         */
-        [[nodiscard]] std::vector<E>& get() noexcept { return value; }
-
-        /**
-         * \brief Get const vector.
-         * \return Const vector.
-         */
-        [[nodiscard]] const std::vector<E>& get() const noexcept { return value; }
-
-        void set(blob_t& v)
+        template<typename Self>
+        auto get(this Self&& self)
         {
-            // Move, copy, or generate static assertion failure.
-            if constexpr (std::is_move_assignable_v<blob_t>)
-                value = std::move(v);
-            else if constexpr (std::is_copy_assignable_v<blob_t>)
-                value = v;
-            else
-                constexpr_static_assert();
+            return std::forward<Self>(self).value;
+        }
+
+        template<typename U>
+            requires(std::same_as<value_t, std::remove_cvref_t<U>>)
+        void set(U&& v)
+        {
+            value = std::forward<U>(v);
         }
 
         [[nodiscard]] sql::StaticBlob getStaticBlob() const noexcept
         {
-            return sql::StaticBlob{.data = value.data(), .size = value.size() * sizeof(E)};
+            return sql::StaticBlob{.data = value.data(), .size = value.size() * sizeof element_t};
         }
 
     private:
-        std::vector<E> value;
+        value_t value;
     };
 
     ////////////////////////////////////////////////////////////////

@@ -4,7 +4,6 @@
 // Standard includes.
 ////////////////////////////////////////////////////////////////
 
-#include <memory>
 #include <string>
 #include <variant>
 
@@ -12,27 +11,17 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "cppql-core/database.h"
-#include "cppql-typed/typed_table.h"
+#include "cppql/include_all.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/data_type.h"
+#include "alexandria/core/data_type.h"
 #include "alexandria/member_types/instance_id.h"
 
 namespace alex
 {
-    class Library;
-    class Property;
-    class Type;
-    using PropertyPtr = std::unique_ptr<Property>;
-    using TypeTable   = sql::TypedTable<sql::row_id, std::string>;
-    using PropertyTable =
-      sql::TypedTable<sql::row_id, std::string, std::string, sql::row_id, int32_t, int32_t, int32_t, std::string>;
-    using MemberTable = sql::TypedTable<sql::row_id, sql::row_id, sql::row_id>;
-
     class Property
     {
     public:
@@ -42,13 +31,12 @@ namespace alex
         using default_value_t =
           std::variant<std::nullptr_t, int32_t, uint32_t, int64_t, uint64_t, float, double, std::string>;
 
-        Property(std::string propName, DataType type, bool isReference, bool isArray, bool isBlob);
+        ////////////////////////////////////////////////////////////////
+        // Constructors.
+        ////////////////////////////////////////////////////////////////
 
-        Property(sql::row_id propId, std::string propName, DataType type, bool isReference, bool isArray, bool isBlob);
-
-        Property(std::string propName, Type& refType, bool isReference, bool isArray, bool isBlob);
-
-        Property(sql::row_id propId, std::string propName, Type& refType, bool isReference, bool isArray, bool isBlob);
+        Property(
+          Type& t, sql::row_id propId, std::string propName, DataType type, Type* refType, bool isArray, bool isBlob);
 
         Property() = delete;
 
@@ -67,14 +55,26 @@ namespace alex
         ////////////////////////////////////////////////////////////////
 
         /**
+         * \brief Get type this property is a part of.
+         * \return Type.
+         */
+        [[nodiscard]] Type& getType() noexcept;
+
+        /**
+         * \brief Get type this property is a part of.
+         * \return Type.
+         */
+        [[nodiscard]] const Type& getType() const noexcept;
+
+        /**
          * \brief Returns whether this property was committed to the database.
          * \return True if committed.
          */
         [[nodiscard]] bool isCommitted() const noexcept;
 
         /**
-         * \brief Get internal type ID.
-         * \return Type ID.
+         * \brief Get internal property ID.
+         * \return Property ID.
          */
         [[nodiscard]] sql::row_id getId() const noexcept;
 
@@ -103,12 +103,6 @@ namespace alex
         [[nodiscard]] const Type* getReferenceType() const noexcept;
 
         /**
-         * \brief Returns whether this property is a reference.
-         * \return True if reference.
-         */
-        [[nodiscard]] bool isReference() const noexcept;
-
-        /**
          * \brief Returns whether this property is an array.
          * \return True if array.
          */
@@ -119,10 +113,6 @@ namespace alex
          * \return True if blob.
          */
         [[nodiscard]] bool isBlob() const noexcept;
-
-        [[nodiscard]] bool isPrimitive() const noexcept;
-
-        [[nodiscard]] bool isType() const noexcept;
 
         [[nodiscard]] const default_value_t& getDefaultValue() const noexcept;
 
@@ -148,42 +138,30 @@ namespace alex
         // ...
         ////////////////////////////////////////////////////////////////
 
-        void deleteReferences(InstanceId instId) const;
+        void requireNotCommitted() const;
+
+        void requireCommitted() const;
+
+        void requireReferencedTypesCommitted() const;
 
     private:
         /**
-         * \brief Commit property to the database. Also commits all dependencies.
-         * \param db Sqlite database.
-         * \param typeTable Type table.
-         * \param propsTable Property table.
-         * \param memTable Member table.
+         * \brief Commit this property to the library. Inserts entries into the property table.
          */
-        void commit(sql::Database& db, TypeTable& typeTable, PropertyTable& propsTable, MemberTable& memTable);
+        void commit();
 
-        /**
-         * \brief Generate columns for instance table and create reference tables.
-         * \param db Sqlite database.
-         * \param table Instance table.
-         * \param prefix Concatenation of all parent property names.
-         */
-        void generateTables(sql::Database& db, sql::Table& table, const std::string& prefix) const;
-
-        /**
-         * \brief Resolve references.
-         * \param db Sqlite database.
-         * \param table Instance table.
-         * \param prefix Concatenation of all parent property names.
-         */
-        void resolve(sql::Database& db, sql::Table& table, const std::string& prefix);
+        void generate(sql::Table& instanceTable, const std::string& prefix) const;
 
         ////////////////////////////////////////////////////////////////
         // Member variables.
         ////////////////////////////////////////////////////////////////
 
+        Type* type = nullptr;
+
         /**
          * \brief Row ID.
          */
-        sql::row_id id;
+        sql::row_id id = -1;
 
         /**
          * \brief Property name.
@@ -196,14 +174,9 @@ namespace alex
         DataType dataType;
 
         /**
-         * \brief Pointer to type. Only set if dataType == Type.
+         * \brief Pointer to type. Only set if dataType == Reference or Nested.
          */
         Type* referenceType;
-
-        /**
-         * \brief Indicates property is a reference type.
-         */
-        bool reference;
 
         /**
          * \brief Indicates property is an array type.
@@ -216,7 +189,5 @@ namespace alex
         bool blob;
 
         default_value_t defaultValue;
-
-        sql::StatementPtr deleteRefStmt;
     };
 }  // namespace alex

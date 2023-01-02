@@ -94,7 +94,7 @@ namespace alex
         /**
          * \brief Reset this reference to point to no object.
          */
-        void reset() noexcept { id = 0; }
+        void clear() noexcept { id.clear(); }
 
         /**
          * \brief Assign an object to this reference.
@@ -120,19 +120,19 @@ namespace alex
         }
 
         /**
-         * \brief Assign the object referenced by the other reference to this reference. Other reference is reset. If the other reference does not point to any object, this reference is also reset.
+         * \brief Assign the object referenced by the other reference to this reference. Other reference is cleared. If the other reference does not point to any object, this reference is also cleared.
          * \param ref Object reference to copy.
          * \return *this.
          */
         Reference<object_t>& operator=(Reference<object_t>&& ref) noexcept
         {
             id = ref.id;
-            ref.reset();
+            ref.clear();
             return *this;
         }
 
     private:
-        InstanceId id = 0;
+        InstanceId id;
     };
 
     ////////////////////////////////////////////////////////////////

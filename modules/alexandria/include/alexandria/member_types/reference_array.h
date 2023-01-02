@@ -49,17 +49,11 @@ namespace alex
         // Getters.
         ////////////////////////////////////////////////////////////////
 
-        /**
-         * \brief Get vector.
-         * \return Vector.
-         */
-        [[nodiscard]] std::vector<InstanceId>& get() noexcept { return ids; }
-
-        /**
-         * \brief Get const vector.
-         * \return Const vector.
-         */
-        [[nodiscard]] const std::vector<InstanceId>& get() const noexcept { return ids; }
+        template<typename Self>
+        auto get(this Self&& self)
+        {
+            return std::forward<Self>(self).ids;
+        }
 
         ////////////////////////////////////////////////////////////////
         // Modifiers.

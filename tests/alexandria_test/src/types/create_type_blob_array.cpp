@@ -3,19 +3,18 @@
 void CreateTypeBlobArray::operator()()
 {
     // Create type and property.
-    alex::Type*     type;
-    alex::Property* prop;
-    expectNoThrow([&type, &prop, this]() {
-        type = &library->createType("type0");
-        prop = &type->createBlobArrayProperty("prop0");
+    alex::Type* type = nullptr;
+    expectNoThrow([&] {
+        type = &nameSpace->createType("type");
+        type->createBlobArrayProperty("prop");
     });
 
     // Commit.
-    expectNoThrow([this]() { library->commitTypes(); });
+    expectNoThrow([&] { type->commit(); });
 
     // Check type tables.
-    std::vector<utils::Type>     types      = {{0, "type0"}};
-    std::vector<utils::Property> properties = {{0, "prop0", alex::toString(alex::DataType::Blob), 0, true, 1, 1}};
-    std::vector<utils::Member>   members    = {{0, type->getId(), prop->getId()}};
-    checkTypeTables(std::move(types), std::move(properties), std::move(members));
+    const std::vector<alex::NamespaceRow> namespaces = {{1, "main"}};
+    const std::vector<alex::TypeRow>      types      = {{1, 1, "type", true}};
+    const std::vector<alex::PropertyRow>  properties = {{1, 1, "prop", toString(alex::DataType::Blob), 0, true, false}};
+    checkTypeTables(namespaces, types, properties);
 }

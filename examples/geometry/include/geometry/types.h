@@ -11,7 +11,10 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
+#include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
+#include "alexandria/member_types/blob.h"
+#include "alexandria/member_types/reference.h"
 
 ////////////////////////////////////////////////////////////////
 // Types.
@@ -73,12 +76,12 @@ using vertex_t = alex::MemberList<alex::NestedMember<float3_t, &Vertex::position
                                   alex::NestedMember<float3_t, &Vertex::normal>,
                                   alex::NestedMember<float2_t, &Vertex::uv>>;
 
-using MaterialHandler = alex::object_handler_t<alex::Member<&Material::id>,
-                                               alex::Member<&Material::name>,
-                                               alex::NestedMember<float3_t, &Material::color>,
-                                               alex::Member<&Material::specular>>;
+using MaterialDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Material::id>,
+                                                        alex::Member<&Material::name>,
+                                                        alex::NestedMember<float3_t, &Material::color>,
+                                                        alex::Member<&Material::specular>>;
 
-using MeshHandler = alex::object_handler_t<alex::Member<&Mesh::id>,
-                                           alex::Member<&Mesh::name>,
-                                           alex::Member<&Mesh::vertices>,
-                                           alex::Member<&Mesh::material>>;
+using MeshDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Mesh::id>,
+                                                    alex::Member<&Mesh::name>,
+                                                    alex::Member<&Mesh::vertices>,
+                                                    alex::Member<&Mesh::material>>;

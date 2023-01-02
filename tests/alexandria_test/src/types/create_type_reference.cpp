@@ -2,42 +2,46 @@
 
 void CreateTypeReference::operator()()
 {
-    // Create types and properties.
-    // type0 -> prop0(type1&)
-    // type1 -> prop1(type2&)
-    //       \
-    //        -> prop2(type3&)
-    // type3 -> prop3
-    alex::Type *    type0, *type1, *type2, *type3;
-    alex::Property *prop0, *prop1, *prop2, *prop3;
-    expectNoThrow([&type0, this]() { type0 = &library->createType("type0"); });
-    expectNoThrow([&type1, this]() { type1 = &library->createType("type1"); });
-    expectNoThrow([&type2, this]() { type2 = &library->createType("type2"); });
-    expectNoThrow([&type3, this]() { type3 = &library->createType("type3"); });
+    // TODO: Test creation of reference cycles, references to self, etc. Same for ReferenceArray.
 
-    expectNoThrow([&type0, &type1, &prop0, this]() { prop0 = &type0->createReferenceProperty("prop0", *type1); });
-    expectNoThrow([&type1, &type2, &type3, &prop1, &prop2, this]() {
-        prop1 = &type1->createReferenceProperty("prop1", *type2);
-        prop2 = &type1->createReferenceProperty("prop2", *type3);
+    // Create types and properties.
+    // type0  -> prop0(type1)
+    // type1  -> prop1(type2)
+    //      \ -> prop2(type3)
+    // type3  -> prop3
+    alex::Type *type0 = nullptr, *type1 = nullptr, *type2 = nullptr, *type3 = nullptr;
+    expectNoThrow([&] { type0 = &nameSpace->createType("type0"); });
+    expectNoThrow([&] { type1 = &nameSpace->createType("type1"); });
+    expectNoThrow([&] { type2 = &nameSpace->createType("type2"); });
+    expectNoThrow([&] { type3 = &nameSpace->createType("type3"); });
+
+    expectNoThrow([&] { type0->createReferenceProperty("prop0", *type1); });
+    expectNoThrow([&] {
+        type1->createReferenceProperty("prop1", *type2);
+        type1->createReferenceProperty("prop2", *type3);
     });
-    expectNoThrow(
-      [&type3, &prop3, this]() { prop3 = &type3->createPrimitiveProperty("prop3", alex::DataType::Float); });
+    expectNoThrow([&] { type2->createPrimitiveProperty("prop3", alex::DataType::Int64); });
+    expectNoThrow([&] { type3->createPrimitiveProperty("prop4", alex::DataType::Float); });
+
+    // Referenced types must be committed first.
+    expectThrow([&] { type0->commit(); });
+    expectThrow([&] { type1->commit(); });
 
     // Commit.
-    expectNoThrow([this]() { library->commitTypes(); });
+    expectNoThrow([&] { type3->commit(); });
+    expectNoThrow([&] { type2->commit(); });
+    expectNoThrow([&] { type1->commit(); });
+    expectNoThrow([&] { type0->commit(); });
 
     // Check type tables.
-    // When types and properties are committed, their dependencies are committed first; hence the order here.
-    std::vector<utils::Type>     types      = {{0, "type0"}, {0, "type1"}, {0, "type2"}, {0, "type3"}};
-    std::vector<utils::Property> properties = {
-      {0, "prop1", alex::toString(alex::DataType::Type), type2->getId(), 1, 0, 0},
-      {0, "prop3", alex::toString(alex::DataType::Float), 0, 0, 0, 0},
-      {0, "prop2", alex::toString(alex::DataType::Type), type3->getId(), 1, 0, 0},
-      {0, "prop0", alex::toString(alex::DataType::Type), type1->getId(), 1, 0, 0},
-    };
-    std::vector<utils::Member> members = {{0, type3->getId(), prop3->getId()},
-                                          {0, type1->getId(), prop1->getId()},
-                                          {0, type1->getId(), prop2->getId()},
-                                          {0, type0->getId(), prop0->getId()}};
-    checkTypeTables(std::move(types), std::move(properties), std::move(members));
+    const std::vector<alex::NamespaceRow> namespaces = {{1, "main"}};
+    const std::vector<alex::TypeRow>      types      = {
+      {1, 1, "type3", true}, {2, 1, "type2", true}, {3, 1, "type1", true}, {4, 1, "type0", true}};
+    const std::vector<alex::PropertyRow> properties = {
+      {1, 1, "prop4", toString(alex::DataType::Float), 0, false, false},
+      {2, 2, "prop3", toString(alex::DataType::Int64), 0, false, false},
+      {3, 3, "prop1", toString(alex::DataType::Reference), 2, false, false},
+      {4, 3, "prop2", toString(alex::DataType::Reference), 1, false, false},
+      {5, 4, "prop0", toString(alex::DataType::Reference), 3, false, false}};
+    checkTypeTables(namespaces, types, properties);
 }

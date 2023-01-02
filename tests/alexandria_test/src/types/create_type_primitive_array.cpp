@@ -3,24 +3,29 @@
 void CreateTypePrimitiveArray::operator()()
 {
     // Create type and property.
-    alex::Type*     type;
-    alex::Property *prop0, *prop1, *prop2, *prop3;
-    expectNoThrow([&type, &prop0, &prop1, &prop2, this]() {
-        type  = &library->createType("type0");
-        prop0 = &type->createPrimitiveArrayProperty("prop0", alex::DataType::Int32);
-        prop1 = &type->createPrimitiveArrayProperty("prop1", alex::DataType::Int64);
-        prop2 = &type->createPrimitiveArrayProperty("prop2", alex::DataType::Float);
+    alex::Type* type = nullptr;
+    expectNoThrow([&] {
+        type = &nameSpace->createType("type");
+        type->createPrimitiveArrayProperty("p0", alex::DataType::Int32);
+        type->createPrimitiveArrayProperty("p1", alex::DataType::Int64);
+        type->createPrimitiveArrayProperty("p2", alex::DataType::Float);
+        type->createPrimitiveArrayProperty("p3", alex::DataType::Double);
     });
 
+    // Should not be able to add non-primitive properties like this.
+    expectThrow([&] { type->createPrimitiveArrayProperty("p4", alex::DataType::Blob); });
+    expectThrow([&] { type->createPrimitiveArrayProperty("p5", alex::DataType::Reference); });
+    expectThrow([&] { type->createPrimitiveArrayProperty("p6", alex::DataType::String); });
+
     // Commit.
-    expectNoThrow([this]() { library->commitTypes(); });
+    expectNoThrow([&] { type->commit(); });
 
     // Check type tables.
-    std::vector<utils::Type>     types      = {{0, "type0"}};
-    std::vector<utils::Property> properties = {{0, "prop0", alex::toString(alex::DataType::Int32), 0, 1, 1, 0},
-                                               {0, "prop1", alex::toString(alex::DataType::Int64), 0, 1, 1, 0},
-                                               {0, "prop2", alex::toString(alex::DataType::Float), 0, 1, 1, 0}};
-    std::vector<utils::Member>   members    = {
-      {0, type->getId(), prop0->getId()}, {0, type->getId(), prop1->getId()}, {0, type->getId(), prop2->getId()}};
-    checkTypeTables(std::move(types), std::move(properties), std::move(members));
+    const std::vector<alex::NamespaceRow> namespaces = {{1, "main"}};
+    const std::vector<alex::TypeRow>      types      = {{1, 1, "type", true}};
+    const std::vector<alex::PropertyRow>  properties = {{1, 1, "p0", toString(alex::DataType::Int32), 0, true, false},
+                                                        {2, 1, "p1", toString(alex::DataType::Int64), 0, true, false},
+                                                        {3, 1, "p2", toString(alex::DataType::Float), 0, true, false},
+                                                        {4, 1, "p3", toString(alex::DataType::Double), 0, true, false}};
+    checkTypeTables(namespaces, types, properties);
 }
