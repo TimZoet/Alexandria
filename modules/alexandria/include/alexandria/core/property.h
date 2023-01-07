@@ -135,7 +135,7 @@ namespace alex
         void setDefaultValue(std::string value);
 
         ////////////////////////////////////////////////////////////////
-        // ...
+        // Commit.
         ////////////////////////////////////////////////////////////////
 
         void requireNotCommitted() const;
@@ -151,6 +151,12 @@ namespace alex
         void commit();
 
         void generate(sql::Table& instanceTable, const std::string& prefix) const;
+
+        void getPrimitiveArrayTables(std::vector<sql::Table*>& tables, const sql::Table& instanceTable, const std::string& prefix) const;
+
+        void getBlobArrayTables(std::vector<sql::Table*>& tables, const sql::Table& instanceTable, const std::string& prefix) const;
+
+        void getReferenceArrayTables(std::vector<sql::Table*>& tables, const sql::Table& instanceTable, const std::string& prefix) const;
 
         ////////////////////////////////////////////////////////////////
         // Member variables.

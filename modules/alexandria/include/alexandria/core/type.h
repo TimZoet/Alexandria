@@ -197,8 +197,14 @@ namespace alex
          */
         Property& createNestedTypeProperty(const std::string& propName, Type& nestedType);
 
+        [[nodiscard]] std::vector<sql::Table*> getPrimitiveArrayTables() const;
+
+        [[nodiscard]] std::vector<sql::Table*> getBlobArrayTables() const;
+
+        [[nodiscard]] std::vector<sql::Table*> getReferenceArrayTables() const;
+
         ////////////////////////////////////////////////////////////////
-        // ...
+        // Commit.
         ////////////////////////////////////////////////////////////////
 
         void requireNotCommitted() const;
@@ -209,6 +215,10 @@ namespace alex
          * \brief Commit this type to the library. Inserts entries into the type and property tables.
          */
         void commit();
+
+        ////////////////////////////////////////////////////////////////
+        // ...
+        ////////////////////////////////////////////////////////////////
 
     private:
         ////////////////////////////////////////////////////////////////

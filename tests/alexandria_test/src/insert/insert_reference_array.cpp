@@ -4,9 +4,8 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/reference_array.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -29,14 +28,22 @@ namespace
         alex::ReferenceArray<Foo> foo;
         alex::ReferenceArray<Bar> bar;
     };
+
+    using FooDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>;
+
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::foo>>;
+
+    using BazDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>;
 }  // namespace
 
 void InsertReferenceArray::operator()()
 {
     // Create types.
-    auto& fooType = library->createType("Foo");
-    auto& barType = library->createType("Bar");
-    auto& bazType = library->createType("Baz");
+    auto& fooType = nameSpace->createType("Foo");
+    auto& barType = nameSpace->createType("Bar");
+    auto& bazType = nameSpace->createType("Baz");
 
     // Add properties to types.
     fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
@@ -46,100 +53,88 @@ void InsertReferenceArray::operator()()
     bazType.createReferenceArrayProperty("barProp", barType);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+        bazType.commit();
+    }).fatal("Failed to commit types");
 
-    // Get tables.
-    sql::TypedTable<int64_t>                   barTable(library->getDatabase().getTable(barType.getName()));
-    sql::TypedTable<int64_t>                   bazTable(library->getDatabase().getTable(bazType.getName()));
-    sql::TypedTable<int64_t, int64_t, int64_t> barFooTable(
-      library->getDatabase().getTable(barType.getName() + "_fooProp"));
-    sql::TypedTable<int64_t, int64_t, int64_t> bazFooTable(
-      library->getDatabase().getTable(bazType.getName() + "_fooProp"));
-    sql::TypedTable<int64_t, int64_t, int64_t> bazBarTable(
-      library->getDatabase().getTable(bazType.getName() + "_barProp"));
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(
-        fooType.getName());
-    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::foo>>(barType.getName());
-    auto bazHandler =
-      library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>(
-        bazType.getName());
-
-    // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
-    // TODO: Test insert of empty/null references.
-
-    // Insert Foo.
-    //
     // Create objects.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
 
-    // Try to insert.
-    expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
+    // Insert Foo.
+    expectNoThrow([&] {
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        inserter(foo0);
+        inserter(foo1);
+    }).fatal("Failed to insert object");
 
-    // Insert Bar.
-    //
-    // Create objects.
     Bar bar0, bar1;
     bar0.foo.add(foo0);
     bar0.foo.add(foo1);
 
-    // Try to insert.
-    expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
+    // Insert Bar.
+    {
+        const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
+          library->getDatabase().getTable("main_Bar_fooProp"));
 
-    // Check assigned IDs.
-    compareEQ(bar0.id, alex::InstanceId(1));
-    compareEQ(bar1.id, alex::InstanceId(2));
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
 
-    // Select inserted object using sql.
-    auto bar0_get = barTable.selectOne<int64_t>(barTable.col<0>() == bar0.id.get(), true)(false);
-    auto bar1_get = barTable.selectOne<int64_t>(barTable.col<0>() == bar1.id.get(), true)(false);
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
 
-    // Compare objects.
-    compareEQ(bar0.id, bar0_get);
-    compareEQ(bar1.id, bar1_get);
+        // Check assigned IDs.
+        compareTrue(bar0.id.valid());
+        compareTrue(bar1.id.valid());
 
-    // Select references in separate table.
-    auto                 idparam    = bar0.id.get();
-    auto                 foo_select = barFooTable.select<int64_t, 2>(barFooTable.col<1>() == &idparam, true);
-    std::vector<int64_t> foo_get(foo_select.begin(), foo_select.end());
-    compareEQ(bar0.foo.get(), foo_get);
-    idparam = bar1.id;
-    foo_get.assign(foo_select(true).begin(), foo_select.end());
-    compareEQ(bar1.foo.get(), foo_get);
+        // Check references in array table.
+        std::string id;
+        auto        stmt = arrayTable.selectAs<std::string, 2>()
+                      .where(like(arrayTable.col<1>(), &id))
+                      .orderBy(ascending(arrayTable.col<0>()))
+                      .compile();
+        id = bar0.id.getAsString();
+        stmt.bind(sql::BindParameters::All);
+        std::vector<alex::InstanceId> refs(stmt.begin(), stmt.end());
+        compareEQ(bar0.foo.get(), refs);
+        id = bar1.id.getAsString();
+        stmt.bind(sql::BindParameters::All);
+        refs.assign(stmt.begin(), stmt.end());
+        compareEQ(bar1.foo.get(), refs);
+    }
 
-    // Insert Baz.
-    //
-    // Create objects.
-    Baz baz;
-    baz.foo.add(foo1);
-    baz.foo.add(foo0);
-    baz.bar.add(bar0);
-    baz.bar.add(bar1);
-    baz.bar.add(bar0);
+    {
+        const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
+          library->getDatabase().getTable("main_Baz_barProp"));
 
-    // Try to insert.
-    expectNoThrow([&] { bazHandler->insert(baz); }).fatal("Failed to insert object");
+        auto inserter = alex::InsertQuery(BazDescriptor(bazType));
 
-    // Check assigned IDs.
-    compareEQ(baz.id, alex::InstanceId(1));
+        // Create objects.
+        Baz baz;
+        baz.foo.add(foo1);
+        baz.foo.add(foo0);
+        baz.bar.add(bar0);
+        baz.bar.add(bar1);
+        baz.bar.add(bar0);
 
-    // Select inserted object using sql.
-    auto baz_get = bazTable.selectOne<int64_t>(bazTable.col<0>() == baz.id.get(), true)(false);
+        // Try to insert.
+        expectNoThrow([&] { inserter(baz); }).fatal("Failed to insert object");
 
-    // Compare objects.
-    compareEQ(baz.id, baz_get);
+        // Check assigned IDs.
+        compareTrue(baz.id.valid());
 
-    // Select references in separate table.
-    idparam          = baz.id;
-    auto foo_select2 = bazFooTable.select<int64_t, 2>(bazFooTable.col<1>() == &idparam, true);
-    auto bar_select  = bazBarTable.select<int64_t, 2>(bazBarTable.col<1>() == &idparam, true);
-    foo_get.assign(foo_select2.begin(), foo_select2.end());
-    compareEQ(baz.foo.get(), foo_get);
-    foo_get.assign(bar_select.begin(), bar_select.end());
-    compareEQ(baz.bar.get(), foo_get);
+        // Check references in array table.
+        auto stmt = arrayTable.selectAs<std::string, 2>()
+                      .where(like(arrayTable.col<1>(), baz.id.getAsString()))
+                      .orderBy(ascending(arrayTable.col<0>()))
+                      .compile()
+                      .bind(sql::BindParameters::All);
+        const std::vector<alex::InstanceId> refs(stmt.begin(), stmt.end());
+        compareEQ(baz.bar.get(), refs);
+    }
+
+    // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
+    // TODO: Test insert of empty/null references.
 }

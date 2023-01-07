@@ -33,11 +33,9 @@ namespace alex
 
         StringArray& operator=(StringArray&&) = default;
 
-        template<typename Self>
-        auto get(this Self&& self)
-        {
-            return std::forward<Self>(self).value;
-        }
+        value_t& get() noexcept { return container; }
+
+        const value_t& get() const noexcept { return container; }
 
     private:
         value_t container;

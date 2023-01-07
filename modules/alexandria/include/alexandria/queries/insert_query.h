@@ -41,23 +41,28 @@ namespace alex
         // Types.
         ////////////////////////////////////////////////////////////////
 
-        using type_descriptor_t    = T;
-        using object_t             = typename type_descriptor_t::object_t;
-        using primitive_inserter_t = PrimitiveInserter<type_descriptor_t>;
-        using primitive_array_members_t =
-          detail::extract_primitive_array_members_t<typename type_descriptor_t::user_members_t>;
-        using blob_array_members_t = detail::extract_blob_array_members_t<typename type_descriptor_t::user_members_t>;
-        using reference_array_members_t =
-          detail::extract_reference_array_members_t<typename type_descriptor_t::user_members_t>;
+        using type_descriptor_t          = T;
+        using object_t                   = typename type_descriptor_t::object_t;
+        using primitive_inserter_t       = PrimitiveInserter<type_descriptor_t>;
+        using primitive_array_inserter_t = PrimitiveArrayInserter<type_descriptor_t>;
+        using blob_array_inserter_t      = BlobArrayInserter<type_descriptor_t>;
+        using reference_array_inserter_t = ReferenceArrayInserter<type_descriptor_t>;
 
         ////////////////////////////////////////////////////////////////
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
-        explicit InsertQuery(type_descriptor_t desc) : descriptor(desc), primitiveInserter(desc) {}
+        explicit InsertQuery(type_descriptor_t desc) :
+            descriptor(desc),
+            primitiveInserter(desc),
+            primitiveArrayInserter(desc),
+            blobArrayInserter(desc),
+            referenceArrayInserter(desc)
+        {
+        }
 
         ////////////////////////////////////////////////////////////////
-        // ...
+        // Invoke.
         ////////////////////////////////////////////////////////////////
 
         void operator()(object_t& instance)
@@ -76,6 +81,9 @@ namespace alex
                 sql::Transaction transaction(db, sql::Transaction::Type::Deferred);
 
                 primitiveInserter(instance);
+                primitiveArrayInserter(instance);
+                blobArrayInserter(instance);
+                referenceArrayInserter(instance);
 
                 transaction.commit();
             }
@@ -92,7 +100,10 @@ namespace alex
         // Member variables.
         ////////////////////////////////////////////////////////////////
 
-        type_descriptor_t    descriptor;
-        primitive_inserter_t primitiveInserter;
+        type_descriptor_t          descriptor;
+        primitive_inserter_t       primitiveInserter;
+        primitive_array_inserter_t primitiveArrayInserter;
+        blob_array_inserter_t      blobArrayInserter;
+        reference_array_inserter_t referenceArrayInserter;
     };
 }  // namespace alex

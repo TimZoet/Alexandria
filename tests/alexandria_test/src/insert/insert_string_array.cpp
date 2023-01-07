@@ -4,9 +4,8 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/string_array.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -34,41 +33,37 @@ namespace
             strings2.get() = std::move(sstrings2);
         }
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>;
+
+    using BarDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>;
 }  // namespace
 
 void InsertStringArray::operator()()
 {
     // Create type with 1 string.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createStringArrayProperty("strings");
 
     // Create type with 2 strings.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createStringArrayProperty("strings1");
     barType.createStringArrayProperty("strings2");
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+    }).fatal("Failed to commit types");
 
-    // Get tables.
-    sql::TypedTable<int64_t>                       fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::TypedTable<int64_t, int64_t, std::string> fooStringsTable(
-      library->getDatabase().getTable(fooType.getName() + "_strings"));
-    sql::TypedTable<int64_t>                       barTable(library->getDatabase().getTable(barType.getName()));
-    sql::TypedTable<int64_t, int64_t, std::string> barStrings1Table(
-      library->getDatabase().getTable(barType.getName() + "_strings1"));
-    sql::TypedTable<int64_t, int64_t, std::string> barStrings2Table(
-      library->getDatabase().getTable(barType.getName() + "_strings2"));
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>(fooType.getName());
-    auto barHandler =
-      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>(
-        barType.getName());
-    
     // Insert Foo.
     {
+        const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
+          library->getDatabase().getTable("main_Foo_strings"));
+
+        auto           inserter = alex::InsertQuery(FooDescriptor(fooType));
+
         // Create objects.
         Foo foo0;
         foo0.strings.get().push_back("abc");
@@ -79,33 +74,39 @@ void InsertStringArray::operator()()
         foo1.strings.get().push_back("%^&*&(*U");
 
         // Try to insert.
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, alex::InstanceId(1));
-        compareEQ(foo1.id, alex::InstanceId(2));
+        compareTrue(foo0.id.valid());
+        compareTrue(foo1.id.valid());
 
-        // Select inserted object using sql.
-        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false);
-        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false);
+        // Select strings in array table.
+        std::string id;
+        auto        stmt = arrayTable.selectAs<std::string, 2>()
+                      .where(like(arrayTable.col<1>(), &id))
+                      .orderBy(ascending(arrayTable.col<0>()))
+                      .compile();
+        id = foo0.id.getAsString();
+        stmt.bind(sql::BindParameters::All);
+        std::vector<std::string> strings(stmt.begin(), stmt.end());
+        compareEQ(foo0.strings.get(), strings);
+        id = foo1.id.getAsString();
+        stmt.bind(sql::BindParameters::All);
+        strings.assign(stmt.begin(), stmt.end());
+        compareEQ(foo1.strings.get(), strings);
 
-        // Compare objects.
-        compareEQ(foo0.id, std::get<0>(foo0_get));
-        compareEQ(foo1.id, std::get<0>(foo1_get));
-
-        // Select floats in separate table.
-        auto idparam        = foo0.id.get();
-        auto strings_select = fooStringsTable.select<std::string, 2>(fooStringsTable.col<1>() == &idparam, true);
-        std::vector<std::string> strings_get(strings_select.begin(), strings_select.end());
-        compareEQ(foo0.strings.get(), strings_get);
-        idparam = foo1.id;
-        strings_get.assign(strings_select(true).begin(), strings_select.end());
-        compareEQ(foo1.strings.get(), strings_get);
     }
 
     // Insert Bar.
     {
+        const sql::TypedTable<sql::row_id, std::string, std::string> array0Table(
+          library->getDatabase().getTable("main_Bar_strings1"));
+        const sql::TypedTable<sql::row_id, std::string, std::string> array1Table(
+          library->getDatabase().getTable("main_Bar_strings2"));
+
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+
         // Create objects.
         Bar bar0;
         Bar bar1;
@@ -117,33 +118,36 @@ void InsertStringArray::operator()()
         bar1.strings2.get().push_back("hntfdrgtef");
 
         // Try to insert.
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, alex::InstanceId(1));
-        compareEQ(bar1.id, alex::InstanceId(2));
+        compareTrue(bar0.id.valid());
+        compareTrue(bar1.id.valid());
 
-        // Select inserted object using sql.
-        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
-        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
-
-        // Compare objects.
-        compareEQ(bar0.id, std::get<0>(bar0_get));
-        compareEQ(bar1.id, std::get<0>(bar1_get));
-
-        // Select ints in separate table.
-        auto idparam         = bar0.id.get();
-        auto strings1_select = barStrings1Table.select<std::string, 2>(barStrings1Table.col<1>() == &idparam, true);
-        auto strings2_select = barStrings2Table.select<std::string, 2>(barStrings2Table.col<1>() == &idparam, true);
-        std::vector<std::string> strings1_get(strings1_select.begin(), strings1_select.end());
-        std::vector<std::string> strings2_get(strings2_select.begin(), strings2_select.end());
-        compareEQ(bar0.strings1.get(), strings1_get);
-        compareEQ(bar0.strings2.get(), strings2_get);
-        idparam = bar1.id;
-        strings1_get.assign(strings1_select(true).begin(), strings1_select.end());
-        strings2_get.assign(strings2_select(true).begin(), strings2_select.end());
-        compareEQ(bar1.strings1.get(), strings1_get);
-        compareEQ(bar1.strings2.get(), strings2_get);
+        // Select strings in array table.
+        std::string id;
+        auto        stmt0 = array0Table.selectAs<std::string, 2>()
+                       .where(like(array0Table.col<1>(), &id))
+                       .orderBy(ascending(array0Table.col<0>()))
+                       .compile();
+        auto stmt1 = array1Table.selectAs<std::string, 2>()
+                       .where(like(array1Table.col<1>(), &id))
+                       .orderBy(ascending(array1Table.col<0>()))
+                       .compile();
+        id = bar0.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        std::vector<std::string> strings1(stmt0.begin(), stmt0.end());
+        std::vector<std::string> strings2(stmt1.begin(), stmt1.end());
+        compareEQ(bar0.strings1.get(), strings1);
+        compareEQ(bar0.strings2.get(), strings2);
+        id = bar1.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        strings1.assign(stmt0.begin(), stmt0.end());
+        strings2.assign(stmt1.begin(), stmt1.end());
+        compareEQ(bar1.strings1.get(), strings1);
+        compareEQ(bar1.strings2.get(), strings2);
     }
 }

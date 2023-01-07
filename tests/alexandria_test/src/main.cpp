@@ -36,17 +36,15 @@
 //#include "alexandria_test/get/get_reference_array.h"
 //#include "alexandria_test/get/get_string.h"
 //#include "alexandria_test/get/get_string_array.h"
-//#include "alexandria_test/insert/insert_blob.h"
-//#include "alexandria_test/insert/insert_blob_array.h"
-//#include "alexandria_test/insert/insert_direct.h"
-//#include "alexandria_test/insert/insert_managed.h"
+#include "alexandria_test/insert/insert_blob.h"
+#include "alexandria_test/insert/insert_blob_array.h"
 #include "alexandria_test/insert/insert_primitive.h"
-//#include "alexandria_test/insert/insert_primitive_array.h"
-//#include "alexandria_test/insert/insert_primitive_blob.h"
-//#include "alexandria_test/insert/insert_reference.h"
-//#include "alexandria_test/insert/insert_reference_array.h"
-//#include "alexandria_test/insert/insert_string.h"
-//#include "alexandria_test/insert/insert_string_array.h"
+#include "alexandria_test/insert/insert_primitive_array.h"
+#include "alexandria_test/insert/insert_primitive_blob.h"
+#include "alexandria_test/insert/insert_reference.h"
+#include "alexandria_test/insert/insert_reference_array.h"
+#include "alexandria_test/insert/insert_string.h"
+#include "alexandria_test/insert/insert_string_array.h"
 #include "alexandria_test/library/create_library.h"
 //#include "alexandria_test/member_types/member_type_blob.h"
 //#include "alexandria_test/member_types/member_type_blob_array.h"
@@ -118,17 +116,15 @@ int main(int argc, char** argv)
       //GetString,
       //GetStringArray,
       // insert
-      //InsertBlob,
-      //InsertBlobArray,
-      //InsertDirect,
-      //InsertManaged,
+      InsertBlob,
+      InsertBlobArray,
       InsertPrimitive,
-      //InsertPrimitiveArray,
-      //InsertPrimitiveBlob,
-      //InsertReference,
-      //InsertReferenceArray,
-      //InsertString,
-      //InsertStringArray,
+      InsertPrimitiveArray,
+      InsertPrimitiveBlob,
+      InsertReference,
+      InsertReferenceArray,
+      InsertString,
+      InsertStringArray,
       // library
       CreateLibrary,
       // member_types
@@ -155,6 +151,6 @@ int main(int argc, char** argv)
       // update
       //UpdateDirect,
       //UpdateManaged
-    >(argc, argv, "alexandria");
+      >(argc, argv, "alexandria");
     return 0;
 }

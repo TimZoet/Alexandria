@@ -10,9 +10,8 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/blob.h"
-#include "alexandria/member_types/member.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -41,35 +40,35 @@ namespace
         alex::Blob<std::vector<Baz>>   a;
         alex::Blob<std::vector<float>> b;
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
+
+    using BarDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>;
 }  // namespace
 
 void InsertBlob::operator()()
 {
     // Create type with 1 blob.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createBlobProperty("blobProp1");
 
     // Create type with 2 blobs.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createBlobProperty("blobProp1");
     barType.createBlobProperty("blobProp2");
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::TypedTable<int64_t, Baz> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::TypedTable<int64_t, std::vector<Baz>, std::vector<float>> barTable(
-      library->getDatabase().getTable(barType.getName()));
-
-    // Create object handlers.
-    auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>>(fooType.getName());
-    auto barHandler =
-      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>(
-        barType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+    }).fatal("Failed to commit types");
 
     // Insert Foo.
     {
+        const sql::TypedTable<sql::row_id, std::string, Baz> table(fooType.getInstanceTable());
+        auto                                                 inserter = alex::InsertQuery(FooDescriptor(fooType));
+
         // Create objects.
         Foo foo0;
         foo0.a.get().x = 3.5f;
@@ -79,16 +78,20 @@ void InsertBlob::operator()()
         foo1.a.get().y = -10;
 
         // Try to insert.
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, alex::InstanceId(1));
-        compareEQ(foo1.id, alex::InstanceId(2));
+        compareTrue(foo0.id.valid());
+        compareTrue(foo1.id.valid());
 
-        // Select inserted object using sql.
-        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false);
-        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false);
+        // Select inserted object using sql and compare.
+        std::string id;
+        auto        stmt    = table.select<1, 2>().where(like(table.col<1>(), &id)).compileOne();
+        id                  = foo0.id.getAsString();
+        const auto foo0_get = stmt.bind(sql::BindParameters::All)();
+        id                  = foo1.id.getAsString();
+        const auto foo1_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
         compareEQ(foo0.id, std::get<0>(foo0_get));
@@ -99,6 +102,10 @@ void InsertBlob::operator()()
 
     // Insert Bar.
     {
+        const sql::TypedTable<sql::row_id, std::string, std::vector<Baz>, std::vector<float>> table(
+          barType.getInstanceTable());
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+
         // Create objects.
         Bar bar0;
         bar0.a.get().push_back(Baz{.x = 1.0f, .y = 2});
@@ -112,16 +119,20 @@ void InsertBlob::operator()()
         bar1.b.get().push_back(-30.0f);
 
         // Try to insert.
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, alex::InstanceId(1));
-        compareEQ(bar1.id, alex::InstanceId(2));
+        compareTrue(bar0.id.valid());
+        compareTrue(bar1.id.valid());
 
-        // Select inserted object using sql.
-        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
-        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
+        // Select inserted object using sql and compare.
+        std::string id;
+        auto        stmt    = table.select<1, 2, 3>().where(like(table.col<1>(), &id)).compileOne();
+        id                  = bar0.id.getAsString();
+        const auto bar0_get = stmt.bind(sql::BindParameters::All)();
+        id                  = bar1.id.getAsString();
+        const auto bar1_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
         compareEQ(bar0.id, std::get<0>(bar0_get));

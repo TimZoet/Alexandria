@@ -33,6 +33,8 @@ namespace alex
          */
         using object_t = T;
 
+        using value_t = std::vector<InstanceId>;
+
         ReferenceArray() = default;
 
         ~ReferenceArray() = default;
@@ -49,11 +51,9 @@ namespace alex
         // Getters.
         ////////////////////////////////////////////////////////////////
 
-        template<typename Self>
-        auto get(this Self&& self)
-        {
-            return std::forward<Self>(self).ids;
-        }
+        value_t& get() noexcept { return ids; }
+
+        const value_t& get() const noexcept { return ids; }
 
         ////////////////////////////////////////////////////////////////
         // Modifiers.
@@ -80,7 +80,7 @@ namespace alex
         }
 
     private:
-        std::vector<InstanceId> ids;
+        value_t ids;
     };
 
     ////////////////////////////////////////////////////////////////

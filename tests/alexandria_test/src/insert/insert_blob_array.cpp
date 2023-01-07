@@ -4,9 +4,8 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/blob_array.h"
-#include "alexandria/member_types/member.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -35,40 +34,37 @@ namespace
         alex::BlobArray<std::vector<Baz>>   a;
         alex::BlobArray<std::vector<float>> b;
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
+
+    using BarDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>;
 }  // namespace
 
 void InsertBlobArray::operator()()
 {
     // Create type with 1 blob.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createBlobArrayProperty("blob1");
 
     // Create type with 2 blobs.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createBlobArrayProperty("blob1");
     barType.createBlobArrayProperty("blob2");
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::TypedTable<int64_t>               fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::TypedTable<int64_t>               barTable(library->getDatabase().getTable(barType.getName()));
-    sql::TypedTable<int64_t, int64_t, Baz> fooBlob1Table(
-      library->getDatabase().getTable(fooType.getName() + "_blob1"));
-    sql::TypedTable<int64_t, int64_t, std::vector<Baz>> barBlob1Table(
-      library->getDatabase().getTable(barType.getName() + "_blob1"));
-    sql::TypedTable<int64_t, int64_t, std::vector<float>> barBlob2Table(
-      library->getDatabase().getTable(barType.getName() + "_blob2"));
-
-    // Create object handlers.
-    auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>>(fooType.getName());
-    auto barHandler =
-      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>(
-        barType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+    }).fatal("Failed to commit types");
 
     // Insert Foo.
     {
+        const sql::TypedTable<sql::row_id, std::string, Baz> arrayTable(
+          library->getDatabase().getTable("main_Foo_blob1"));
+
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+
         // Create objects.
         Foo foo0;
         foo0.a.get().emplace_back(Baz{.x = 0.5f, .y = 10});
@@ -77,34 +73,38 @@ void InsertBlobArray::operator()()
         foo1.a.get().emplace_back(Baz{.x = 4.5f, .y = 10000});
 
         // Try to insert.
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(foo0.id, alex::InstanceId(1));
-        compareEQ(foo1.id, alex::InstanceId(2));
+        compareTrue(foo0.id.valid());
+        compareTrue(foo1.id.valid());
 
-        // Select inserted object using sql.
-        auto foo0_get = fooTable.selectOne(fooTable.col<0>() == foo0.id.get(), true)(false);
-        auto foo1_get = fooTable.selectOne(fooTable.col<0>() == foo1.id.get(), true)(false);
-
-        // Compare objects.
-        compareEQ(foo0.id, std::get<0>(foo0_get));
-        compareEQ(foo1.id, std::get<0>(foo1_get));
-
-        // Select blobs in separate table and compare.
-        auto                         idparam      = foo0.id.get();
-        auto                         blobs_select = fooBlob1Table.select<2>(fooBlob1Table.col<1>() == &idparam, true);
-        std::vector<std::tuple<Baz>> blobs_get(blobs_select.begin(), blobs_select.end());
-        compareEQ(foo0.a.get()[0], std::get<0>(blobs_get[0]));
-        compareEQ(foo0.a.get()[1], std::get<0>(blobs_get[1]));
-        idparam = foo1.id;
-        blobs_get.assign(blobs_select(true).begin(), blobs_select.end());
-        compareEQ(foo1.a.get()[0], std::get<0>(blobs_get[0]));
+        // Select blobs in array table.
+        std::string id;
+        auto        stmt = arrayTable.selectAs<Baz, 2>()
+                      .where(like(arrayTable.col<1>(), &id))
+                      .orderBy(ascending(arrayTable.col<0>()))
+                      .compile();
+        id = foo0.id.getAsString();
+        stmt.bind(sql::BindParameters::All);
+        std::vector<Baz> blobs(stmt.begin(), stmt.end());
+        compareEQ(foo0.a.get(), blobs);
+        id = foo1.id.getAsString();
+        stmt.bind(sql::BindParameters::All);
+        blobs.assign(stmt.begin(), stmt.end());
+        compareEQ(foo1.a.get(), blobs);
     }
 
     // Insert Bar.
     {
+        const sql::TypedTable<sql::row_id, std::string, std::vector<Baz>> array0Table(
+          library->getDatabase().getTable("main_Bar_blob1"));
+        const sql::TypedTable<sql::row_id, std::string, std::vector<float>> array1Table(
+          library->getDatabase().getTable("main_Bar_blob2"));
+
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+
         // Create objects.
         Bar bar0;
         bar0.a.get().resize(2);
@@ -127,37 +127,36 @@ void InsertBlobArray::operator()()
         bar1.b.get()[0].push_back(13.0f);
 
         // Try to insert.
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareEQ(bar0.id, alex::InstanceId(1));
-        compareEQ(bar1.id, alex::InstanceId(2));
+        compareTrue(bar0.id.valid());
+        compareTrue(bar1.id.valid());
 
-        // Select inserted object using sql.
-        auto bar0_get = barTable.selectOne(barTable.col<0>() == bar0.id.get(), true)(false);
-        auto bar1_get = barTable.selectOne(barTable.col<0>() == bar1.id.get(), true)(false);
-
-        // Compare objects.
-        compareEQ(bar0.id, std::get<0>(bar0_get));
-        compareEQ(bar1.id, std::get<0>(bar1_get));
-
-        // Select blobs in separate table and compare.
-        auto idparam       = bar0.id.get();
-        auto blobs1_select = barBlob1Table.select<2>(barBlob1Table.col<1>() == &idparam, true);
-        auto blobs2_select = barBlob2Table.select<2>(barBlob2Table.col<1>() == &idparam, true);
-        std::vector<std::tuple<std::vector<Baz>>>   blobs1_get(blobs1_select.begin(), blobs1_select.end());
-        std::vector<std::tuple<std::vector<float>>> blobs2_get(blobs2_select.begin(), blobs2_select.end());
-        compareEQ(bar0.a.get()[0], std::get<0>(blobs1_get[0]));
-        compareEQ(bar0.a.get()[1], std::get<0>(blobs1_get[1]));
-        compareEQ(bar0.b.get()[0], std::get<0>(blobs2_get[0]));
-        compareEQ(bar0.b.get()[1], std::get<0>(blobs2_get[1]));
-        compareEQ(bar0.b.get()[2], std::get<0>(blobs2_get[2]));
-        idparam = bar1.id;
-        blobs1_get.assign(blobs1_select(true).begin(), blobs1_select.end());
-        blobs2_get.assign(blobs2_select(true).begin(), blobs2_select.end());
-        compareEQ(bar1.a.get()[0], std::get<0>(blobs1_get[0]));
-        compareEQ(bar1.b.get()[0], std::get<0>(blobs2_get[0]));
-        compareEQ(bar1.b.get()[1], std::get<0>(blobs2_get[1]));
+        // Select blobs in array table.
+        std::string id;
+        auto        stmt0 = array0Table.selectAs<std::vector<Baz>, 2>()
+                       .where(like(array0Table.col<1>(), &id))
+                       .orderBy(ascending(array0Table.col<0>()))
+                       .compile();
+        auto stmt1 = array1Table.selectAs<std::vector<float>, 2>()
+                       .where(like(array1Table.col<1>(), &id))
+                       .orderBy(ascending(array1Table.col<0>()))
+                       .compile();
+        id = bar0.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        std::vector<std::vector<Baz>>   blobs(stmt0.begin(), stmt0.end());
+        std::vector<std::vector<float>> floats(stmt1.begin(), stmt1.end());
+        compareEQ(bar0.a.get(), blobs);
+        compareEQ(bar0.b.get(), floats);
+        id = bar1.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        blobs.assign(stmt0.begin(), stmt0.end());
+        floats.assign(stmt1.begin(), stmt1.end());
+        compareEQ(bar1.a.get(), blobs);
+        compareEQ(bar1.b.get(), floats);
     }
 }

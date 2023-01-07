@@ -46,11 +46,9 @@ namespace alex
 
         Blob& operator=(Blob&&) = default;
 
-        template<typename Self>
-        auto get(this Self&& self)
-        {
-            return std::forward<Self>(self).value;
-        }
+        value_t& get() noexcept { return value; }
+
+        const value_t& get() const noexcept { return value; }
 
         template<typename U>
             requires(std::same_as<value_t, std::remove_cvref_t<U>>)

@@ -57,8 +57,8 @@ void InsertPrimitive::operator()()
 
     // Insert Foo.
     {
-        const sql::TypedTable<std::string, float, double> table(fooType.getInstanceTable());
-        auto                                              inserter = alex::InsertQuery(FooDescriptor(fooType));
+        const sql::TypedTable<sql::row_id, std::string, float, double> table(fooType.getInstanceTable());
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
 
         // Create objects.
         Foo foo0{.a = 0.5f, .b = 1.5};
@@ -74,7 +74,7 @@ void InsertPrimitive::operator()()
 
         // Select inserted object using sql and compare.
         std::string id;
-        auto        stmt    = table.selectAs<Foo>().where(like(table.col<0>(), &id)).compileOne();
+        auto        stmt    = table.selectAs<Foo, 1, 2, 3>().where(like(table.col<1>(), &id)).compileOne();
         id                  = foo0.id.getAsString();
         const auto foo0_get = stmt.bind(sql::BindParameters::All)();
         id                  = foo1.id.getAsString();
@@ -91,7 +91,8 @@ void InsertPrimitive::operator()()
 
     // Insert Bar.
     {
-        const sql::TypedTable<std::string, int32_t, int64_t, uint32_t, uint64_t> table(barType.getInstanceTable());
+        const sql::TypedTable<sql::row_id, std::string, int32_t, int64_t, uint32_t, uint64_t> table(
+          barType.getInstanceTable());
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
 
         // Create objects.
@@ -108,7 +109,7 @@ void InsertPrimitive::operator()()
 
         // Select inserted object using sql and compare.
         std::string id;
-        auto        stmt    = table.selectAs<Bar>().where(like(table.col<0>(), &id)).compileOne();
+        auto        stmt    = table.selectAs<Bar, 1, 2, 3, 4, 5>().where(like(table.col<1>(), &id)).compileOne();
         id                  = bar0.id.getAsString();
         const auto bar0_get = stmt.bind(sql::BindParameters::All)();
         id                  = bar1.id.getAsString();

@@ -46,11 +46,9 @@ namespace alex
 
         BlobArray& operator=(BlobArray&&) = default;
 
-        template<typename Self>
-        auto get(this Self&& self)
-        {
-            return std::forward<Self>(self).values;
-        }
+        value_t& get() noexcept { return values; }
+
+        const value_t& get() const noexcept { return values; }
 
         /**
          * \brief Get number of elements.
@@ -76,8 +74,8 @@ namespace alex
     class BlobArray<std::vector<T>>
     {
     public:
-        using element_t = T;
-        using value_t   = std::vector<std::vector<element_t>>;
+        using element_t = std::vector<T>;
+        using value_t   = std::vector<element_t>;
 
         BlobArray() = default;
 
@@ -91,11 +89,9 @@ namespace alex
 
         BlobArray& operator=(BlobArray&&) = default;
 
-        template<typename Self>
-        auto get(this Self&& self)
-        {
-            return std::forward<Self>(self).values;
-        }
+        value_t& get() noexcept { return values; }
+
+        const value_t& get() const noexcept { return values; }
 
         /**
          * \brief Get number of elements.
@@ -105,7 +101,7 @@ namespace alex
 
         [[nodiscard]] sql::StaticBlob getStaticBlob(const size_t index) const noexcept
         {
-            return sql::StaticBlob{.data = values[index].data(), .size = values[index].size() * sizeof element_t};
+            return sql::StaticBlob{.data = values[index].data(), .size = values[index].size() * sizeof T};
         }
 
     private:

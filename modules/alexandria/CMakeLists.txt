@@ -44,6 +44,7 @@ set(HEADERS
     ${INCLUDE_DIR}/queries/inserters/primitive_array_inserter.h
     ${INCLUDE_DIR}/queries/inserters/primitive_inserter.h
     ${INCLUDE_DIR}/queries/inserters/reference_array_inserter.h
+    ${INCLUDE_DIR}/queries/types/member_extractor.h
 )
 
 set(SOURCES

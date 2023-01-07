@@ -202,8 +202,35 @@ namespace alex
         return createProperty(propName, DataType::Nested, &nestedType, false, false);
     }
 
+    std::vector<sql::Table*> Type::getPrimitiveArrayTables() const
+    {
+        requireCommitted();
+
+        std::vector<sql::Table*> tables;
+        for (const auto& prop : properties) prop->getPrimitiveArrayTables(tables, getInstanceTable(), "");
+        return tables;
+    }
+
+    std::vector<sql::Table*> Type::getBlobArrayTables() const
+    {
+        requireCommitted();
+
+        std::vector<sql::Table*> tables;
+        for (const auto& prop : properties) prop->getBlobArrayTables(tables, getInstanceTable(), "");
+        return tables;
+    }
+
+    std::vector<sql::Table*> Type::getReferenceArrayTables() const
+    {
+        requireCommitted();
+
+        std::vector<sql::Table*> tables;
+        for (const auto& prop : properties) prop->getReferenceArrayTables(tables, getInstanceTable(), "");
+        return tables;
+    }
+
     ////////////////////////////////////////////////////////////////
-    // ...
+    // Commit.
     ////////////////////////////////////////////////////////////////
 
     void Type::requireNotCommitted() const
@@ -268,7 +295,8 @@ namespace alex
 
         // Create instance table.
         auto& instanceTable = db.createTable(getInstanceTableName());
-        instanceTable.createColumn("uuid", sql::Column::Type::Text).primaryKey().unique().notNull();
+        instanceTable.createColumn("id", sql::Column::Type::Int).primaryKey(true);
+        instanceTable.createColumn("uuid", sql::Column::Type::Text).unique();  // .primaryKey().unique().notNull();
 
         // Add columns and reference tables for all properties.
         for (const auto& prop : properties) prop->generate(instanceTable, "");
