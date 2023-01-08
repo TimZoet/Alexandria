@@ -105,8 +105,11 @@ void InsertReferenceArray::operator()()
         compareEQ(bar1.foo.get(), refs);
     }
 
+    // Insert Baz.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
+        const sql::TypedTable<sql::row_id, std::string, std::string> array0Table(
+          library->getDatabase().getTable("main_Baz_fooProp"));
+        const sql::TypedTable<sql::row_id, std::string, std::string> array1Table(
           library->getDatabase().getTable("main_Baz_barProp"));
 
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
@@ -126,13 +129,20 @@ void InsertReferenceArray::operator()()
         compareTrue(baz.id.valid());
 
         // Check references in array table.
-        auto stmt = arrayTable.selectAs<std::string, 2>()
-                      .where(like(arrayTable.col<1>(), baz.id.getAsString()))
-                      .orderBy(ascending(arrayTable.col<0>()))
-                      .compile()
-                      .bind(sql::BindParameters::All);
-        const std::vector<alex::InstanceId> refs(stmt.begin(), stmt.end());
-        compareEQ(baz.bar.get(), refs);
+        auto stmt0 = array0Table.selectAs<std::string, 2>()
+                       .where(like(array0Table.col<1>(), baz.id.getAsString()))
+                       .orderBy(ascending(array0Table.col<0>()))
+                       .compile()
+                       .bind(sql::BindParameters::All);
+        auto stmt1 = array1Table.selectAs<std::string, 2>()
+                       .where(like(array1Table.col<1>(), baz.id.getAsString()))
+                       .orderBy(ascending(array1Table.col<0>()))
+                       .compile()
+                       .bind(sql::BindParameters::All);
+        const std::vector<alex::InstanceId> refs0(stmt0.begin(), stmt0.end());
+        const std::vector<alex::InstanceId> refs1(stmt1.begin(), stmt1.end());
+        compareEQ(baz.foo.get(), refs0);
+        compareEQ(baz.bar.get(), refs1);
     }
 
     // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.

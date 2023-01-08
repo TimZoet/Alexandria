@@ -38,8 +38,13 @@ set(HEADERS
     #${INCLUDE_DIR}/object_handler/primitive_handler.h
     #${INCLUDE_DIR}/object_handler/reference_array_handler.h
     #${INCLUDE_DIR}/object_handler/type_traits.h
+    ${INCLUDE_DIR}/queries/delete_query.h
     ${INCLUDE_DIR}/queries/insert_query.h
     ${INCLUDE_DIR}/queries/utils.h
+    ${INCLUDE_DIR}/queries/deleters/blob_array_deleter.h
+    ${INCLUDE_DIR}/queries/deleters/primitive_array_deleter.h
+    ${INCLUDE_DIR}/queries/deleters/primitive_deleter.h
+    ${INCLUDE_DIR}/queries/deleters/reference_array_deleter.h
     ${INCLUDE_DIR}/queries/inserters/blob_array_inserter.h
     ${INCLUDE_DIR}/queries/inserters/primitive_array_inserter.h
     ${INCLUDE_DIR}/queries/inserters/primitive_inserter.h

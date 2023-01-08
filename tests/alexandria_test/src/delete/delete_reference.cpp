@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/reference.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/delete_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -21,6 +21,9 @@ namespace
     {
         alex::InstanceId     id;
         alex::Reference<Foo> foo;
+
+        Bar() = default;
+        Bar(std::string iid, std::string fooid) : id(std::move(iid)), foo(std::move(fooid)) {}
     };
 
     struct Baz
@@ -28,15 +31,29 @@ namespace
         alex::InstanceId     id;
         alex::Reference<Foo> foo;
         alex::Reference<Bar> bar;
+
+        Baz() = default;
+        Baz(std::string iid, std::string fooid, std::string barid) :
+            id(std::move(iid)), foo(std::move(fooid)), bar(std::move(barid))
+        {
+        }
     };
+
+    using FooDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>;
+
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::foo>>;
+
+    using BazDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>;
 }  // namespace
 
 void DeleteReference::operator()()
 {
     // Create types.
-    auto& fooType = library->createType("Foo");
-    auto& barType = library->createType("Bar");
-    auto& bazType = library->createType("Baz");
+    auto& fooType = nameSpace->createType("Foo");
+    auto& barType = nameSpace->createType("Bar");
+    auto& bazType = nameSpace->createType("Baz");
 
     // Add properties to types.
     fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
@@ -46,59 +63,94 @@ void DeleteReference::operator()()
     bazType.createReferenceProperty("barProp", barType);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+        bazType.commit();
+    }).fatal("Failed to commit types");
 
-    // Get tables.
-    sql::TypedTable<int64_t, int64_t>          barTable(library->getDatabase().getTable(barType.getName()));
-    sql::TypedTable<int64_t, int64_t, int64_t> bazTable(library->getDatabase().getTable(bazType.getName()));
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>(
-        fooType.getName());
-    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::foo>>(barType.getName());
-    auto bazHandler =
-      library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>(
-        bazType.getName());
-
-    // Create and insert objects.
+    // Create objects.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
-    expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
+
+    // Insert Foo.
+    expectNoThrow([&] {
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        inserter(foo0);
+        inserter(foo1);
+    }).fatal("Failed to insert object");
+
     Bar bar0, bar1;
     bar0.foo = foo0;
     bar1.foo = foo1;
-    expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
-    Baz baz0, baz1, baz2, baz3;
-    baz0.foo = foo0;
-    baz0.bar = bar0;
-    baz1.foo = foo0;
-    baz1.bar = bar1;
-    baz2.foo = foo1;
-    baz2.bar = bar0;
-    baz3.foo = foo1;
-    baz3.bar = bar1;
-    expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler->insert(baz2); }).fatal("Failed to insert object");
-    expectNoThrow([&] { bazHandler->insert(baz3); }).fatal("Failed to insert object");
 
-    // Delete objects one by one and check tables.
-    compareEQ(static_cast<size_t>(2), barTable.countAll()(true));
-    expectNoThrow([&] { barHandler->del(bar0.id); });
-    compareEQ(static_cast<size_t>(1), barTable.countAll()(true));
-    expectNoThrow([&] { barHandler->del(bar1.id); });
-    compareEQ(static_cast<size_t>(0), barTable.countAll()(true));
+    // Delete Bar.
+    {
+        const sql::TypedTable<sql::row_id, std::string, std::string> table(library->getDatabase().getTable("main_Bar"));
 
-    compareEQ(static_cast<size_t>(4), bazTable.countAll()(true));
-    expectNoThrow([&] { bazHandler->del(baz0.id); });
-    compareEQ(static_cast<size_t>(3), bazTable.countAll()(true));
-    expectNoThrow([&] { bazHandler->del(baz1.id); });
-    compareEQ(static_cast<size_t>(2), bazTable.countAll()(true));
-    expectNoThrow([&] { bazHandler->del(baz2.id); });
-    compareEQ(static_cast<size_t>(1), bazTable.countAll()(true));
-    expectNoThrow([&] { bazHandler->del(baz3.id); });
-    compareEQ(static_cast<size_t>(0), bazTable.countAll()(true));
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
+
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = bar0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = bar1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+    }
+
+    // Delete Baz.
+    {
+        const sql::TypedTable<sql::row_id, std::string, std::string, std::string> table(
+          library->getDatabase().getTable("main_Baz"));
+
+        auto inserter = alex::InsertQuery(BazDescriptor(bazType));
+        auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));
+
+        // Create objects.
+        Baz baz0, baz1, baz2, baz3;
+        baz0.foo = foo0;
+        baz0.bar = bar0;
+        baz1.foo = foo0;
+        baz1.bar = bar1;
+        baz2.foo = foo1;
+        baz2.bar = bar0;
+        baz3.foo = foo1;
+        baz3.bar = bar1;
+
+        // Try to insert.
+        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz3); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = baz0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = baz1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = baz2.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz2); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = baz3.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz3); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+    }
 }

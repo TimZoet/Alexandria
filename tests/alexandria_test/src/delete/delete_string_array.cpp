@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/string_array.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/delete_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -34,42 +34,39 @@ namespace
             strings2.get() = std::move(sstrings2);
         }
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>;
+
+    using BarDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>;
 }  // namespace
 
 void DeleteStringArray::operator()()
 {
     // Create type with 1 string.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createStringArrayProperty("strings");
 
     // Create type with 2 strings.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createStringArrayProperty("strings1");
     barType.createStringArrayProperty("strings2");
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::TypedTable<int64_t>                       fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::TypedTable<int64_t, int64_t, std::string> fooStringsTable(
-      library->getDatabase().getTable(fooType.getName() + "_strings"));
-    sql::TypedTable<int64_t>                       barTable(library->getDatabase().getTable(barType.getName()));
-    sql::TypedTable<int64_t, int64_t, std::string> barStrings1Table(
-      library->getDatabase().getTable(barType.getName() + "_strings1"));
-    sql::TypedTable<int64_t, int64_t, std::string> barStrings2Table(
-      library->getDatabase().getTable(barType.getName() + "_strings2"));
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>(fooType.getName());
-    auto barHandler =
-      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>(
-        barType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+    }).fatal("Failed to commit types");
 
     // Delete Foo.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
+          library->getDatabase().getTable("main_Foo_strings"));
+
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
+
+        // Create objects.
         Foo foo0;
         foo0.strings.get().push_back("abc");
         foo0.strings.get().push_back("def");
@@ -77,23 +74,35 @@ void DeleteStringArray::operator()()
         foo1.strings.get().push_back("10");
         foo1.strings.get().push_back("1111");
         foo1.strings.get().push_back("%^&*&(*U");
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
-        // Delete objects one by one and check tables.
-        compareEQ(static_cast<size_t>(2), fooTable.countAll()(true));
-        compareEQ(static_cast<size_t>(2 + 3), fooStringsTable.countAll()(true));
-        expectNoThrow([&] { fooHandler->del(foo0.id); });
-        compareEQ(static_cast<size_t>(1), fooTable.countAll()(true));
-        compareEQ(static_cast<size_t>(3), fooStringsTable.countAll()(true));
-        expectNoThrow([&] { fooHandler->del(foo1.id); });
-        compareEQ(static_cast<size_t>(0), fooTable.countAll()(true));
-        compareEQ(static_cast<size_t>(0), fooStringsTable.countAll()(true));
+        // Try to insert.
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = arrayTable.count().where(like(arrayTable.col<1>(), &id)).compile();
+        id               = foo0.id.getAsString();
+        compareEQ(2, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(foo0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = foo1.id.getAsString();
+        compareEQ(3, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(foo1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 
-    // Delete Bar.
+    // Insert Bar.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::string> array0Table(
+          library->getDatabase().getTable("main_Bar_strings1"));
+        const sql::TypedTable<sql::row_id, std::string, std::string> array1Table(
+          library->getDatabase().getTable("main_Bar_strings2"));
+
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
+
+        // Create objects.
         Bar bar0;
         Bar bar1;
         bar1.strings1.get().push_back("");
@@ -102,20 +111,26 @@ void DeleteStringArray::operator()()
         bar1.strings2.get().push_back("dbsfdcesw");
         bar1.strings2.get().push_back("utikrt");
         bar1.strings2.get().push_back("hntfdrgtef");
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
-        // Delete objects one by one and check tables.
-        compareEQ(static_cast<size_t>(2), barTable.countAll()(true));
-        compareEQ(static_cast<size_t>(0 + 3), barStrings1Table.countAll()(true));
-        compareEQ(static_cast<size_t>(0 + 3), barStrings2Table.countAll()(true));
-        expectNoThrow([&] { barHandler->del(bar0.id); });
-        compareEQ(static_cast<size_t>(1), barTable.countAll()(true));
-        compareEQ(static_cast<size_t>(3), barStrings1Table.countAll()(true));
-        compareEQ(static_cast<size_t>(3), barStrings2Table.countAll()(true));
-        expectNoThrow([&] { barHandler->del(bar1.id); });
-        compareEQ(static_cast<size_t>(0), barTable.countAll()(true));
-        compareEQ(static_cast<size_t>(0), barStrings1Table.countAll()(true));
-        compareEQ(static_cast<size_t>(0), barStrings2Table.countAll()(true));
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt0 = array0Table.count().where(like(array0Table.col<1>(), &id)).compile();
+        auto        stmt1 = array1Table.count().where(like(array1Table.col<1>(), &id)).compile();
+        id                = bar0.id.getAsString();
+        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
+        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar0); });
+        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
+        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
+        id = bar1.id.getAsString();
+        compareEQ(3, stmt0.bind(sql::BindParameters::All)());
+        compareEQ(3, stmt1.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar1); });
+        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
+        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
     }
 }

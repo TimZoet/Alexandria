@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/primitive_blob.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/delete_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -44,43 +44,45 @@ namespace
             floats.get() = std::move(ffloats);
         }
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>;
+
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>;
+
+    using BazDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>;
 }  // namespace
 
 void DeletePrimitiveBlob::operator()()
 {
     // Create type with floats.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createPrimitiveBlobProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createPrimitiveBlobProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
-    auto& bazType = library->createType("Baz");
+    auto& bazType = nameSpace->createType("Baz");
     bazType.createPrimitiveBlobProperty("uints", alex::DataType::Uint64);
     bazType.createPrimitiveBlobProperty("doubles", alex::DataType::Double);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::TypedTable<int64_t, std::vector<float>>   fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::TypedTable<int64_t, std::vector<int32_t>> barTable(library->getDatabase().getTable(barType.getName()));
-    sql::TypedTable<int64_t, std::vector<uint64_t>, std::vector<double>> bazTable(
-      library->getDatabase().getTable(bazType.getName()));
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>(fooType.getName());
-    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>(barType.getName());
-    auto bazHandler =
-      library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>(
-        bazType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+        bazType.commit();
+    }).fatal("Failed to commit types");
 
     // Delete Foo.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::vector<float>> table(
+          library->getDatabase().getTable("main_Foo"));
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
+
+        // Create objects.
         Foo foo0;
         foo0.floats.get().push_back(0.5f);
         foo0.floats.get().push_back(1.5f);
@@ -88,20 +90,32 @@ void DeletePrimitiveBlob::operator()()
         foo1.floats.get().push_back(-2.5f);
         foo1.floats.get().push_back(-3.5f);
         foo1.floats.get().push_back(-4.5f);
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
-        // Delete objects one by one and check tables.
-        compareEQ(static_cast<size_t>(2), fooTable.countAll()(true));
-        expectNoThrow([&] { fooHandler->del(foo0.id); });
-        compareEQ(static_cast<size_t>(1), fooTable.countAll()(true));
-        expectNoThrow([&] { fooHandler->del(foo1.id); });
-        compareEQ(static_cast<size_t>(0), fooTable.countAll()(true));
+        // Try to insert.
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = foo0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(foo0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = foo1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(foo1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 
     // Delete Bar.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::vector<int32_t>> table(
+          library->getDatabase().getTable("main_Bar"));
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
+
+        // Create objects.
         Bar bar0;
         bar0.ints.get().push_back(10);
         bar0.ints.get().push_back(100);
@@ -109,20 +123,33 @@ void DeletePrimitiveBlob::operator()()
         bar1.ints.get().push_back(-111);
         bar1.ints.get().push_back(-2222);
         bar1.ints.get().push_back(-33333);
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
-        // Delete objects one by one and check tables.
-        compareEQ(static_cast<size_t>(2), barTable.countAll()(true));
-        expectNoThrow([&] { barHandler->del(bar0.id); });
-        compareEQ(static_cast<size_t>(1), barTable.countAll()(true));
-        expectNoThrow([&] { barHandler->del(bar1.id); });
-        compareEQ(static_cast<size_t>(0), barTable.countAll()(true));
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = bar0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = bar1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 
     // Delete Baz.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::vector<uint64_t>, std::vector<double>> table(
+          library->getDatabase().getTable("main_Baz"));
+
+        auto inserter = alex::InsertQuery(BazDescriptor(bazType));
+        auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));
+
+        // Create objects.
         Baz baz0;
         baz0.ints.get().push_back(10);
         baz0.ints.get().push_back(100);
@@ -135,14 +162,25 @@ void DeletePrimitiveBlob::operator()()
         baz1.floats.get().push_back(-2.5);
         baz1.floats.get().push_back(-3.5);
         baz1.floats.get().push_back(-4.5);
-        expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
 
-        // Delete objects one by one and check tables.
-        compareEQ(static_cast<size_t>(2), bazTable.countAll()(true));
-        expectNoThrow([&] { bazHandler->del(baz0.id); });
-        compareEQ(static_cast<size_t>(1), bazTable.countAll()(true));
-        expectNoThrow([&] { bazHandler->del(baz1.id); });
-        compareEQ(static_cast<size_t>(0), bazTable.countAll()(true));
+        // Try to insert.
+        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+
+        // Check assigned IDs.
+        compareTrue(baz0.id.valid());
+        compareTrue(baz1.id.valid());
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = baz0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = baz1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 }

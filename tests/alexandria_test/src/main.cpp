@@ -10,21 +10,15 @@
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
-//#include "alexandria_test/create/create_direct.h"
-//#include "alexandria_test/create/create_managed.h"
-//#include "alexandria_test/create/create_primitive.h"
-//#include "alexandria_test/create/create_string.h"
-//#include "alexandria_test/delete/delete_blob.h"
-//#include "alexandria_test/delete/delete_blob_array.h"
-//#include "alexandria_test/delete/delete_direct.h"
-//#include "alexandria_test/delete/delete_managed.h"
-//#include "alexandria_test/delete/delete_primitive.h"
-//#include "alexandria_test/delete/delete_primitive_array.h"
-//#include "alexandria_test/delete/delete_primitive_blob.h"
-//#include "alexandria_test/delete/delete_reference.h"
-//#include "alexandria_test/delete/delete_reference_array.h"
-//#include "alexandria_test/delete/delete_string.h"
-//#include "alexandria_test/delete/delete_string_array.h"
+#include "alexandria_test/delete/delete_blob.h"
+#include "alexandria_test/delete/delete_blob_array.h"
+#include "alexandria_test/delete/delete_primitive.h"
+#include "alexandria_test/delete/delete_primitive_array.h"
+#include "alexandria_test/delete/delete_primitive_blob.h"
+#include "alexandria_test/delete/delete_reference.h"
+#include "alexandria_test/delete/delete_reference_array.h"
+#include "alexandria_test/delete/delete_string.h"
+#include "alexandria_test/delete/delete_string_array.h"
 //#include "alexandria_test/get/get_blob.h"
 //#include "alexandria_test/get/get_blob_array.h"
 //#include "alexandria_test/get/get_direct.h"
@@ -86,23 +80,16 @@ int main(int argc, char** argv)
 #endif
 
     bt::run<
-      // create
-      //CreateDirect,
-      //CreateManaged,
-      //CreatePrimitive,
-      //CreateString,
       // delete
-      //DeleteBlob,
-      //DeleteBlobArray,
-      //DeleteDirect,
-      //DeleteManaged,
-      //DeletePrimitive,
-      //DeletePrimitiveArray,
-      //DeletePrimitiveBlob,
-      //DeleteReference,
-      //DeleteReferenceArray,
-      //DeleteString,
-      //DeleteStringArray,
+      DeleteBlob,
+      DeleteBlobArray,
+      DeletePrimitive,
+      DeletePrimitiveArray,
+      DeletePrimitiveBlob,
+      DeleteReference,
+      DeleteReferenceArray,
+      DeleteString,
+      DeleteStringArray,
       // get
       //GetBlob,
       //GetBlobArray,

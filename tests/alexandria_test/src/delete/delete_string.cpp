@@ -4,8 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/delete_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -13,6 +14,9 @@ namespace
     {
         alex::InstanceId id;
         std::string      a;
+
+        Foo() = default;
+        Foo(std::string sid, std::string sa) : id(std::move(sid)), a(std::move(sa)) {}
     };
 
     struct Bar
@@ -20,63 +24,89 @@ namespace
         alex::InstanceId id;
         std::string      a;
         std::string      b;
+
+        Bar() = default;
+        Bar(std::string sid, std::string sa, std::string sb) : id(std::move(sid)), a(std::move(sa)), b(std::move(sb)) {}
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
+
+    using BarDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>;
 }  // namespace
 
 void DeleteString::operator()()
 {
     // Create type with 1 string.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createStringProperty("prop1");
 
     // Create type with 2 strings.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createStringProperty("prop1");
     barType.createStringProperty("prop2");
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Get tables.
-    sql::TypedTable<int64_t, std::string> fooTable(library->getDatabase().getTable(fooType.getName()));
-    sql::TypedTable<int64_t, std::string, std::string> barTable(
-      library->getDatabase().getTable(barType.getName()));
-
-    // Create object handlers.
-    auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>>(fooType.getName());
-    auto barHandler =
-      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>(
-        barType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+    }).fatal("Failed to commit types");
 
     // Delete Foo.
     {
-        // Create and insert objects.
-        Foo foo0{.a = "abc"};
-        Foo foo1{.a = "def"};
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
+        const sql::TypedTable<sql::row_id, std::string, std::string> table(fooType.getInstanceTable());
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
 
-        // Delete objects one by one and check tables.
-        compareEQ(static_cast<size_t>(2), fooTable.countAll()(true));
-        expectNoThrow([&] { fooHandler->del(foo0.id); });
-        compareEQ(static_cast<size_t>(1), fooTable.countAll()(true));
-        expectNoThrow([&] { fooHandler->del(foo1.id); });
-        compareEQ(static_cast<size_t>(0), fooTable.countAll()(true));
+        // Create objects.
+        Foo foo0, foo1;
+        foo0.a = "abc";
+        foo1.a = "def";
+
+        // Try to insert.
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = foo0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(foo0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = foo1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(foo1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 
     // Delete Bar.
     {
-        // Create and insert objects.
-        Bar bar0{.a = "hijkl", .b = "aaaa"};
-        Bar bar1{.a = "^%*&", .b = ""};
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
+        const sql::TypedTable<sql::row_id, std::string, std::string, std::string> table(barType.getInstanceTable());
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
 
-        // Delete objects one by one and check tables.
-        compareEQ(static_cast<size_t>(2), barTable.countAll()(true));
-        expectNoThrow([&] { barHandler->del(bar0.id); });
-        compareEQ(static_cast<size_t>(1), barTable.countAll()(true));
-        expectNoThrow([&] { barHandler->del(bar1.id); });
-        compareEQ(static_cast<size_t>(0), barTable.countAll()(true));
+        // Create objects.
+        Bar bar0, bar1;
+        bar0.a = "hijkl";
+        bar0.b = "aaaa";
+        bar1.a = "^%*&";
+        bar1.b = "";
+
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = bar0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = bar1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 }
