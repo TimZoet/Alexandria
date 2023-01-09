@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/blob_array.h"
-#include "alexandria/member_types/member.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/get_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -35,54 +35,64 @@ namespace
         alex::BlobArray<std::vector<Baz>>   a;
         alex::BlobArray<std::vector<float>> b;
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
+
+    using BarDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>;
 }  // namespace
 
 void GetBlobArray::operator()()
 {
     // Create type with 1 blob.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createBlobArrayProperty("blob1");
 
     // Create type with 2 blobs.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createBlobArrayProperty("blob1");
     barType.createBlobArrayProperty("blob2");
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Create object handlers.
-    auto fooHandler = library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::a>>(fooType.getName());
-    auto barHandler =
-      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>(
-        barType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+    }).fatal("Failed to commit types");
 
     // Retrieve Foo.
     {
-        // Create and insert objects.
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto getter   = alex::GetQuery(FooDescriptor(fooType));
+
+        // Create objects.
         Foo foo0;
         foo0.a.get().emplace_back(Baz{.x = 0.5f, .y = 10});
         foo0.a.get().emplace_back(Baz{.x = -2.0f, .y = -32});
         Foo foo1;
         foo1.a.get().emplace_back(Baz{.x = 4.5f, .y = 10000});
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
+        // Try to insert.
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
         Foo foo0_get, foo1_get;
-        expectNoThrow([&] { fooHandler->get(foo0.id, foo0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { fooHandler->get(foo1.id, foo1_get); }).fatal("Failed to get object");
+        foo0_get.id = foo0.id;
+        foo1_get.id = foo1.id;
+        expectNoThrow([&] { getter(foo0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(foo1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get.id);
         compareEQ(foo0.a.get(), foo0_get.a.get());
-        compareEQ(foo1.id, foo1_get.id);
         compareEQ(foo1.a.get(), foo1_get.a.get());
     }
 
     // Retrieve Bar.
     {
-        // Create and insert objects.
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto getter   = alex::GetQuery(BarDescriptor(barType));
+
+        // Create objects.
         Bar bar0;
         bar0.a.get().resize(2);
         bar0.a.get()[0].emplace_back(Baz{.x = 0.5f, .y = 10});
@@ -102,19 +112,21 @@ void GetBlobArray::operator()()
         bar1.b.get()[0].push_back(11.0f);
         bar1.b.get()[0].push_back(12.0f);
         bar1.b.get()[0].push_back(13.0f);
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
         Bar bar0_get, bar1_get;
-        expectNoThrow([&] { barHandler->get(bar0.id, bar0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { barHandler->get(bar1.id, bar1_get); }).fatal("Failed to get object");
+        bar0_get.id = bar0.id;
+        bar1_get.id = bar1.id;
+        expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get.id);
         compareEQ(bar0.a.get(), bar0_get.a.get());
         compareEQ(bar0.b.get(), bar0_get.b.get());
-        compareEQ(bar1.id, bar1_get.id);
         compareEQ(bar1.a.get(), bar1_get.a.get());
         compareEQ(bar1.b.get(), bar1_get.b.get());
     }

@@ -24,7 +24,7 @@ namespace alex
          * \tparam T TypeDescriptor.
          */
         template<size_t I, typename T, typename...>
-        struct PrimitiveArrayInserterImpl
+        struct ReferenceArrayGetterImpl
         {
             ////////////////////////////////////////////////////////////////
             // Types.
@@ -44,7 +44,7 @@ namespace alex
             // Constructors.
             ////////////////////////////////////////////////////////////////
 
-            explicit PrimitiveArrayInserterImpl(const type_descriptor_t&) noexcept {}
+            ReferenceArrayGetterImpl(const type_descriptor_t&, std::string&) noexcept {}
 
             ////////////////////////////////////////////////////////////////
             // Invoke.
@@ -61,8 +61,8 @@ namespace alex
          * \tparam Ms Remaining Members.
          */
         template<size_t I, typename T, typename M, typename... Ms>
-        struct PrimitiveArrayInserterImpl<I, T, std::tuple<M, Ms...>>
-            : PrimitiveArrayInserterImpl<I, T, std::tuple<M>>, PrimitiveArrayInserterImpl<I + 1, T, std::tuple<Ms...>>
+        struct ReferenceArrayGetterImpl<I, T, std::tuple<M, Ms...>>
+            : ReferenceArrayGetterImpl<I, T, std::tuple<M>>, ReferenceArrayGetterImpl<I + 1, T, std::tuple<Ms...>>
         {
             ////////////////////////////////////////////////////////////////
             // Types.
@@ -82,9 +82,9 @@ namespace alex
             // Constructors.
             ////////////////////////////////////////////////////////////////
 
-            explicit PrimitiveArrayInserterImpl(const type_descriptor_t& desc) :
-                PrimitiveArrayInserterImpl<I, T, std::tuple<M>>(desc),
-                PrimitiveArrayInserterImpl<I + 1, T, std::tuple<Ms...>>(desc)
+            explicit ReferenceArrayGetterImpl(const type_descriptor_t& desc, std::string& uuidParam) :
+                ReferenceArrayGetterImpl<I, T, std::tuple<M>>(desc, uuidParam),
+                ReferenceArrayGetterImpl<I + 1, T, std::tuple<Ms...>>(desc, uuidParam)
             {
             }
 
@@ -95,9 +95,9 @@ namespace alex
             void operator()(object_t& instance)
             {
                 // Call implementation for M.
-                static_cast<PrimitiveArrayInserterImpl<I, T, std::tuple<M>>&>(*this)(instance);
+                static_cast<ReferenceArrayGetterImpl<I, T, std::tuple<M>>&>(*this)(instance);
                 // Recurse on Ms...
-                static_cast<PrimitiveArrayInserterImpl<I + 1, T, std::tuple<Ms...>>&>(*this)(instance);
+                static_cast<ReferenceArrayGetterImpl<I + 1, T, std::tuple<Ms...>>&>(*this)(instance);
             }
         };
 
@@ -108,7 +108,7 @@ namespace alex
          * \tparam M Member.
          */
         template<size_t I, typename T, typename M>
-        struct PrimitiveArrayInserterImpl<I, T, std::tuple<M>>
+        struct ReferenceArrayGetterImpl<I, T, std::tuple<M>>
         {
             ////////////////////////////////////////////////////////////////
             // Types.
@@ -130,17 +130,18 @@ namespace alex
             using member_t = M;
 
             /**
-             * \brief TypedTable for the primitive array table.
+             * \brief TypedTable for the reference array table.
              */
-            using table_t = primitive_array_table_t<member_t>;
+            using table_t = reference_array_table_t<member_t>;
 
             /**
-             * \brief Insert query type.
+             * \brief Select query type.
              */
-            using query_t = std::remove_cvref_t<decltype(std::declval<table_t>().insert())>;
+            using query_t =
+              std::remove_cvref_t<decltype(std::declval<table_t>().template selectAs<sql::col_t<2, table_t>, 2>())>;
 
             /**
-             * \brief Insert statement type.
+             * \brief Select statement type.
              */
             using statement_t = std::remove_cvref_t<decltype(std::declval<query_t>().compile())>;
 
@@ -148,7 +149,10 @@ namespace alex
             // Constructors.
             ////////////////////////////////////////////////////////////////
 
-            explicit PrimitiveArrayInserterImpl(const type_descriptor_t& desc) : statement(compile(desc)) {}
+            explicit ReferenceArrayGetterImpl(const type_descriptor_t& desc, std::string& uuidParam) :
+                statement(compile(desc, uuidParam))
+            {
+            }
 
             ////////////////////////////////////////////////////////////////
             // Invoke.
@@ -156,27 +160,21 @@ namespace alex
 
             void operator()(object_t& instance)
             {
-                // TODO: Construction of this uuid can be pulled into main inserter. Same for other classes.
-                const std::string uuidstr = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
-                const auto        uuid    = sql::toStaticText(uuidstr);
-
-                for (const auto& values = member_t::template get(instance).get(); const auto& v : values)
-                {
-                    if constexpr (member_t::is_string_array)
-                        statement(nullptr, uuid, sql::toStaticText(v));
-                    else
-                        statement(nullptr, uuid, v);
-                }
+                auto& container = member_t::template get(instance).get();
+                container.clear();
+                for (auto v : statement.bind(sql::BindParameters::Dynamic)) { container.emplace_back(std::move(v)); }
             }
 
         private:
-            [[nodiscard]] static statement_t compile(const type_descriptor_t& desc)
+            [[nodiscard]] static statement_t compile(const type_descriptor_t& desc, std::string& uuidParam)
             {
                 const Type& type = desc.getType();
                 // TODO: This constructs the same vector for each inserter now. Somewhat inefficient.
-                const auto tables = type.getPrimitiveArrayTables();
+                const auto tables = type.getReferenceArrayTables();
                 const auto table  = table_t(*tables[I]);
-                return table.insert().compile();
+                return table.template selectAs<sql::col_t<2, table_t>, 2>()
+                  .where(sql::like(table.template col<1>(), &uuidParam))
+                  .compile();
             }
 
             ////////////////////////////////////////////////////////////////
@@ -188,12 +186,11 @@ namespace alex
     }  // namespace detail
 
     /**
-     * \brief The PrimitiveArrayInserter handles the insertion of PrimitiveArray members into their dedicated array
-     * table.
+     * \brief The ReferenceArrayGetter handles the retrieval of rows from the array table of each ReferenceArray member.
      * \tparam T TypeDescriptor.
      */
     template<typename T>
-    class PrimitiveArrayInserter
+    class ReferenceArrayGetter
     {
     public:
         ////////////////////////////////////////////////////////////////
@@ -211,32 +208,32 @@ namespace alex
         using object_t = typename type_descriptor_t::object_t;
 
         /**
-         * \brief List of PrimitiveArray members.
+         * \brief List of ReferenceArray members.
          */
-        using members_t = detail::extract_primitive_array_members_t<typename type_descriptor_t::members_t>;
+        using members_t = detail::extract_reference_array_members_t<typename type_descriptor_t::members_t>;
 
         /**
-         * \brief 
+         * \brief
          */
-        using impl_t = detail::PrimitiveArrayInserterImpl<0, type_descriptor_t, members_t>;
+        using impl_t = detail::ReferenceArrayGetterImpl<0, type_descriptor_t, members_t>;
 
         ////////////////////////////////////////////////////////////////
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
-        PrimitiveArrayInserter() = delete;
+        ReferenceArrayGetter() = delete;
 
-        explicit PrimitiveArrayInserter(const type_descriptor_t& desc) : impl(desc) {}
+        ReferenceArrayGetter(const type_descriptor_t& desc, std::string& uuidParam) : impl(desc, uuidParam) {}
 
-        PrimitiveArrayInserter(const PrimitiveArrayInserter&) = delete;
+        ReferenceArrayGetter(const ReferenceArrayGetter&) = delete;
 
-        PrimitiveArrayInserter(PrimitiveArrayInserter&&) = default;
+        ReferenceArrayGetter(ReferenceArrayGetter&&) = default;
 
-        ~PrimitiveArrayInserter() noexcept = default;
+        ~ReferenceArrayGetter() noexcept = default;
 
-        PrimitiveArrayInserter& operator=(const PrimitiveArrayInserter&) = delete;
+        ReferenceArrayGetter& operator=(const ReferenceArrayGetter&) = delete;
 
-        PrimitiveArrayInserter& operator=(PrimitiveArrayInserter&&) = default;
+        ReferenceArrayGetter& operator=(ReferenceArrayGetter&&) = default;
 
         ////////////////////////////////////////////////////////////////
         // Invoke.

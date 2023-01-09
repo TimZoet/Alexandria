@@ -19,17 +19,15 @@
 #include "alexandria_test/delete/delete_reference_array.h"
 #include "alexandria_test/delete/delete_string.h"
 #include "alexandria_test/delete/delete_string_array.h"
-//#include "alexandria_test/get/get_blob.h"
-//#include "alexandria_test/get/get_blob_array.h"
-//#include "alexandria_test/get/get_direct.h"
-//#include "alexandria_test/get/get_managed.h"
-//#include "alexandria_test/get/get_primitive.h"
-//#include "alexandria_test/get/get_primitive_array.h"
-//#include "alexandria_test/get/get_primitive_blob.h"
-//#include "alexandria_test/get/get_reference.h"
-//#include "alexandria_test/get/get_reference_array.h"
-//#include "alexandria_test/get/get_string.h"
-//#include "alexandria_test/get/get_string_array.h"
+#include "alexandria_test/get/get_blob.h"
+#include "alexandria_test/get/get_blob_array.h"
+#include "alexandria_test/get/get_primitive.h"
+#include "alexandria_test/get/get_primitive_array.h"
+#include "alexandria_test/get/get_primitive_blob.h"
+#include "alexandria_test/get/get_reference.h"
+#include "alexandria_test/get/get_reference_array.h"
+#include "alexandria_test/get/get_string.h"
+#include "alexandria_test/get/get_string_array.h"
 #include "alexandria_test/insert/insert_blob.h"
 #include "alexandria_test/insert/insert_blob_array.h"
 #include "alexandria_test/insert/insert_primitive.h"
@@ -91,17 +89,15 @@ int main(int argc, char** argv)
       DeleteString,
       DeleteStringArray,
       // get
-      //GetBlob,
-      //GetBlobArray,
-      //GetDirect,
-      //GetManaged,
-      //GetPrimitive,
-      //GetPrimitiveArray,
-      //GetPrimitiveBlob,
-      //GetReference,
-      //GetReferenceArray,
-      //GetString,
-      //GetStringArray,
+      GetBlob,
+      GetBlobArray,
+      GetPrimitive,
+      GetPrimitiveArray,
+      GetPrimitiveBlob,
+      GetReference,
+      GetReferenceArray,
+      GetString,
+      GetStringArray,
       // insert
       InsertBlob,
       InsertBlobArray,

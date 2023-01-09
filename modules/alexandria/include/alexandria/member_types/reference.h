@@ -67,7 +67,7 @@ namespace alex
          * \param objectHandler ObjectHandler.
          * \return True if referenced object exists, false if it does not or when this reference is empty.
          */
-        template<typename O>// TODO: Constrain O to valid ObjectHandler.
+        template<typename O>  // TODO: Constrain O to valid ObjectHandler.
         [[nodiscard]] bool isValid(O& objectHandler) const
         {
             if (isNone()) return false;
@@ -80,7 +80,7 @@ namespace alex
          * \param objectHandler ObjectHandler.
          * \return Instance.
          */
-        template<typename O>// TODO: Constrain O to valid ObjectHandler.
+        template<typename O>  // TODO: Constrain O to valid ObjectHandler.
         [[nodiscard]] std::shared_ptr<object_t> get(O& objectHandler) const
         {
             if (isNone()) throw std::runtime_error("This reference does not point to an object");
@@ -128,6 +128,12 @@ namespace alex
         {
             id = ref.id;
             ref.clear();
+            return *this;
+        }
+
+        Reference<object_t>& operator=(std::string uuid) noexcept
+        {
+            id = std::move(uuid);
             return *this;
         }
 

@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/primitive_blob.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/get_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -44,37 +44,46 @@ namespace
             floats.get() = std::move(ffloats);
         }
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>;
+
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>;
+
+    using BazDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>;
 }  // namespace
 
 void GetPrimitiveBlob::operator()()
 {
     // Create type with floats.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createPrimitiveBlobProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createPrimitiveBlobProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
-    auto& bazType = library->createType("Baz");
+    auto& bazType = nameSpace->createType("Baz");
     bazType.createPrimitiveBlobProperty("uints", alex::DataType::Uint64);
     bazType.createPrimitiveBlobProperty("doubles", alex::DataType::Double);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>(fooType.getName());
-    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>(barType.getName());
-    auto bazHandler =
-      library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>(
-        bazType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+        bazType.commit();
+    }).fatal("Failed to commit types");
 
     // Retrieve Foo.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::vector<float>> table(
+          library->getDatabase().getTable("main_Foo"));
+
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto getter   = alex::GetQuery(FooDescriptor(fooType));
+
+        // Create objects.
         Foo foo0;
         foo0.floats.get().push_back(0.5f);
         foo0.floats.get().push_back(1.5f);
@@ -82,13 +91,16 @@ void GetPrimitiveBlob::operator()()
         foo1.floats.get().push_back(-2.5f);
         foo1.floats.get().push_back(-3.5f);
         foo1.floats.get().push_back(-4.5f);
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
-        Foo foo0_get, foo1_get;
-        expectNoThrow([&] { fooHandler->get(foo0.id, foo0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { fooHandler->get(foo1.id, foo1_get); }).fatal("Failed to get object");
+        // Try to insert.
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
+        Foo foo0_get(foo0.id, {});
+        Foo foo1_get(foo1.id, {});
+        expectNoThrow([&] { getter(foo0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(foo1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
         compareEQ(foo0.id, foo0_get.id);
@@ -99,7 +111,13 @@ void GetPrimitiveBlob::operator()()
 
     // Retrieve Bar.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::vector<int32_t>> table(
+          library->getDatabase().getTable("main_Bar"));
+
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto getter   = alex::GetQuery(BarDescriptor(barType));
+
+        // Create objects.
         Bar bar0;
         bar0.ints.get().push_back(10);
         bar0.ints.get().push_back(100);
@@ -107,13 +125,16 @@ void GetPrimitiveBlob::operator()()
         bar1.ints.get().push_back(-111);
         bar1.ints.get().push_back(-2222);
         bar1.ints.get().push_back(-33333);
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
-        Bar bar0_get, bar1_get;
-        expectNoThrow([&] { barHandler->get(bar0.id, bar0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { barHandler->get(bar1.id, bar1_get); }).fatal("Failed to get object");
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
+        Bar bar0_get(bar0.id, {});
+        Bar bar1_get(bar1.id, {});
+        expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
         compareEQ(bar0.id, bar0_get.id);
@@ -122,9 +143,14 @@ void GetPrimitiveBlob::operator()()
         compareEQ(bar1.ints.get(), bar1_get.ints.get());
     }
 
-    // Retrieve Baz.
+    // Insert Baz.
     {
-        // Create and insert objects.
+        const sql::TypedTable<sql::row_id, std::string, std::vector<uint64_t>, std::vector<double>> table(
+          library->getDatabase().getTable("main_Baz"));
+
+        auto inserter = alex::InsertQuery(BazDescriptor(bazType));
+
+        // Create objects.
         Baz baz0;
         baz0.ints.get().push_back(10);
         baz0.ints.get().push_back(100);
@@ -137,13 +163,22 @@ void GetPrimitiveBlob::operator()()
         baz1.floats.get().push_back(-2.5);
         baz1.floats.get().push_back(-3.5);
         baz1.floats.get().push_back(-4.5);
-        expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
-        Baz baz0_get, baz1_get;
-        expectNoThrow([&] { bazHandler->get(baz0.id, baz0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { bazHandler->get(baz1.id, baz1_get); }).fatal("Failed to get object");
+        // Try to insert.
+        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+
+        // Check assigned IDs.
+        compareTrue(baz0.id.valid());
+        compareTrue(baz1.id.valid());
+
+        // Select inserted object using sql and compare.
+        std::string id;
+        auto        stmt    = table.selectAs<Baz, 1, 2, 3>().where(like(table.col<1>(), &id)).compileOne();
+        id                  = baz0.id.getAsString();
+        const auto baz0_get = stmt.bind(sql::BindParameters::All)();
+        id                  = baz1.id.getAsString();
+        const auto baz1_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
         compareEQ(baz0.id, baz0_get.id);

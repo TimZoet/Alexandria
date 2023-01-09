@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/string_array.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/get_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -34,32 +34,36 @@ namespace
             strings2.get() = std::move(sstrings2);
         }
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>;
+
+    using BarDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>;
 }  // namespace
 
 void GetStringArray::operator()()
 {
     // Create type with 1 string.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createStringArrayProperty("strings");
 
     // Create type with 2 strings.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createStringArrayProperty("strings1");
     barType.createStringArrayProperty("strings2");
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>(fooType.getName());
-    auto barHandler =
-      library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>(
-        barType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+    }).fatal("Failed to commit types");
 
     // Retrieve Foo.
     {
-        // Create and insert objects.
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto getter   = alex::GetQuery(FooDescriptor(fooType));
+
+        // Create objects.
         Foo foo0;
         foo0.strings.get().push_back("abc");
         foo0.strings.get().push_back("def");
@@ -67,24 +71,29 @@ void GetStringArray::operator()()
         foo1.strings.get().push_back("10");
         foo1.strings.get().push_back("1111");
         foo1.strings.get().push_back("%^&*&(*U");
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
+        // Try to insert.
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
         Foo foo0_get, foo1_get;
-        expectNoThrow([&] { fooHandler->get(foo0.id, foo0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { fooHandler->get(foo1.id, foo1_get); }).fatal("Failed to get object");
+        foo0_get.id = foo0.id;
+        foo1_get.id = foo1.id;
+        expectNoThrow([&] { getter(foo0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(foo1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get.id);
         compareEQ(foo0.strings.get(), foo0_get.strings.get());
-        compareEQ(foo1.id, foo1_get.id);
         compareEQ(foo1.strings.get(), foo1_get.strings.get());
     }
 
     // Retrieve Bar.
     {
-        // Create and insert objects.
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto getter = alex::GetQuery(BarDescriptor(barType));
+
+        // Create objects.
         Bar bar0;
         Bar bar1;
         bar1.strings1.get().push_back("");
@@ -93,19 +102,21 @@ void GetStringArray::operator()()
         bar1.strings2.get().push_back("dbsfdcesw");
         bar1.strings2.get().push_back("utikrt");
         bar1.strings2.get().push_back("hntfdrgtef");
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
         Bar bar0_get, bar1_get;
-        expectNoThrow([&] { barHandler->get(bar0.id, bar0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { barHandler->get(bar1.id, bar1_get); }).fatal("Failed to get object");
+        bar0_get.id = bar0.id;
+        bar1_get.id = bar1.id;
+        expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get.id);
         compareEQ(bar0.strings1.get(), bar0_get.strings1.get());
         compareEQ(bar0.strings2.get(), bar0_get.strings2.get());
-        compareEQ(bar1.id, bar1_get.id);
         compareEQ(bar1.strings1.get(), bar1_get.strings1.get());
         compareEQ(bar1.strings2.get(), bar1_get.strings2.get());
     }

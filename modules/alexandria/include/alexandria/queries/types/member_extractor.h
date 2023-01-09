@@ -90,7 +90,7 @@ namespace alex::detail
 
     /**
      * \brief Takes a tuple of members and returns a tuple with all non primitive members filtered out.
-     * \tparam T Tuple of all members without UuidMember.
+     * \tparam T Tuple of all members.
      */
     template<typename T>
     using extract_primitive_members_t = typename MemberExtractor<PrimitiveExtractor, T>::type;

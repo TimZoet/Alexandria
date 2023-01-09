@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/library.h"
-#include "alexandria/member_types/member.h"
-#include "alexandria/member_types/primitive_array.h"
+#include "alexandria/core/library.h"
+#include "alexandria/queries/get_query.h"
+#include "alexandria/queries/insert_query.h"
 
 namespace
 {
@@ -33,48 +33,54 @@ namespace
     struct Baz
     {
         alex::InstanceId               id;
-        alex::PrimitiveArray<uint64_t> ints;
-        alex::PrimitiveArray<double>   floats;
+        alex::PrimitiveArray<uint64_t> uints;
+        alex::PrimitiveArray<double>   doubles;
 
         Baz() = default;
 
         Baz(alex::InstanceId iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
         {
-            ints.get()   = std::move(iints);
-            floats.get() = std::move(ffloats);
+            uints.get()   = std::move(iints);
+            doubles.get() = std::move(ffloats);
         }
     };
+
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>;
+
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>;
+
+    using BazDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::uints>, alex::Member<&Baz::doubles>>;
 }  // namespace
 
 void GetPrimitiveArray::operator()()
 {
     // Create type with floats.
-    auto& fooType = library->createType("Foo");
+    auto& fooType = nameSpace->createType("Foo");
     fooType.createPrimitiveArrayProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
-    auto& barType = library->createType("Bar");
+    auto& barType = nameSpace->createType("Bar");
     barType.createPrimitiveArrayProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
-    auto& bazType = library->createType("Baz");
+    auto& bazType = nameSpace->createType("Baz");
     bazType.createPrimitiveArrayProperty("uints", alex::DataType::Uint64);
     bazType.createPrimitiveArrayProperty("doubles", alex::DataType::Double);
 
     // Commit types.
-    expectNoThrow([this]() { library->commitTypes(); }).fatal("Failed to commit types");
-
-    // Create object handlers.
-    auto fooHandler =
-      library->createObjectHandler<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>(fooType.getName());
-    auto barHandler = library->createObjectHandler<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>(barType.getName());
-    auto bazHandler =
-      library->createObjectHandler<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>(
-        bazType.getName());
+    expectNoThrow([&] {
+        fooType.commit();
+        barType.commit();
+        bazType.commit();
+    }).fatal("Failed to commit types");
 
     // Retrieve Foo.
     {
-        // Create and insert objects.
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto getter   = alex::GetQuery(FooDescriptor(fooType));
+
+        // Create objects.
         Foo foo0;
         foo0.floats.get().push_back(0.5f);
         foo0.floats.get().push_back(1.5f);
@@ -82,24 +88,29 @@ void GetPrimitiveArray::operator()()
         foo1.floats.get().push_back(-2.5f);
         foo1.floats.get().push_back(-3.5f);
         foo1.floats.get().push_back(-4.5f);
-        expectNoThrow([&] { fooHandler->insert(foo0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { fooHandler->insert(foo1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
+        // Try to insert.
+        expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
         Foo foo0_get, foo1_get;
-        expectNoThrow([&] { fooHandler->get(foo0.id, foo0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { fooHandler->get(foo1.id, foo1_get); }).fatal("Failed to get object");
+        foo0_get.id = foo0.id;
+        foo1_get.id = foo1.id;
+        expectNoThrow([&] { getter(foo0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(foo1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get.id);
         compareEQ(foo0.floats.get(), foo0_get.floats.get());
-        compareEQ(foo1.id, foo1_get.id);
         compareEQ(foo1.floats.get(), foo1_get.floats.get());
     }
 
     // Retrieve Bar.
     {
-        // Create and insert objects.
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto getter   = alex::GetQuery(BarDescriptor(barType));
+
+        // Create objects.
         Bar bar0;
         bar0.ints.get().push_back(10);
         bar0.ints.get().push_back(100);
@@ -107,50 +118,57 @@ void GetPrimitiveArray::operator()()
         bar1.ints.get().push_back(-111);
         bar1.ints.get().push_back(-2222);
         bar1.ints.get().push_back(-33333);
-        expectNoThrow([&] { barHandler->insert(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { barHandler->insert(bar1); }).fatal("Failed to insert object");
 
-        // Try to retrieve objects.
+        // Try to insert.
+        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
         Bar bar0_get, bar1_get;
-        expectNoThrow([&] { barHandler->get(bar0.id, bar0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { barHandler->get(bar1.id, bar1_get); }).fatal("Failed to get object");
+        bar0_get.id = bar0.id;
+        bar1_get.id = bar1.id;
+        expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get.id);
         compareEQ(bar0.ints.get(), bar0_get.ints.get());
-        compareEQ(bar1.id, bar1_get.id);
         compareEQ(bar1.ints.get(), bar1_get.ints.get());
     }
 
-    // Retrieve Baz.
+    // Insert Baz.
     {
-        // Create and insert objects.
-        Baz baz0;
-        baz0.ints.get().push_back(10);
-        baz0.ints.get().push_back(100);
-        baz0.floats.get().push_back(0.5);
-        baz0.floats.get().push_back(1.5);
-        Baz baz1;
-        baz1.ints.get().push_back(-111);
-        baz1.ints.get().push_back(-2222);
-        baz1.ints.get().push_back(-33333);
-        baz1.floats.get().push_back(-2.5);
-        baz1.floats.get().push_back(-3.5);
-        baz1.floats.get().push_back(-4.5);
-        expectNoThrow([&] { bazHandler->insert(baz0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { bazHandler->insert(baz1); }).fatal("Failed to insert object");
+        auto inserter = alex::InsertQuery(BazDescriptor(bazType));
+        auto getter   = alex::GetQuery(BazDescriptor(bazType));
 
-        // Try to retrieve objects.
+        // Create objects.
+        Baz baz0;
+        baz0.uints.get().push_back(10);
+        baz0.uints.get().push_back(100);
+        baz0.doubles.get().push_back(0.5);
+        baz0.doubles.get().push_back(1.5);
+        Baz baz1;
+        baz1.uints.get().push_back(111);
+        baz1.uints.get().push_back(2222);
+        baz1.uints.get().push_back(33333);
+        baz1.doubles.get().push_back(-2.5);
+        baz1.doubles.get().push_back(-3.5);
+        baz1.doubles.get().push_back(-4.5);
+
+        // Try to insert.
+        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+
+        // Try to retrieve.
         Baz baz0_get, baz1_get;
-        expectNoThrow([&] { bazHandler->get(baz0.id, baz0_get); }).fatal("Failed to get object");
-        expectNoThrow([&] { bazHandler->get(baz1.id, baz1_get); }).fatal("Failed to get object");
+        baz0_get.id = baz0.id;
+        baz1_get.id = baz1.id;
+        expectNoThrow([&] { getter(baz0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(baz1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(baz0.id, baz0_get.id);
-        compareEQ(baz0.ints.get(), baz0_get.ints.get());
-        compareEQ(baz0.floats.get(), baz0_get.floats.get());
-        compareEQ(baz1.id, baz1_get.id);
-        compareEQ(baz1.ints.get(), baz1_get.ints.get());
-        compareEQ(baz1.floats.get(), baz1_get.floats.get());
+        compareEQ(baz0.uints.get(), baz0_get.uints.get());
+        compareEQ(baz0.doubles.get(), baz0_get.doubles.get());
+        compareEQ(baz1.uints.get(), baz1_get.uints.get());
+        compareEQ(baz1.doubles.get(), baz1_get.doubles.get());
     }
 }
