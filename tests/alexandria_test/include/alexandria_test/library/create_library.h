@@ -8,7 +8,7 @@
 #include "bettertest/mixins/exception_mixin.h"
 #include "bettertest/tests/unit_test.h"
 
-class CreateLibrary : public bt::UnitTest<CreateLibrary, bt::CompareMixin, bt::ExceptionMixin>
+class CreateLibrary final : public bt::UnitTest<CreateLibrary, bt::CompareMixin, bt::ExceptionMixin>
 {
 public:
     void operator()() override;

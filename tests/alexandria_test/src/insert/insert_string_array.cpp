@@ -16,7 +16,7 @@ namespace
 
         Foo() = default;
 
-        Foo(alex::InstanceId iid, std::vector<std::string> sstrings) : id(iid) { strings.get() = std::move(sstrings); }
+        Foo(const alex::InstanceId iid, std::vector<std::string> sstrings) : id(iid) { strings.get() = std::move(sstrings); }
     };
 
     struct Bar
@@ -27,7 +27,7 @@ namespace
 
         Bar() = default;
 
-        Bar(alex::InstanceId iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) : id(iid)
+        Bar(const alex::InstanceId iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) : id(iid)
         {
             strings1.get() = std::move(sstrings1);
             strings2.get() = std::move(sstrings2);

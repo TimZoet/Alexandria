@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class CreateTypeReference : public utils::LibraryMember
+class CreateTypeReference final : public utils::LibraryMember
 {
 public:
     void operator()() override;

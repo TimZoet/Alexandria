@@ -33,7 +33,7 @@ namespace
         alex::Reference<Bar> bar;
 
         Baz() = default;
-        Baz(std::string iid) : id(std::move(iid)) {}
+        explicit Baz(std::string iid) : id(std::move(iid)) {}
         Baz(std::string iid, std::string fooid, std::string barid) :
             id(std::move(iid)), foo(std::move(fooid)), bar(std::move(barid))
         {

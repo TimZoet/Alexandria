@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class CreateTypeStringArray : public utils::LibraryMember
+class CreateTypeStringArray final : public utils::LibraryMember
 {
 public:
     void operator()() override;

@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class CreateTypePrimitiveArray : public utils::LibraryMember
+class CreateTypePrimitiveArray final : public utils::LibraryMember
 {
 public:
     void operator()() override;

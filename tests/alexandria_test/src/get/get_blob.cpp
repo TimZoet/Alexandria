@@ -1,16 +1,9 @@
 #include "alexandria_test/get/get_blob.h"
 
 ////////////////////////////////////////////////////////////////
-// Standard includes.
-////////////////////////////////////////////////////////////////
-
-#include <ostream>
-
-////////////////////////////////////////////////////////////////
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
 
@@ -32,7 +25,7 @@ namespace
     struct Foo
     {
         alex::InstanceId id;
-        alex::Blob<Baz>  a;
+        alex::Blob<Baz>  a{};
     };
 
     struct Bar

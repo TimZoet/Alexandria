@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class InsertBlobArray : public utils::LibraryMember
+class InsertBlobArray final : public utils::LibraryMember
 {
 public:
     void operator()() override;

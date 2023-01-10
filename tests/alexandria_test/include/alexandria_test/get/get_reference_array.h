@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class GetReferenceArray : public utils::LibraryMember
+class GetReferenceArray final : public utils::LibraryMember
 {
 public:
     void operator()() override;

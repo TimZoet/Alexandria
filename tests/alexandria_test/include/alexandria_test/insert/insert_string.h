@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class InsertString : public utils::LibraryMember
+class InsertString final : public utils::LibraryMember
 {
 public:
     void operator()() override;

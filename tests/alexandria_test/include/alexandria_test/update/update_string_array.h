@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class UpdateStringArray : public utils::LibraryMember
+class UpdateStringArray final : public utils::LibraryMember
 {
 public:
     void operator()() override;

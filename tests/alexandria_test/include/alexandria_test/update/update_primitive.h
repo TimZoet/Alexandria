@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class UpdatePrimitive : public utils::LibraryMember
+class UpdatePrimitive final : public utils::LibraryMember
 {
 public:
     void operator()() override;

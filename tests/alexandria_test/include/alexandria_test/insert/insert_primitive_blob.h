@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class InsertPrimitiveBlob : public utils::LibraryMember
+class InsertPrimitiveBlob final : public utils::LibraryMember
 {
 public:
     void operator()() override;

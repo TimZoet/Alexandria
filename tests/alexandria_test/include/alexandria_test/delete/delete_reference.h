@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class DeleteReference : public utils::LibraryMember
+class DeleteReference final : public utils::LibraryMember
 {
 public:
     void operator()() override;

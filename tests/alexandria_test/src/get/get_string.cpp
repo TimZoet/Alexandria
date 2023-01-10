@@ -4,7 +4,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
 
@@ -54,7 +53,6 @@ void GetString::operator()()
 
     // Retrieve Foo.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::string> table(fooType.getInstanceTable());
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
         auto getter   = alex::GetQuery(FooDescriptor(fooType));
 
@@ -82,7 +80,6 @@ void GetString::operator()()
 
     // Retrieve Bar.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::string, std::string> table(barType.getInstanceTable());
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
         auto getter   = alex::GetQuery(BarDescriptor(barType));
 

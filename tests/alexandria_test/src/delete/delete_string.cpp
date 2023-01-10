@@ -4,7 +4,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
 #include "alexandria/queries/delete_query.h"
 #include "alexandria/queries/insert_query.h"
 

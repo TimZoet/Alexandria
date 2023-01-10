@@ -129,7 +129,7 @@ void DeleteBlobArray::operator()()
         // Verify existence of objects before and after delete.
         std::string id;
         auto        stmt0 = array0Table.count().where(like(array0Table.col<1>(), &id)).compile();
-        auto        stmt1 = array0Table.count().where(like(array0Table.col<1>(), &id)).compile();
+        auto        stmt1 = array1Table.count().where(like(array1Table.col<1>(), &id)).compile();
         id                = bar0.id.getAsString();
         compareEQ(2, stmt0.bind(sql::BindParameters::All)());
         compareEQ(2, stmt1.bind(sql::BindParameters::All)());

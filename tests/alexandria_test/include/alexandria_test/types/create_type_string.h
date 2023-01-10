@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class CreateTypeString : public utils::LibraryMember
+class CreateTypeString final : public utils::LibraryMember
 {
 public:
     void operator()() override;

@@ -22,7 +22,15 @@ namespace utils
     public:
         LibraryMember();
 
+        LibraryMember(const LibraryMember&) = delete;
+
+        LibraryMember(LibraryMember&&) noexcept = delete;
+
         ~LibraryMember() noexcept override;
+
+        LibraryMember& operator=(const LibraryMember&) = delete;
+
+        LibraryMember& operator=(LibraryMember&&) noexcept = delete;
 
         void reopen();
 

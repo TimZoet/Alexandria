@@ -6,7 +6,7 @@
 
 #include "alexandria_test/utils.h"
 
-class UpdateBlob : public utils::LibraryMember
+class UpdateBlob final : public utils::LibraryMember
 {
 public:
     void operator()() override;
