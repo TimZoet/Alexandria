@@ -57,8 +57,15 @@
 #include "alexandria_test/types/create_type_reference_array.h"
 #include "alexandria_test/types/create_type_string.h"
 #include "alexandria_test/types/create_type_string_array.h"
-//#include "alexandria_test/update/update_direct.h"
-//#include "alexandria_test/update/update_managed.h"
+#include "alexandria_test/update/update_blob.h"
+#include "alexandria_test/update/update_blob_array.h"
+#include "alexandria_test/update/update_primitive.h"
+#include "alexandria_test/update/update_primitive_array.h"
+#include "alexandria_test/update/update_primitive_blob.h"
+#include "alexandria_test/update/update_reference.h"
+#include "alexandria_test/update/update_reference_array.h"
+#include "alexandria_test/update/update_string.h"
+#include "alexandria_test/update/update_string_array.h"
 
 #ifdef WIN32
 #include "Windows.h"
@@ -130,10 +137,16 @@ int main(int argc, char** argv)
       CreateTypeReference,
       CreateTypeReferenceArray,
       CreateTypeString,
-      CreateTypeStringArray
+      CreateTypeStringArray,
       // update
-      //UpdateDirect,
-      //UpdateManaged
-      >(argc, argv, "alexandria");
+      UpdateBlob,
+      UpdateBlobArray,
+      UpdatePrimitive,
+      UpdatePrimitiveArray,
+      UpdatePrimitiveBlob,
+      UpdateReference,
+      UpdateReferenceArray,
+      UpdateString,
+      UpdateStringArray>(argc, argv, "alexandria");
     return 0;
 }

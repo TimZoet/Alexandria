@@ -1,4 +1,4 @@
-#include "alexandria_test/get/get_primitive_blob.h"
+#include "alexandria_test/update/update_primitive_blob.h"
 
 ////////////////////////////////////////////////////////////////
 // Module includes.
@@ -7,6 +7,7 @@
 #include "alexandria/core/library.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
+#include "alexandria/queries/update_query.h"
 
 namespace
 {
@@ -53,7 +54,7 @@ namespace
       alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::uints>, alex::Member<&Baz::doubles>>;
 }  // namespace
 
-void GetPrimitiveBlob::operator()()
+void UpdatePrimitiveBlob::operator()()
 {
     // Create type with floats.
     auto& fooType = nameSpace->createType("Foo");
@@ -75,12 +76,10 @@ void GetPrimitiveBlob::operator()()
         bazType.commit();
     }).fatal("Failed to commit types");
 
-    // Retrieve Foo.
+    // Update Foo.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::vector<float>> table(
-          library->getDatabase().getTable("main_Foo"));
-
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto updater  = alex::UpdateQuery(FooDescriptor(fooType));
         auto getter   = alex::GetQuery(FooDescriptor(fooType));
 
         // Create objects.
@@ -109,12 +108,10 @@ void GetPrimitiveBlob::operator()()
         compareEQ(foo1.floats.get(), foo1_get.floats.get());
     }
 
-    // Retrieve Bar.
+    // Update Bar.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::vector<int32_t>> table(
-          library->getDatabase().getTable("main_Bar"));
-
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto updater  = alex::UpdateQuery(BarDescriptor(barType));
         auto getter   = alex::GetQuery(BarDescriptor(barType));
 
         // Create objects.
@@ -143,9 +140,10 @@ void GetPrimitiveBlob::operator()()
         compareEQ(bar1.ints.get(), bar1_get.ints.get());
     }
 
-    // Retrieve Baz.
+    // Update Baz.
     {
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
+        auto updater  = alex::UpdateQuery(BazDescriptor(bazType));
         auto getter   = alex::GetQuery(BazDescriptor(bazType));
 
         // Create objects.
@@ -165,6 +163,17 @@ void GetPrimitiveBlob::operator()()
         // Try to insert.
         expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+
+        // Modify objects.
+        baz0.uints.get().push_back(25);
+        baz0.doubles.get().push_back(5.0);
+        baz1.uints.get().push_back(100);
+        baz1.uints.get().push_back(200);
+        baz1.uints.get().push_back(300);
+
+        // Try to update.
+        expectNoThrow([&] { updater(baz0); }).fatal("Failed to update object");
+        expectNoThrow([&] { updater(baz1); }).fatal("Failed to update object");
 
         // Try to retrieve.
         Baz baz0_get, baz1_get;

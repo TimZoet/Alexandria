@@ -1,4 +1,4 @@
-#include "alexandria_test/get/get_primitive_blob.h"
+#include "alexandria_test/update/update_primitive_array.h"
 
 ////////////////////////////////////////////////////////////////
 // Module includes.
@@ -7,13 +7,14 @@
 #include "alexandria/core/library.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
+#include "alexandria/queries/update_query.h"
 
 namespace
 {
     struct Foo
     {
-        alex::InstanceId           id;
-        alex::PrimitiveBlob<float> floats;
+        alex::InstanceId            id;
+        alex::PrimitiveArray<float> floats;
 
         Foo() = default;
 
@@ -22,8 +23,8 @@ namespace
 
     struct Bar
     {
-        alex::InstanceId             id;
-        alex::PrimitiveBlob<int32_t> ints;
+        alex::InstanceId              id;
+        alex::PrimitiveArray<int32_t> ints;
 
         Bar() = default;
 
@@ -32,9 +33,9 @@ namespace
 
     struct Baz
     {
-        alex::InstanceId              id;
-        alex::PrimitiveBlob<uint64_t> uints;
-        alex::PrimitiveBlob<double>   doubles;
+        alex::InstanceId               id;
+        alex::PrimitiveArray<uint64_t> uints;
+        alex::PrimitiveArray<double>   doubles;
 
         Baz() = default;
 
@@ -53,20 +54,20 @@ namespace
       alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::uints>, alex::Member<&Baz::doubles>>;
 }  // namespace
 
-void GetPrimitiveBlob::operator()()
+void UpdatePrimitiveArray::operator()()
 {
     // Create type with floats.
     auto& fooType = nameSpace->createType("Foo");
-    fooType.createPrimitiveBlobProperty("floats", alex::DataType::Float);
+    fooType.createPrimitiveArrayProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
     auto& barType = nameSpace->createType("Bar");
-    barType.createPrimitiveBlobProperty("ints", alex::DataType::Int32);
+    barType.createPrimitiveArrayProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
     auto& bazType = nameSpace->createType("Baz");
-    bazType.createPrimitiveBlobProperty("uints", alex::DataType::Uint64);
-    bazType.createPrimitiveBlobProperty("doubles", alex::DataType::Double);
+    bazType.createPrimitiveArrayProperty("uints", alex::DataType::Uint64);
+    bazType.createPrimitiveArrayProperty("doubles", alex::DataType::Double);
 
     // Commit types.
     expectNoThrow([&] {
@@ -75,12 +76,10 @@ void GetPrimitiveBlob::operator()()
         bazType.commit();
     }).fatal("Failed to commit types");
 
-    // Retrieve Foo.
+    // Update Foo.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::vector<float>> table(
-          library->getDatabase().getTable("main_Foo"));
-
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto updater  = alex::UpdateQuery(FooDescriptor(fooType));
         auto getter   = alex::GetQuery(FooDescriptor(fooType));
 
         // Create objects.
@@ -96,25 +95,30 @@ void GetPrimitiveBlob::operator()()
         expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
 
+        // Modify objects.
+        foo0.floats.get().clear();
+        foo1.floats.get().push_back(4.0f);
+
+        // Try to update.
+        expectNoThrow([&] { updater(foo0); }).fatal("Failed to update object");
+        expectNoThrow([&] { updater(foo1); }).fatal("Failed to update object");
+
         // Try to retrieve.
-        Foo foo0_get(foo0.id, {});
-        Foo foo1_get(foo1.id, {});
+        Foo foo0_get, foo1_get;
+        foo0_get.id = foo0.id;
+        foo1_get.id = foo1.id;
         expectNoThrow([&] { getter(foo0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(foo1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(foo0.id, foo0_get.id);
         compareEQ(foo0.floats.get(), foo0_get.floats.get());
-        compareEQ(foo1.id, foo1_get.id);
         compareEQ(foo1.floats.get(), foo1_get.floats.get());
     }
 
-    // Retrieve Bar.
+    // Update Bar.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::vector<int32_t>> table(
-          library->getDatabase().getTable("main_Bar"));
-
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto updater  = alex::UpdateQuery(BarDescriptor(barType));
         auto getter   = alex::GetQuery(BarDescriptor(barType));
 
         // Create objects.
@@ -130,22 +134,32 @@ void GetPrimitiveBlob::operator()()
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
 
+        // Modify objects.
+        bar0.ints.get().push_back(10);
+        bar0.ints.get().push_back(10);
+        bar0.ints.get().push_back(10);
+        bar1.ints.get().clear();
+
+        // Try to update.
+        expectNoThrow([&] { updater(bar0); }).fatal("Failed to update object");
+        expectNoThrow([&] { updater(bar1); }).fatal("Failed to update object");
+
         // Try to retrieve.
-        Bar bar0_get(bar0.id, {});
-        Bar bar1_get(bar1.id, {});
+        Bar bar0_get, bar1_get;
+        bar0_get.id = bar0.id;
+        bar1_get.id = bar1.id;
         expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(bar0.id, bar0_get.id);
         compareEQ(bar0.ints.get(), bar0_get.ints.get());
-        compareEQ(bar1.id, bar1_get.id);
         compareEQ(bar1.ints.get(), bar1_get.ints.get());
     }
 
-    // Retrieve Baz.
+    // Update Baz.
     {
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
+        auto updater  = alex::UpdateQuery(BazDescriptor(bazType));
         auto getter   = alex::GetQuery(BazDescriptor(bazType));
 
         // Create objects.
@@ -155,9 +169,9 @@ void GetPrimitiveBlob::operator()()
         baz0.doubles.get().push_back(0.5);
         baz0.doubles.get().push_back(1.5);
         Baz baz1;
-        baz1.uints.get().push_back(-111);
-        baz1.uints.get().push_back(-2222);
-        baz1.uints.get().push_back(-33333);
+        baz1.uints.get().push_back(111);
+        baz1.uints.get().push_back(2222);
+        baz1.uints.get().push_back(33333);
         baz1.doubles.get().push_back(-2.5);
         baz1.doubles.get().push_back(-3.5);
         baz1.doubles.get().push_back(-4.5);
@@ -165,6 +179,17 @@ void GetPrimitiveBlob::operator()()
         // Try to insert.
         expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+
+        // Modify objects.
+        baz0.uints.get().push_back(25);
+        baz0.doubles.get().push_back(5.0);
+        baz1.uints.get().push_back(100);
+        baz1.uints.get().push_back(200);
+        baz1.uints.get().push_back(300);
+
+        // Try to update.
+        expectNoThrow([&] { updater(baz0); }).fatal("Failed to update object");
+        expectNoThrow([&] { updater(baz1); }).fatal("Failed to update object");
 
         // Try to retrieve.
         Baz baz0_get, baz1_get;

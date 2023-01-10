@@ -61,8 +61,15 @@ set(HEADERS
     ${INCLUDE_DIR}/types/create_type_string.h
     ${INCLUDE_DIR}/types/create_type_string_array.h
 
-    #${INCLUDE_DIR}/update/update_direct.h
-	#${INCLUDE_DIR}/update/update_managed.h
+    ${INCLUDE_DIR}/update/update_blob.h
+	${INCLUDE_DIR}/update/update_blob_array.h
+	${INCLUDE_DIR}/update/update_primitive.h
+	${INCLUDE_DIR}/update/update_primitive_array.h
+	${INCLUDE_DIR}/update/update_primitive_blob.h
+	${INCLUDE_DIR}/update/update_reference.h
+	${INCLUDE_DIR}/update/update_reference_array.h
+	${INCLUDE_DIR}/update/update_string.h
+	${INCLUDE_DIR}/update/update_string_array.h
 )
 
 set(SOURCES
@@ -122,8 +129,15 @@ set(SOURCES
     ${SRC_DIR}/types/create_type_string.cpp
     ${SRC_DIR}/types/create_type_string_array.cpp
 
-    #${SRC_DIR}/update/update_direct.cpp
-	#${SRC_DIR}/update/update_managed.cpp
+    ${SRC_DIR}/update/update_blob.cpp
+	${SRC_DIR}/update/update_blob_array.cpp
+	${SRC_DIR}/update/update_primitive.cpp
+	${SRC_DIR}/update/update_primitive_array.cpp
+	${SRC_DIR}/update/update_primitive_blob.cpp
+	${SRC_DIR}/update/update_reference.cpp
+	${SRC_DIR}/update/update_reference_array.cpp
+	${SRC_DIR}/update/update_string.cpp
+	${SRC_DIR}/update/update_string_array.cpp
 )
 
 set(DEPS_PRIVATE
