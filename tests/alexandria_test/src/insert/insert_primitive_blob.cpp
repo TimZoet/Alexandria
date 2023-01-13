@@ -172,14 +172,17 @@ void InsertPrimitiveBlob::operator()()
         baz1.floats.get().push_back(-2.5);
         baz1.floats.get().push_back(-3.5);
         baz1.floats.get().push_back(-4.5);
+        Baz baz2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareTrue(baz0.id.valid());
         compareTrue(baz1.id.valid());
+        compareTrue(baz2.id.valid());
 
         // Select inserted object using sql and compare.
         std::string id;
@@ -188,6 +191,8 @@ void InsertPrimitiveBlob::operator()()
         const auto baz0_get = stmt.bind(sql::BindParameters::All)();
         id                  = baz1.id.getAsString();
         const auto baz1_get = stmt.bind(sql::BindParameters::All)();
+        id                  = baz2.id.getAsString();
+        const auto baz2_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
         compareEQ(baz0.id, baz0_get.id);
@@ -196,5 +201,8 @@ void InsertPrimitiveBlob::operator()()
         compareEQ(baz1.id, baz1_get.id);
         compareEQ(baz1.ints.get(), baz1_get.ints.get());
         compareEQ(baz1.floats.get(), baz1_get.floats.get());
+        compareEQ(baz2.id, baz2_get.id);
+        compareEQ(baz2.ints.get(), baz2_get.ints.get());
+        compareEQ(baz2.floats.get(), baz2_get.floats.get());
     }
 }

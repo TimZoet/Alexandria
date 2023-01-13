@@ -16,7 +16,10 @@ namespace
 
         Foo() = default;
 
-        Foo(const alex::InstanceId iid, std::vector<std::string> sstrings) : id(iid) { strings.get() = std::move(sstrings); }
+        Foo(const alex::InstanceId iid, std::vector<std::string> sstrings) : id(iid)
+        {
+            strings.get() = std::move(sstrings);
+        }
     };
 
     struct Bar
@@ -27,7 +30,8 @@ namespace
 
         Bar() = default;
 
-        Bar(const alex::InstanceId iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) : id(iid)
+        Bar(const alex::InstanceId iid, std::vector<std::string> sstrings1, std::vector<std::string> sstrings2) :
+            id(iid)
         {
             strings1.get() = std::move(sstrings1);
             strings2.get() = std::move(sstrings2);
@@ -62,7 +66,7 @@ void InsertStringArray::operator()()
         const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
           library->getDatabase().getTable("main_Foo_strings"));
 
-        auto           inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
 
         // Create objects.
         Foo foo0;
@@ -95,7 +99,6 @@ void InsertStringArray::operator()()
         stmt.bind(sql::BindParameters::All);
         strings.assign(stmt.begin(), stmt.end());
         compareEQ(foo1.strings.get(), strings);
-
     }
 
     // Insert Bar.

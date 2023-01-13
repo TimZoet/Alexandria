@@ -176,14 +176,17 @@ void InsertPrimitiveArray::operator()()
         baz1.doubles.get().push_back(-2.5);
         baz1.doubles.get().push_back(-3.5);
         baz1.doubles.get().push_back(-4.5);
+        Baz baz2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareTrue(baz0.id.valid());
         compareTrue(baz1.id.valid());
+        compareTrue(baz2.id.valid());
 
         // Select ints and floats in array table.
         std::string id;
@@ -209,5 +212,12 @@ void InsertPrimitiveArray::operator()()
         doubles.assign(stmt1.begin(), stmt1.end());
         compareEQ(baz1.uints.get(), uints);
         compareEQ(baz1.doubles.get(), doubles);
+        id = baz2.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        uints.assign(stmt0.begin(), stmt0.end());
+        doubles.assign(stmt1.begin(), stmt1.end());
+        compareEQ(baz2.uints.get(), uints);
+        compareEQ(baz2.doubles.get(), doubles);
     }
 }

@@ -100,6 +100,7 @@ namespace alex
                 blobArrayInserter(instance);
                 referenceArrayInserter(instance);
 
+                // TODO: What if the object didn't exist? Should that throw or return some kind of error code?
                 transaction.commit();
             }
             catch (...)

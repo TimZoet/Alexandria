@@ -102,23 +102,28 @@ void GetReferenceArray::operator()()
         auto getter   = alex::GetQuery(BazDescriptor(bazType));
 
         // Create objects.
-        Baz baz;
-        baz.foo.add(foo1);
-        baz.foo.add(foo0);
-        baz.bar.add(bar0);
-        baz.bar.add(bar1);
-        baz.bar.add(bar0);
+        Baz baz0, baz1;
+        baz0.foo.add(foo1);
+        baz0.foo.add(foo0);
+        baz0.bar.add(bar0);
+        baz0.bar.add(bar1);
+        baz0.bar.add(bar0);
 
         // Try to insert.
-        expectNoThrow([&] { inserter(baz); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
 
         // Try to retrieve.
-        Baz baz_get;
-        baz_get.id = baz.id;
-        expectNoThrow([&] { getter(baz_get); }).fatal("Failed to retrieve object");
+        Baz baz0_get, baz1_get;
+        baz0_get.id = baz0.id;
+        baz1_get.id = baz1.id;
+        expectNoThrow([&] { getter(baz0_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(baz1_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
-        compareEQ(baz.foo.get(), baz_get.foo.get());
-        compareEQ(baz.bar.get(), baz_get.bar.get());
+        compareEQ(baz0.foo.get(), baz0_get.foo.get());
+        compareEQ(baz0.bar.get(), baz0_get.bar.get());
+        compareEQ(baz1.foo.get(), baz1_get.foo.get());
+        compareEQ(baz1.bar.get(), baz1_get.bar.get());
     }
 }

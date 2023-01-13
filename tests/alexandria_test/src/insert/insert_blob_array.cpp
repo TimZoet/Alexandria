@@ -71,14 +71,17 @@ void InsertBlobArray::operator()()
         foo0.a.get().emplace_back(Baz{.x = -2.0f, .y = -32});
         Foo foo1;
         foo1.a.get().emplace_back(Baz{.x = 4.5f, .y = 10000});
+        Foo foo2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(foo1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(foo2); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareTrue(foo0.id.valid());
         compareTrue(foo1.id.valid());
+        compareTrue(foo2.id.valid());
 
         // Select blobs in array table.
         std::string id;
@@ -94,6 +97,10 @@ void InsertBlobArray::operator()()
         stmt.bind(sql::BindParameters::All);
         blobs.assign(stmt.begin(), stmt.end());
         compareEQ(foo1.a.get(), blobs);
+        id = foo2.id.getAsString();
+        stmt.bind(sql::BindParameters::All);
+        blobs.assign(stmt.begin(), stmt.end());
+        compareEQ(foo2.a.get(), blobs);
     }
 
     // Insert Bar.
@@ -125,14 +132,17 @@ void InsertBlobArray::operator()()
         bar1.b.get()[0].push_back(11.0f);
         bar1.b.get()[0].push_back(12.0f);
         bar1.b.get()[0].push_back(13.0f);
+        Bar bar2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar2); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareTrue(bar0.id.valid());
         compareTrue(bar1.id.valid());
+        compareTrue(bar2.id.valid());
 
         // Select blobs in array table.
         std::string id;
@@ -158,5 +168,12 @@ void InsertBlobArray::operator()()
         floats.assign(stmt1.begin(), stmt1.end());
         compareEQ(bar1.a.get(), blobs);
         compareEQ(bar1.b.get(), floats);
+        id = bar2.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        blobs.assign(stmt0.begin(), stmt0.end());
+        floats.assign(stmt1.begin(), stmt1.end());
+        compareEQ(bar2.a.get(), blobs);
+        compareEQ(bar2.b.get(), floats);
     }
 }

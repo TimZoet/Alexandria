@@ -107,10 +107,12 @@ void DeleteBlob::operator()()
         bar1.b.get().push_back(-10.0f);
         bar1.b.get().push_back(-20.0f);
         bar1.b.get().push_back(-30.0f);
+        Bar bar2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar2); }).fatal("Failed to insert object");
 
         // Verify existence of objects before and after delete.
         std::string id;
@@ -122,6 +124,10 @@ void DeleteBlob::operator()()
         id = bar1.id.getAsString();
         compareEQ(1, stmt.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(bar1); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = bar2.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar2); });
         compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 }

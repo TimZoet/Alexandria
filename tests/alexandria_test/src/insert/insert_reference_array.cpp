@@ -115,36 +115,45 @@ void InsertReferenceArray::operator()()
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
 
         // Create objects.
-        Baz baz;
-        baz.foo.add(foo1);
-        baz.foo.add(foo0);
-        baz.bar.add(bar0);
-        baz.bar.add(bar1);
-        baz.bar.add(bar0);
+        Baz baz0;
+        baz0.foo.add(foo1);
+        baz0.foo.add(foo0);
+        baz0.bar.add(bar0);
+        baz0.bar.add(bar1);
+        baz0.bar.add(bar0);
+        Baz baz1;
 
         // Try to insert.
-        expectNoThrow([&] { inserter(baz); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
-        compareTrue(baz.id.valid());
+        compareTrue(baz0.id.valid());
+        compareTrue(baz1.id.valid());
 
         // Check references in array table.
-        auto stmt0 = array0Table.selectAs<std::string, 2>()
-                       .where(like(array0Table.col<1>(), baz.id.getAsString()))
+        std::string id;
+        auto        stmt0 = array0Table.selectAs<std::string, 2>()
+                       .where(like(array0Table.col<1>(), &id))
                        .orderBy(ascending(array0Table.col<0>()))
-                       .compile()
-                       .bind(sql::BindParameters::All);
+                       .compile();
         auto stmt1 = array1Table.selectAs<std::string, 2>()
-                       .where(like(array1Table.col<1>(), baz.id.getAsString()))
+                       .where(like(array1Table.col<1>(), &id))
                        .orderBy(ascending(array1Table.col<0>()))
-                       .compile()
-                       .bind(sql::BindParameters::All);
-        const std::vector<alex::InstanceId> refs0(stmt0.begin(), stmt0.end());
-        const std::vector<alex::InstanceId> refs1(stmt1.begin(), stmt1.end());
-        compareEQ(baz.foo.get(), refs0);
-        compareEQ(baz.bar.get(), refs1);
+                       .compile();
+        id = baz0.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        std::vector<alex::InstanceId> refs0(stmt0.begin(), stmt0.end());
+        std::vector<alex::InstanceId> refs1(stmt1.begin(), stmt1.end());
+        compareEQ(baz0.foo.get(), refs0);
+        compareEQ(baz0.bar.get(), refs1);
+        id = baz1.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        refs0.assign(stmt0.begin(), stmt0.end());
+        refs1.assign(stmt1.begin(), stmt1.end());
+        compareEQ(baz1.foo.get(), refs0);
+        compareEQ(baz1.bar.get(), refs1);
     }
-
-    // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
-    // TODO: Test insert of empty/null references.
 }

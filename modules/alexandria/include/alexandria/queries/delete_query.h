@@ -82,6 +82,7 @@ namespace alex
                 blobArrayDeleter();
                 referenceArrayDeleter();
 
+                // TODO: What if the object didn't exist in the first place? Should that throw or return some kind of error code?
                 transaction.commit();
             }
             catch (...)

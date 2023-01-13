@@ -117,7 +117,7 @@ void DeleteReference::operator()()
         auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));
 
         // Create objects.
-        Baz baz0, baz1, baz2, baz3;
+        Baz baz0, baz1, baz2, baz3, baz4;
         baz0.foo = foo0;
         baz0.bar = bar0;
         baz1.foo = foo0;
@@ -132,6 +132,7 @@ void DeleteReference::operator()()
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz3); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz4); }).fatal("Failed to insert object");
 
         // Verify existence of objects before and after delete.
         std::string id;
@@ -151,6 +152,10 @@ void DeleteReference::operator()()
         id = baz3.id.getAsString();
         compareEQ(1, stmt.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(baz3); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = baz4.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz4); });
         compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 }

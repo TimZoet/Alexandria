@@ -155,22 +155,28 @@ void GetPrimitiveBlob::operator()()
         baz1.doubles.get().push_back(-2.5);
         baz1.doubles.get().push_back(-3.5);
         baz1.doubles.get().push_back(-4.5);
+        Baz baz2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
 
         // Try to retrieve.
-        Baz baz0_get, baz1_get;
+        Baz baz0_get, baz1_get, baz2_get;
         baz0_get.id = baz0.id;
         baz1_get.id = baz1.id;
+        baz2_get.id = baz2.id;
         expectNoThrow([&] { getter(baz0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(baz1_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(baz2_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
         compareEQ(baz0.uints.get(), baz0_get.uints.get());
         compareEQ(baz0.doubles.get(), baz0_get.doubles.get());
         compareEQ(baz1.uints.get(), baz1_get.uints.get());
         compareEQ(baz1.doubles.get(), baz1_get.doubles.get());
+        compareEQ(baz2.uints.get(), baz2_get.uints.get());
+        compareEQ(baz2.doubles.get(), baz2_get.doubles.get());
     }
 }

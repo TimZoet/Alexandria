@@ -111,22 +111,28 @@ void GetBlobArray::operator()()
         bar1.b.get()[0].push_back(11.0f);
         bar1.b.get()[0].push_back(12.0f);
         bar1.b.get()[0].push_back(13.0f);
+        Bar bar2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar2); }).fatal("Failed to insert object");
 
         // Try to retrieve.
-        Bar bar0_get, bar1_get;
+        Bar bar0_get, bar1_get, bar2_get;
         bar0_get.id = bar0.id;
         bar1_get.id = bar1.id;
+        bar2_get.id = bar2.id;
         expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(bar2_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
         compareEQ(bar0.a.get(), bar0_get.a.get());
         compareEQ(bar0.b.get(), bar0_get.b.get());
         compareEQ(bar1.a.get(), bar1_get.a.get());
         compareEQ(bar1.b.get(), bar1_get.b.get());
+        compareEQ(bar2.a.get(), bar2_get.a.get());
+        compareEQ(bar2.b.get(), bar2_get.b.get());
     }
 }

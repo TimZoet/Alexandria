@@ -111,14 +111,17 @@ void InsertBlob::operator()()
         bar1.b.get().push_back(-10.0f);
         bar1.b.get().push_back(-20.0f);
         bar1.b.get().push_back(-30.0f);
+        Bar bar2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar2); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareTrue(bar0.id.valid());
         compareTrue(bar1.id.valid());
+        compareTrue(bar2.id.valid());
 
         // Select inserted object using sql and compare.
         std::string id;
@@ -127,6 +130,8 @@ void InsertBlob::operator()()
         const auto bar0_get = stmt.bind(sql::BindParameters::All)();
         id                  = bar1.id.getAsString();
         const auto bar1_get = stmt.bind(sql::BindParameters::All)();
+        id                  = bar2.id.getAsString();
+        const auto bar2_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
         compareEQ(bar0.id, std::get<0>(bar0_get));
@@ -135,5 +140,8 @@ void InsertBlob::operator()()
         compareEQ(bar1.id, std::get<0>(bar1_get));
         compareEQ(bar1.a.get(), std::get<1>(bar1_get));
         compareEQ(bar1.b.get(), std::get<2>(bar1_get));
+        compareEQ(bar2.id, std::get<0>(bar2_get));
+        compareEQ(bar2.a.get(), std::get<1>(bar2_get));
+        compareEQ(bar2.b.get(), std::get<2>(bar2_get));
     }
 }

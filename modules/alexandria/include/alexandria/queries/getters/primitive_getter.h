@@ -87,15 +87,6 @@ namespace alex
                     M::template get(instance) = std::forward<V>(val);
                 else if constexpr (M::is_primitive_blob || M::is_blob)
                     M::template get(instance).set(std::forward<V>(val));
-                //if constexpr (member_t::is_blob || member_t::is_primitive_blob)
-                //    return member_t::template get(instance).getStaticBlob();
-                //else if constexpr (M::is_reference)
-                //    // TODO: What if no object was assigned? Turn return type into std::optional and rely on cppql to insert nullptr?
-                //    return sql::toText(M::template get(instance).getId().getAsString());
-                //else if constexpr (M::is_primitive)
-                //    return M::template get(instance);
-                //else if constexpr (M::is_string)
-                //    return sql::toText(M::template get(instance));
                 else
                     constexpr_static_assert();
             };

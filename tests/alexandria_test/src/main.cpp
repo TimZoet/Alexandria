@@ -12,6 +12,7 @@
 
 #include "alexandria_test/delete/delete_blob.h"
 #include "alexandria_test/delete/delete_blob_array.h"
+#include "alexandria_test/delete/delete_invalid.h"
 #include "alexandria_test/delete/delete_primitive.h"
 #include "alexandria_test/delete/delete_primitive_array.h"
 #include "alexandria_test/delete/delete_primitive_blob.h"
@@ -21,6 +22,7 @@
 #include "alexandria_test/delete/delete_string_array.h"
 #include "alexandria_test/get/get_blob.h"
 #include "alexandria_test/get/get_blob_array.h"
+#include "alexandria_test/get/get_invalid.h"
 #include "alexandria_test/get/get_primitive.h"
 #include "alexandria_test/get/get_primitive_array.h"
 #include "alexandria_test/get/get_primitive_blob.h"
@@ -30,6 +32,7 @@
 #include "alexandria_test/get/get_string_array.h"
 #include "alexandria_test/insert/insert_blob.h"
 #include "alexandria_test/insert/insert_blob_array.h"
+#include "alexandria_test/insert/insert_invalid.h"
 #include "alexandria_test/insert/insert_primitive.h"
 #include "alexandria_test/insert/insert_primitive_array.h"
 #include "alexandria_test/insert/insert_primitive_blob.h"
@@ -59,6 +62,7 @@
 #include "alexandria_test/types/create_type_string_array.h"
 #include "alexandria_test/update/update_blob.h"
 #include "alexandria_test/update/update_blob_array.h"
+#include "alexandria_test/update/update_invalid.h"
 #include "alexandria_test/update/update_primitive.h"
 #include "alexandria_test/update/update_primitive_array.h"
 #include "alexandria_test/update/update_primitive_blob.h"
@@ -88,6 +92,7 @@ int main(const int argc, char** argv)
       // delete
       DeleteBlob,
       DeleteBlobArray,
+      DeleteInvalid,
       DeletePrimitive,
       DeletePrimitiveArray,
       DeletePrimitiveBlob,
@@ -98,6 +103,7 @@ int main(const int argc, char** argv)
       // get
       GetBlob,
       GetBlobArray,
+      GetInvalid,
       GetPrimitive,
       GetPrimitiveArray,
       GetPrimitiveBlob,
@@ -108,6 +114,7 @@ int main(const int argc, char** argv)
       // insert
       InsertBlob,
       InsertBlobArray,
+      InsertInvalid,
       InsertPrimitive,
       InsertPrimitiveArray,
       InsertPrimitiveBlob,
@@ -141,6 +148,7 @@ int main(const int argc, char** argv)
       // update
       UpdateBlob,
       UpdateBlobArray,
+      UpdateInvalid,
       UpdatePrimitive,
       UpdatePrimitiveArray,
       UpdatePrimitiveBlob,

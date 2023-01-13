@@ -111,24 +111,37 @@ void DeleteReferenceArray::operator()()
         auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));
 
         // Create objects.
-        Baz baz;
-        baz.foo.add(foo1);
-        baz.foo.add(foo0);
-        baz.bar.add(bar0);
-        baz.bar.add(bar1);
-        baz.bar.add(bar0);
+        Baz baz0;
+        baz0.foo.add(foo1);
+        baz0.foo.add(foo0);
+        baz0.bar.add(bar0);
+        baz0.bar.add(bar1);
+        baz0.bar.add(bar0);
+        Baz baz1;
 
         // Try to insert.
-        expectNoThrow([&] { inserter(baz); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
 
         // Verify existence of objects before and after delete.
-        std::string id    = baz.id.getAsString();
-        auto        stmt0 = array0Table.count().where(like(array0Table.col<1>(), id)).compile();
-        auto        stmt1 = array1Table.count().where(like(array1Table.col<1>(), id)).compile();
-        compareEQ(2, stmt0.bind(sql::BindParameters::All)());
-        compareEQ(3, stmt1.bind(sql::BindParameters::All)());
-        expectNoThrow([&] { deleter(baz); });
-        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
-        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
+        std::string id;
+        auto        stmt0 = array0Table.count().where(like(array0Table.col<1>(), &id)).compile();
+        auto        stmt1 = array1Table.count().where(like(array1Table.col<1>(), &id)).compile();
+        id                = baz0.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        compareEQ(2, stmt0());
+        compareEQ(3, stmt1());
+        expectNoThrow([&] { deleter(baz0); });
+        compareEQ(0, stmt0());
+        compareEQ(0, stmt1());
+        id = baz1.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        compareEQ(0, stmt0());
+        compareEQ(0, stmt1());
+        expectNoThrow([&] { deleter(baz1); });
+        compareEQ(0, stmt0());
+        compareEQ(0, stmt1());
     }
 }

@@ -121,26 +121,40 @@ void DeleteBlobArray::operator()()
         bar1.b.get()[0].push_back(11.0f);
         bar1.b.get()[0].push_back(12.0f);
         bar1.b.get()[0].push_back(13.0f);
+        Bar bar2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar2); }).fatal("Failed to insert object");
 
         // Verify existence of objects before and after delete.
         std::string id;
         auto        stmt0 = array0Table.count().where(like(array0Table.col<1>(), &id)).compile();
         auto        stmt1 = array1Table.count().where(like(array1Table.col<1>(), &id)).compile();
         id                = bar0.id.getAsString();
-        compareEQ(2, stmt0.bind(sql::BindParameters::All)());
-        compareEQ(2, stmt1.bind(sql::BindParameters::All)());
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        compareEQ(2, stmt0());
+        compareEQ(3, stmt1());
         expectNoThrow([&] { deleter(bar0); });
-        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
-        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
+        compareEQ(0, stmt0());
+        compareEQ(0, stmt1());
         id = bar1.id.getAsString();
-        compareEQ(1, stmt0.bind(sql::BindParameters::All)());
-        compareEQ(1, stmt1.bind(sql::BindParameters::All)());
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        compareEQ(1, stmt0());
+        compareEQ(2, stmt1());
         expectNoThrow([&] { deleter(bar1); });
-        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
-        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
+        compareEQ(0, stmt0());
+        compareEQ(0, stmt1());
+        id = bar2.id.getAsString();
+        stmt0.bind(sql::BindParameters::All);
+        stmt1.bind(sql::BindParameters::All);
+        compareEQ(0, stmt0());
+        compareEQ(0, stmt1());
+        expectNoThrow([&] { deleter(bar2); });
+        compareEQ(0, stmt0());
+        compareEQ(0, stmt1());
     }
 }

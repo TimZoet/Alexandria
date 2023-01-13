@@ -60,8 +60,8 @@ void GetBlob::operator()()
 
     // Retrieve Foo.
     {
-        auto                                                 inserter = alex::InsertQuery(FooDescriptor(fooType));
-        auto                                                 getter   = alex::GetQuery(FooDescriptor(fooType));
+        auto inserter = alex::InsertQuery(FooDescriptor(fooType));
+        auto getter   = alex::GetQuery(FooDescriptor(fooType));
 
         // Create objects.
         Foo foo0;
@@ -104,16 +104,20 @@ void GetBlob::operator()()
         bar1.b.get().push_back(-10.0f);
         bar1.b.get().push_back(-20.0f);
         bar1.b.get().push_back(-30.0f);
+        Bar bar2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(bar2); }).fatal("Failed to insert object");
 
         // Try to retrieve.
         Bar bar0_get{.id = bar0.id};
         Bar bar1_get{.id = bar1.id};
+        Bar bar2_get{.id = bar2.id};
         expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(bar2_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
         compareEQ(bar0.id, bar0_get.id);
@@ -122,5 +126,8 @@ void GetBlob::operator()()
         compareEQ(bar1.id, bar1_get.id);
         compareEQ(bar1.a.get(), bar1_get.a.get());
         compareEQ(bar1.b.get(), bar1_get.b.get());
+        compareEQ(bar2.id, bar2_get.id);
+        compareEQ(bar2.a.get(), bar2_get.a.get());
+        compareEQ(bar2.b.get(), bar2_get.b.get());
     }
 }

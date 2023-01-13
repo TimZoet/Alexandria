@@ -166,10 +166,12 @@ void DeletePrimitiveArray::operator()()
         baz1.doubles.get().push_back(-2.5);
         baz1.doubles.get().push_back(-3.5);
         baz1.doubles.get().push_back(-4.5);
+        Baz baz2;
 
         // Try to insert.
         expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
 
         // Verify existence of objects before and after delete.
         std::string id;
@@ -185,6 +187,12 @@ void DeletePrimitiveArray::operator()()
         compareEQ(3, stmt0.bind(sql::BindParameters::All)());
         compareEQ(3, stmt1.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(baz1); });
+        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
+        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
+        id = baz2.id.getAsString();
+        compareEQ(0, stmt0.bind(sql::BindParameters::All)());
+        compareEQ(0, stmt1.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(baz2); });
         compareEQ(0, stmt0.bind(sql::BindParameters::All)());
         compareEQ(0, stmt1.bind(sql::BindParameters::All)());
     }

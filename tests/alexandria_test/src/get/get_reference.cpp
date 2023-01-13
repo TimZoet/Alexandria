@@ -70,9 +70,6 @@ void GetReference::operator()()
         bazType.commit();
     }).fatal("Failed to commit types");
 
-    // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
-    // TODO: Test insert of empty/null references.
-
     // Create objects.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
@@ -118,7 +115,7 @@ void GetReference::operator()()
         auto getter   = alex::GetQuery(BazDescriptor(bazType));
 
         // Create objects.
-        Baz baz0, baz1, baz2, baz3;
+        Baz baz0, baz1, baz2, baz3, baz4;
         baz0.foo = foo0;
         baz0.bar = bar0;
         baz1.foo = foo0;
@@ -133,16 +130,19 @@ void GetReference::operator()()
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz3); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz4); }).fatal("Failed to insert object");
 
         // Try to retrieve.
         Baz baz0_get(baz0.id);
         Baz baz1_get(baz1.id);
         Baz baz2_get(baz2.id);
         Baz baz3_get(baz3.id);
+        Baz baz4_get(baz4.id);
         expectNoThrow([&] { getter(baz0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(baz1_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(baz2_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(baz3_get); }).fatal("Failed to retrieve object");
+        expectNoThrow([&] { getter(baz4_get); }).fatal("Failed to retrieve object");
 
         // Compare objects.
         compareEQ(baz0.id, baz0_get.id);
@@ -157,5 +157,8 @@ void GetReference::operator()()
         compareEQ(baz3.id, baz3_get.id);
         compareEQ(baz3.foo.getId(), baz3_get.foo.getId());
         compareEQ(baz3.bar.getId(), baz3_get.bar.getId());
+        compareEQ(baz4.id, baz4_get.id);
+        compareEQ(baz4.foo.getId(), baz4_get.foo.getId());
+        compareEQ(baz4.bar.getId(), baz4_get.bar.getId());
     }
 }

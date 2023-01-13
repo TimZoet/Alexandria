@@ -123,7 +123,7 @@ void InsertReference::operator()()
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
 
         // Create objects.
-        Baz baz0, baz1, baz2, baz3;
+        Baz baz0, baz1, baz2, baz3, baz4;
         baz0.foo = foo0;
         baz0.bar = bar0;
         baz1.foo = foo0;
@@ -138,6 +138,7 @@ void InsertReference::operator()()
         expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(baz3); }).fatal("Failed to insert object");
+        expectNoThrow([&] { inserter(baz4); }).fatal("Failed to insert object");
 
         // Check assigned IDs.
         compareTrue(baz0.id.valid());
@@ -156,6 +157,8 @@ void InsertReference::operator()()
         const auto baz2_get = stmt.bind(sql::BindParameters::All)();
         id                  = baz3.id.getAsString();
         const auto baz3_get = stmt.bind(sql::BindParameters::All)();
+        id                  = baz4.id.getAsString();
+        const auto baz4_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
         compareEQ(baz0.id, baz0_get.id);
@@ -170,5 +173,8 @@ void InsertReference::operator()()
         compareEQ(baz3.id, baz3_get.id);
         compareEQ(baz3.foo.getId(), baz3_get.foo.getId());
         compareEQ(baz3.bar.getId(), baz3_get.bar.getId());
+        compareEQ(baz4.id, baz4_get.id);
+        compareEQ(baz4.foo.getId(), baz4_get.foo.getId());
+        compareEQ(baz4.bar.getId(), baz4_get.bar.getId());
     }
 }
