@@ -58,69 +58,6 @@ namespace alex
 
     const PropertyList& Type::getProperties() const noexcept { return properties; }
 
-    //std::vector<Property*> Type::getProperties(const std::function<bool(const Property&)>& predicate) const
-    //{
-    //    std::vector<Property*>         props;
-    //    std::function<void(Property&)> filter;
-    //    filter = [&props, &predicate, &filter](Property& prop) {
-    //        // Test predicate.
-    //        if (predicate(prop)) props.push_back(&prop);
-
-    //        // Recurse on member types that are expanded.
-    //        if (prop.getDataType() == DataType::Type && !prop.isReference())
-    //        {
-    //            for (const auto& p : prop.getReferenceType()->getProperties()) filter(*p);
-    //        }
-    //    };
-
-    //    for (const auto& prop : properties) filter(*prop);
-
-    //    return props;
-    //}
-
-    //std::vector<Property*> Type::getPropertyParents(const Property& prop) const
-    //{
-    //    std::vector<Property*>         parents;
-    //    std::function<bool(Property&)> traverse;
-    //    traverse = [&parents, &prop, &traverse](Property& p) {
-    //        // Check if current property is property we are looking for.
-    //        if (&prop == &p) return true;
-
-    //        // Push.
-    //        parents.push_back(&p);
-
-    //        // Recurse on nested types that are expanded.
-    //        if (p.getDataType() == DataType::Type && !p.isReference())
-    //        {
-    //            for (const auto& p_ : p.getReferenceType()->getProperties())
-    //            {
-    //                if (traverse(*p_)) return true;
-    //            }
-    //        }
-
-    //        // Pop.
-    //        parents.pop_back();
-
-    //        // Did not find property here.
-    //        return false;
-    //    };
-
-    //    for (const auto& p : properties)
-    //    {
-    //        if (traverse(*p)) return parents;
-    //    }
-
-    //    throw std::runtime_error("Property is not a member of this type");
-    //}
-
-    std::string Type::resolveReferenceTableName(const std::vector<Property*>& parents, const Property& prop) const
-    {
-        auto tableName = getName() + "_";
-        for (const auto& p : parents) tableName += p->getName() + "_";
-        tableName += prop.getName();
-        return tableName;
-    }
-
     ////////////////////////////////////////////////////////////////
     // Properties.
     ////////////////////////////////////////////////////////////////
@@ -257,15 +194,13 @@ namespace alex
 
         auto&       library   = nameSpace->getLibrary();
         auto&       db        = library.getDatabase();
-        const auto& typeTable = library.getTypeTable();
 
         try
         {
             auto transaction = db.beginTransaction(sql::Transaction::Type::Deferred);
 
-            // TODO: This insert statement could be cached at library level.
             // Add type to table and retrieve ID.
-            typeTable.insert().compile()(nullptr, nameSpace->getId(), sql::toStaticText(name), isInstance ? 1 : 0);
+            library.getTypeTableInsert()(nullptr, nameSpace->getId(), sql::toStaticText(name), isInstance ? 1 : 0);
             id = db.getLastInsertRowId();
 
             // Commit properties.

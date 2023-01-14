@@ -33,9 +33,9 @@ namespace alex
 
         StringArray& operator=(StringArray&&) = default;
 
-        value_t& get() noexcept { return container; }
+        [[nodiscard]] value_t& get() noexcept { return container; }
 
-        const value_t& get() const noexcept { return container; }
+        [[nodiscard]] const value_t& get() const noexcept { return container; }
 
     private:
         value_t container;

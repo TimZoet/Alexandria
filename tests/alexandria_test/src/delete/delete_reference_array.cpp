@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
 #include "alexandria/queries/delete_query.h"
 #include "alexandria/queries/insert_query.h"
 

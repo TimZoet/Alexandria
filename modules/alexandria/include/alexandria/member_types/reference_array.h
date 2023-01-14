@@ -51,9 +51,9 @@ namespace alex
         // Getters.
         ////////////////////////////////////////////////////////////////
 
-        value_t& get() noexcept { return ids; }
+        [[nodiscard]] value_t& get() noexcept { return ids; }
 
-        const value_t& get() const noexcept { return ids; }
+        [[nodiscard]] const value_t& get() const noexcept { return ids; }
 
         ////////////////////////////////////////////////////////////////
         // Modifiers.

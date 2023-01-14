@@ -162,22 +162,6 @@ namespace alex
     {
         requireNotCommitted();
 
-        // TODO: Format default value as string.
-        //std::string defaultVal;
-        //std::visit(
-        //  [&defaultVal](auto&& arg) {
-        //      using T = std::decay_t<decltype(arg)>;
-        //      if constexpr (std::same_as<T, std::nullptr_t>)
-        //          defaultVal = "NULL";
-        //      else if constexpr (std::integral<T> || std::floating_point<T>)
-        //          defaultVal = std::to_string(arg);
-        //      else if constexpr (std::same_as<T, std::string>)
-        //          defaultVal = "'" + arg + "'";
-        //      else
-        //          constexpr_static_assert();
-        //  },
-        //  defaultValue);
-
         const auto& nameSpace     = type->getNamespace();
         const auto& library       = nameSpace.getLibrary();
         const auto& db            = library.getDatabase();

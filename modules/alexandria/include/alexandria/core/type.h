@@ -4,8 +4,6 @@
 // Standard includes.
 ////////////////////////////////////////////////////////////////
 
-#include <functional>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -93,29 +91,6 @@ namespace alex
          * \return Property list.
          */
         [[nodiscard]] const PropertyList& getProperties() const noexcept;
-
-        /**
-         * \brief Get the list of all properties that match the predicate. Will also traverse all nested properties in depth first order.
-         * \param predicate Function to filter properties by.
-         * \return List of all properties that match predicate.
-         */
-        //[[nodiscard]] std::vector<Property*> getProperties(const std::function<bool(const Property&)>& predicate) const;
-
-        /**
-         * \brief Get the list of all properties that precede the given property in the hierarchy.
-         * \param prop Property.
-         * \return List of properties. Does not include property parameter.
-         */
-        //[[nodiscard]] std::vector<Property*> getPropertyParents(const Property& prop) const;
-
-        /**
-         * \brief Calculate the name of the table that would be generated for the given property. Does not perform any validity checks when it comes to e.g. being a member of this type or data types.
-         * \param parents Parents.
-         * \param prop Property.
-         * \return Full table name.
-         */
-        [[nodiscard]] std::string resolveReferenceTableName(const std::vector<Property*>& parents,
-                                                            const Property&               prop) const;
 
         ////////////////////////////////////////////////////////////////
         // Properties.

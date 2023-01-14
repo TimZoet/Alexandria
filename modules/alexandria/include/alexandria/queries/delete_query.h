@@ -5,7 +5,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include <memory>
-#include <type_traits>
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.
@@ -14,8 +13,6 @@
 #include "alexandria/core/library.h"
 #include "alexandria/core/namespace.h"
 #include "alexandria/core/type.h"
-#include "alexandria/core/type_descriptor.h"
-#include "alexandria/queries/utils.h"
 #include "alexandria/queries/deleters/blob_array_deleter.h"
 #include "alexandria/queries/deleters/primitive_array_deleter.h"
 #include "alexandria/queries/deleters/primitive_deleter.h"

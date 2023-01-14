@@ -11,7 +11,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "common/static_assert.h"
 #include "common/type_traits.h"
 #include "cppql/core/binding.h"
 

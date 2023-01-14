@@ -19,8 +19,7 @@
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/namespace.h"
-#include "alexandria/core/property.h"
+#include "alexandria/core/fwd.h"
 #include "alexandria/core/type.h"
 
 namespace alex
@@ -123,6 +122,8 @@ namespace alex
          */
         [[nodiscard]] const PropertyTable& getPropertyTable() const noexcept;
 
+        [[nodiscard]] TypeTableInsert& getTypeTableInsert() noexcept;
+
         ////////////////////////////////////////////////////////////////
         // Namespaces.
         ////////////////////////////////////////////////////////////////
@@ -167,5 +168,15 @@ namespace alex
          * \brief Sqlite table containing property definitions.
          */
         PropertyTable propertyTable;
+
+        /**
+         * \brief Sqlite statement for inserting new namespaces.
+         */
+        NamespaceTableInsert namespaceInsert;
+
+        /**
+         * \brief Sqlite statement for inserting new types.
+         */
+        TypeTableInsert typeInsert;
     };
 }  // namespace alex

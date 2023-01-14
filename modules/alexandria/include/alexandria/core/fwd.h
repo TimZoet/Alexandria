@@ -117,4 +117,8 @@ namespace alex
                                           decltype(PropertyRow::referenceType),
                                           decltype(PropertyRow::isBlob),
                                           decltype(PropertyRow::isArray)>;
+
+    using NamespaceTableInsert = std::remove_cvref_t<decltype(std::declval<NamespaceTable>().insert().compile())>;
+
+    using TypeTableInsert = std::remove_cvref_t<decltype(std::declval<TypeTable>().insert().compile())>;
 }  // namespace alex

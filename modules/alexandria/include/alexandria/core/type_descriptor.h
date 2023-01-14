@@ -5,9 +5,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/core/member.h"
-#include "alexandria/core/member_chain.h"
-#include "alexandria/core/member_list.h"
-#include "alexandria/core/member_nested.h"
 #include "alexandria/core/type.h"
 
 namespace alex
@@ -29,7 +26,6 @@ namespace alex
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
-        // TODO: Can this be deleted or will GenerateTypeDescriptor start complaining?
         TypeDescriptor() = default;
 
         explicit TypeDescriptor(Type& t) : type(&t)

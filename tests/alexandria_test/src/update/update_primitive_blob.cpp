@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
 #include "alexandria/queries/update_query.h"
@@ -153,9 +153,9 @@ void UpdatePrimitiveBlob::operator()()
         baz0.doubles.get().push_back(0.5);
         baz0.doubles.get().push_back(1.5);
         Baz baz1;
-        baz1.uints.get().push_back(-111);
-        baz1.uints.get().push_back(-2222);
-        baz1.uints.get().push_back(-33333);
+        baz1.uints.get().push_back(111);
+        baz1.uints.get().push_back(2222);
+        baz1.uints.get().push_back(33333);
         baz1.doubles.get().push_back(-2.5);
         baz1.doubles.get().push_back(-3.5);
         baz1.doubles.get().push_back(-4.5);

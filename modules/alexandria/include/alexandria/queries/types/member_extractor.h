@@ -12,9 +12,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/core/member.h"
-#include "alexandria/member_types/blob_array.h"
-#include "alexandria/member_types/instance_id.h"
-#include "alexandria/member_types/reference_array.h"
 
 namespace alex::detail
 {

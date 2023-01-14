@@ -35,7 +35,7 @@ namespace alex
             static constexpr auto func = []<size_t I, size_t... Is>(std::index_sequence<I, Is...>)
                                            -> decltype(std::declval<table_t>().template update<Is...>())
             {
-                //return std::declval<table_t>().template update<Is...>();
+                return std::declval<table_t>().template update<Is...>();
             };
 
             using type = std::remove_cvref_t<std::invoke_result_t<decltype(func), std::index_sequence_for<C, Cs...>>>;

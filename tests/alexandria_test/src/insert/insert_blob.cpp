@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
 #include "alexandria/queries/insert_query.h"
 
 namespace

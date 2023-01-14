@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
 #include "alexandria/queries/update_query.h"
@@ -114,10 +114,10 @@ void UpdatePrimitive::operator()()
         bar0.a = 12;
         bar0.b = -14;
         bar0.c = 55;
-        bar0.d = -9;
+        bar0.d = 9;
         bar1.a = 7876;
         bar1.b = 235;
-        bar1.c = -900;
+        bar1.c = 900;
         bar1.d = 564;
 
         // Try to update.

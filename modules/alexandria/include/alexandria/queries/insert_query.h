@@ -4,7 +4,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "common/type_traits.h"
 #include "cppql/core/transaction.h"
 
 ////////////////////////////////////////////////////////////////
@@ -14,8 +13,6 @@
 #include "alexandria/core/library.h"
 #include "alexandria/core/namespace.h"
 #include "alexandria/core/type.h"
-#include "alexandria/core/type_descriptor.h"
-#include "alexandria/queries/utils.h"
 #include "alexandria/queries/inserters/blob_array_inserter.h"
 #include "alexandria/queries/inserters/primitive_array_inserter.h"
 #include "alexandria/queries/inserters/primitive_inserter.h"

@@ -50,7 +50,7 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()(object_t& instance) const noexcept {}
+            void operator()(object_t&) const noexcept {}
         };
 
         /**

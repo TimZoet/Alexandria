@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
 #include "alexandria/queries/insert_query.h"
 
 namespace
@@ -32,15 +33,15 @@ namespace
     struct Baz
     {
         alex::InstanceId              id;
-        alex::PrimitiveBlob<uint64_t> ints;
-        alex::PrimitiveBlob<double>   floats;
+        alex::PrimitiveBlob<uint64_t> uints;
+        alex::PrimitiveBlob<double>   doubles;
 
         Baz() = default;
 
         Baz(const alex::InstanceId iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
         {
-            ints.get()   = std::move(iints);
-            floats.get() = std::move(ffloats);
+            uints.get()   = std::move(iints);
+            doubles.get() = std::move(ffloats);
         }
     };
 
@@ -49,7 +50,7 @@ namespace
     using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>;
 
     using BazDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>;
+      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::uints>, alex::Member<&Baz::doubles>>;
 }  // namespace
 
 void InsertPrimitiveBlob::operator()()
@@ -161,17 +162,17 @@ void InsertPrimitiveBlob::operator()()
 
         // Create objects.
         Baz baz0;
-        baz0.ints.get().push_back(10);
-        baz0.ints.get().push_back(100);
-        baz0.floats.get().push_back(0.5);
-        baz0.floats.get().push_back(1.5);
+        baz0.uints.get().push_back(10);
+        baz0.uints.get().push_back(100);
+        baz0.doubles.get().push_back(0.5);
+        baz0.doubles.get().push_back(1.5);
         Baz baz1;
-        baz1.ints.get().push_back(-111);
-        baz1.ints.get().push_back(-2222);
-        baz1.ints.get().push_back(-33333);
-        baz1.floats.get().push_back(-2.5);
-        baz1.floats.get().push_back(-3.5);
-        baz1.floats.get().push_back(-4.5);
+        baz1.uints.get().push_back(111);
+        baz1.uints.get().push_back(2222);
+        baz1.uints.get().push_back(33333);
+        baz1.doubles.get().push_back(-2.5);
+        baz1.doubles.get().push_back(-3.5);
+        baz1.doubles.get().push_back(-4.5);
         Baz baz2;
 
         // Try to insert.
@@ -196,13 +197,13 @@ void InsertPrimitiveBlob::operator()()
 
         // Compare objects.
         compareEQ(baz0.id, baz0_get.id);
-        compareEQ(baz0.ints.get(), baz0_get.ints.get());
-        compareEQ(baz0.floats.get(), baz0_get.floats.get());
+        compareEQ(baz0.uints.get(), baz0_get.uints.get());
+        compareEQ(baz0.doubles.get(), baz0_get.doubles.get());
         compareEQ(baz1.id, baz1_get.id);
-        compareEQ(baz1.ints.get(), baz1_get.ints.get());
-        compareEQ(baz1.floats.get(), baz1_get.floats.get());
+        compareEQ(baz1.uints.get(), baz1_get.uints.get());
+        compareEQ(baz1.doubles.get(), baz1_get.doubles.get());
         compareEQ(baz2.id, baz2_get.id);
-        compareEQ(baz2.ints.get(), baz2_get.ints.get());
-        compareEQ(baz2.floats.get(), baz2_get.floats.get());
+        compareEQ(baz2.uints.get(), baz2_get.uints.get());
+        compareEQ(baz2.doubles.get(), baz2_get.doubles.get());
     }
 }

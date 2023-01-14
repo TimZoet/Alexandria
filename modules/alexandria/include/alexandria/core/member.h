@@ -39,14 +39,42 @@ namespace alex
         struct get_last_mp<M, Ms...> : get_last_mp<Ms...>
         {
         };
+
+        template<auto...>
+        struct is_mp_sequence_impl : std::false_type
+        {
+        };
+
+        template<auto M>
+        struct is_mp_sequence_impl<M> : std::true_type
+        {
+        };
+
+        template<auto M, auto N, auto... Ms>
+        struct is_mp_sequence_impl<M, N, Ms...> : std::false_type
+        {
+        };
+
+        template<auto M, auto N, auto... Ms>
+            requires(std::same_as<member_pointer_value_t<std::remove_cvref_t<decltype(M)>>,
+                                  member_pointer_class_t<std::remove_cvref_t<decltype(N)>>>)
+        struct is_mp_sequence_impl<M, N, Ms...> : is_mp_sequence_impl<N, Ms...>
+        {
+        };
+
+        template<auto... Ms>
+        concept is_mp_sequence = is_mp_sequence_impl<Ms...>::value;
     }  // namespace detail
 
+    ////////////////////////////////////////////////////////////////
+    // Member.
+    ////////////////////////////////////////////////////////////////
+
     template<auto M, auto... Ms>
+        requires(detail::is_mp_sequence<M, Ms...>)
     class Member
     {
     public:
-        // TODO: Constrain M and Ms... to be sequence of member pointers.
-
         inline static constexpr bool is_member_v = true;
         inline static constexpr auto mp          = detail::get_last_mp<M, Ms...>::value;
         using class_t                            = member_pointer_class_t<std::decay_t<decltype(M)>>;
@@ -87,6 +115,80 @@ namespace alex
         }
     };
 
+    ////////////////////////////////////////////////////////////////
+    // Type traits.
+    ////////////////////////////////////////////////////////////////
+
     template<typename T>
     concept is_member = requires { T::is_member_v; };
+
+    template<typename...>
+    struct IsMemberListImpl : std::false_type
+    {
+    };
+
+    template<typename T>
+    concept is_member_list = IsMemberListImpl<T>::value;
+
+    template<typename...>
+    struct IsNestedMemberImpl : std::false_type
+    {
+    };
+
+    template<typename T>
+    concept is_nested_member = IsNestedMemberImpl<T>::value;
+
+    ////////////////////////////////////////////////////////////////
+    // MemberList.
+    ////////////////////////////////////////////////////////////////
+
+    template<typename T, typename... Ts>
+    concept is_same_class_member = ((is_member<T> || is_nested_member<T>) && ... &&
+                                    (is_member<Ts> || is_nested_member<Ts>)) &&
+                                   (std::same_as<typename T::class_t, typename Ts::class_t> && ...);
+
+    template<typename T, typename... Ts>
+        requires(is_same_class_member<T, Ts...>)
+    class MemberList
+    {
+    public:
+        using class_t = typename T::class_t;
+    };
+
+    template<typename T, typename... Ts>
+    struct IsMemberListImpl<MemberList<T, Ts...>> : std::true_type
+    {
+    };
+
+    ////////////////////////////////////////////////////////////////
+    // NestedMember.
+    ////////////////////////////////////////////////////////////////
+
+    template<typename T, auto M>
+        requires(is_member_list<T> && std::same_as<typename T::class_t, member_pointer_value_t<decltype(M)>>)
+    class NestedMember
+    {
+    public:
+        using class_t = member_pointer_class_t<decltype(M)>;
+    };
+
+    template<typename T, auto M>
+    struct IsNestedMemberImpl<NestedMember<T, M>> : std::true_type
+    {
+    };
+
+    ////////////////////////////////////////////////////////////////
+    // MemberChain.
+    ////////////////////////////////////////////////////////////////
+
+    template<typename M, typename... Ts>
+    class MemberChain
+    {
+    public:
+        inline static constexpr bool is_member_chain_v = true;
+        inline static constexpr auto size              = sizeof...(Ts);
+    };
+
+    template<typename T>
+    concept is_member_chain = requires { T::is_member_chain_v; };
 }  // namespace alex

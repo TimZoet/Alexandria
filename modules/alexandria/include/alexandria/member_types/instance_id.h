@@ -35,7 +35,8 @@ namespace alex
 
         InstanceId(const uuids::uuid iid) : id(iid) {}
 
-        InstanceId(std::string iid) : id(*uuids::uuid::from_string(iid)) {}
+        // TODO: Dereferencing might throw.
+        InstanceId(const std::string& iid) : id(*uuids::uuid::from_string(iid)) {}
 
         ~InstanceId() = default;
 

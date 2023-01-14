@@ -15,9 +15,6 @@ set(HEADERS
     ${INCLUDE_DIR}/core/fwd.h
     ${INCLUDE_DIR}/core/library.h
     ${INCLUDE_DIR}/core/member.h
-    ${INCLUDE_DIR}/core/member_chain.h
-    ${INCLUDE_DIR}/core/member_list.h
-    ${INCLUDE_DIR}/core/member_nested.h
     ${INCLUDE_DIR}/core/namespace.h
     ${INCLUDE_DIR}/core/property.h
     ${INCLUDE_DIR}/core/type.h
@@ -32,12 +29,6 @@ set(HEADERS
     ${INCLUDE_DIR}/member_types/reference_array.h
     ${INCLUDE_DIR}/member_types/string.h
     ${INCLUDE_DIR}/member_types/string_array.h
-    #${INCLUDE_DIR}/object_handler/blob_array_handler.h
-    #${INCLUDE_DIR}/object_handler/object_handler.h
-    #${INCLUDE_DIR}/object_handler/primitive_array_handler.h
-    #${INCLUDE_DIR}/object_handler/primitive_handler.h
-    #${INCLUDE_DIR}/object_handler/reference_array_handler.h
-    #${INCLUDE_DIR}/object_handler/type_traits.h
     ${INCLUDE_DIR}/queries/delete_query.h
     ${INCLUDE_DIR}/queries/get_query.h
     ${INCLUDE_DIR}/queries/insert_query.h

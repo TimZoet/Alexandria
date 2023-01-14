@@ -6,6 +6,12 @@
 
 #include "dot/graph.h"
 
+////////////////////////////////////////////////////////////////
+// Current target includes.
+////////////////////////////////////////////////////////////////
+
+#include "alexandria/core/namespace.h"
+
 namespace alex
 {
     ////////////////////////////////////////////////////////////////
@@ -16,7 +22,9 @@ namespace alex
         database(std::move(db)),
         namespaceTable(database->getTable("namespaces")),
         typeTable(database->getTable("types")),
-        propertyTable(database->getTable("properties"))
+        propertyTable(database->getTable("properties")),
+        namespaceInsert(namespaceTable.insert().compile()),
+        typeInsert(typeTable.insert().compile())
     {
     }
 
@@ -99,6 +107,8 @@ namespace alex
 
     const PropertyTable& Library::getPropertyTable() const noexcept { return propertyTable; }
 
+    TypeTableInsert& Library::getTypeTableInsert() noexcept { return typeInsert; }
+
     ////////////////////////////////////////////////////////////////
     // Namespaces.
     ////////////////////////////////////////////////////////////////
@@ -108,12 +118,23 @@ namespace alex
         if (namespaces.contains(name))
             throw std::runtime_error(std::format(R"(A namespace with name "{}" already exists.)", name));
 
-        // TODO: This insert statement could be cached at library level.
-        namespaceTable.insert().compile()(nullptr, sql::toStaticText(name));
+        try
+        {
+            auto transaction = database->beginTransaction(sql::Transaction::Type::Deferred);
 
-        // Create namespace.
-        auto space = std::make_unique<Namespace>(*this, database->getLastInsertRowId(), name);
-        return *namespaces.emplace(name, std::move(space)).first->second;
+            // Insert new namespace.
+            namespaceInsert(nullptr, sql::toStaticText(name));
+
+            transaction.commit();
+
+            // Create namespace.
+            auto space = std::make_unique<Namespace>(*this, database->getLastInsertRowId(), name);
+            return *namespaces.emplace(name, std::move(space)).first->second;
+        }
+        catch (...)
+        {
+            throw;
+        }
     }
 
     ////////////////////////////////////////////////////////////////

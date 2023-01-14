@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
 #include "alexandria/queries/update_query.h"
@@ -70,9 +70,6 @@ void UpdateReference::operator()()
         barType.commit();
         bazType.commit();
     }).fatal("Failed to commit types");
-
-    // TODO: Once the way references to not yet inserted objects are handled is finalized, test that here as well.
-    // TODO: Test insert of empty/null references.
 
     // Create objects.
     Foo foo0{.a = 0.5f, .b = 4};

@@ -11,6 +11,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/core/library.h"
+#include "alexandria/core/namespace.h"
 #include "bettertest/mixins/compare_mixin.h"
 #include "bettertest/mixins/exception_mixin.h"
 #include "bettertest/tests/unit_test.h"

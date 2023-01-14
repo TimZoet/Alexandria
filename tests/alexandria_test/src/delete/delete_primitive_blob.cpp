@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/core/library.h"
+#include "alexandria/core/type_descriptor.h"
 #include "alexandria/queries/delete_query.h"
 #include "alexandria/queries/insert_query.h"
 
@@ -33,15 +34,15 @@ namespace
     struct Baz
     {
         alex::InstanceId              id;
-        alex::PrimitiveBlob<uint64_t> ints;
-        alex::PrimitiveBlob<double>   floats;
+        alex::PrimitiveBlob<uint64_t> uints;
+        alex::PrimitiveBlob<double>   doubles;
 
         Baz() = default;
 
         Baz(const alex::InstanceId iid, std::vector<uint64_t> iints, std::vector<double> ffloats) : id(iid)
         {
-            ints.get()   = std::move(iints);
-            floats.get() = std::move(ffloats);
+            uints.get()   = std::move(iints);
+            doubles.get() = std::move(ffloats);
         }
     };
 
@@ -50,7 +51,7 @@ namespace
     using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>;
 
     using BazDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::ints>, alex::Member<&Baz::floats>>;
+      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::uints>, alex::Member<&Baz::doubles>>;
 }  // namespace
 
 void DeletePrimitiveBlob::operator()()
@@ -151,17 +152,17 @@ void DeletePrimitiveBlob::operator()()
 
         // Create objects.
         Baz baz0;
-        baz0.ints.get().push_back(10);
-        baz0.ints.get().push_back(100);
-        baz0.floats.get().push_back(0.5);
-        baz0.floats.get().push_back(1.5);
+        baz0.uints.get().push_back(10);
+        baz0.uints.get().push_back(100);
+        baz0.doubles.get().push_back(0.5);
+        baz0.doubles.get().push_back(1.5);
         Baz baz1;
-        baz1.ints.get().push_back(-111);
-        baz1.ints.get().push_back(-2222);
-        baz1.ints.get().push_back(-33333);
-        baz1.floats.get().push_back(-2.5);
-        baz1.floats.get().push_back(-3.5);
-        baz1.floats.get().push_back(-4.5);
+        baz1.uints.get().push_back(111);
+        baz1.uints.get().push_back(2222);
+        baz1.uints.get().push_back(33333);
+        baz1.doubles.get().push_back(-2.5);
+        baz1.doubles.get().push_back(-3.5);
+        baz1.doubles.get().push_back(-4.5);
         Baz baz2;
 
         // Try to insert.

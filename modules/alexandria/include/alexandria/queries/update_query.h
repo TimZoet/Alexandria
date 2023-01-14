@@ -10,7 +10,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "common/type_traits.h"
 #include "cppql/core/transaction.h"
 
 ////////////////////////////////////////////////////////////////
@@ -20,8 +19,6 @@
 #include "alexandria/core/library.h"
 #include "alexandria/core/namespace.h"
 #include "alexandria/core/type.h"
-#include "alexandria/core/type_descriptor.h"
-#include "alexandria/queries/utils.h"
 #include "alexandria/queries/deleters/blob_array_deleter.h"
 #include "alexandria/queries/deleters/primitive_array_deleter.h"
 #include "alexandria/queries/deleters/reference_array_deleter.h"
