@@ -117,8 +117,15 @@ namespace alex
                 // TODO: All these toText copy data. Might not always be necessary.
                 if constexpr (M::is_instance_id)
                     return sql::toText(M::template get(instance).getAsString());
-                else if constexpr (M::is_blob || M::is_primitive_blob)
-                    return M::template get(instance).getStaticBlob();
+                else if constexpr (M::is_primitive_blob || M::is_blob)
+                {
+                    if constexpr (std::convertible_to<decltype(M::template get(instance)), sql::StaticBlob>)
+                        return static_cast<sql::StaticBlob>(M::template get(instance));
+                    else if constexpr (std::convertible_to<decltype(M::template get(instance)), sql::TransientBlob>)
+                        return static_cast<sql::TransientBlob>(M::template get(instance));
+                    else
+                        return static_cast<sql::Blob>(M::template get(instance));
+                }
                 else if constexpr (M::is_reference)
                     // TODO: What if no object was assigned? Turn return type into std::optional and rely on cppql to insert nullptr?
                     return sql::toText(M::template get(instance).getId().getAsString());
@@ -136,6 +143,8 @@ namespace alex
             };
 
             f(members_t{});
+
+            statement.clearBindings();
         }
 
     private:

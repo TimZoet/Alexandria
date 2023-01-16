@@ -8,23 +8,25 @@
 
 void MemberTypePrimitiveArray::operator()()
 {
-    // PrimitiveArray with float.
-    {
-        alex::PrimitiveArray<float> prim;
-        expectNoThrow([&] {
-            prim.get().push_back(1.0f);
-            prim.get().push_back(2.0f);
-        });
-        compareEQ(static_cast<size_t>(2), prim.get().size());
-    }
-
-    // PrimitiveArray with int.
-    {
-        alex::PrimitiveArray<int64_t> prim;
-        expectNoThrow([&] {
-            prim.get().push_back(1);
-            prim.get().push_back(2);
-        });
-        compareEQ(static_cast<size_t>(2), prim.get().size());
-    }
+    compareTrue(alex::_is_primitive_array<alex::PrimitiveArray<float>>::value);
+    compareTrue(alex::_is_primitive_array<alex::PrimitiveArray<uint64_t>>::value);
+    compareTrue(alex::is_primitive_array<alex::PrimitiveArray<float>>);
+    compareTrue(alex::is_primitive_array<alex::PrimitiveArray<uint64_t>>);
+    compareTrue(std::same_as<float, alex::PrimitiveArray<float>::value_t>);
+    compareTrue(std::same_as<int32_t, alex::PrimitiveArray<int32_t>::value_t>);
+    compareTrue(requires(alex::PrimitiveArray<float> array) {
+                    {
+                        array.get()
+                        } -> std::same_as<std::vector<float>&>;
+                });
+    compareTrue(requires(const alex::PrimitiveArray<float> array) {
+                    {
+                        array.get()
+                        } -> std::same_as<const std::vector<float>&>;
+                });
+    compareTrue(requires(alex::PrimitiveArray<float> array) {
+                    {
+                        array.add(std::declval<float>())
+                    };
+                });
 }

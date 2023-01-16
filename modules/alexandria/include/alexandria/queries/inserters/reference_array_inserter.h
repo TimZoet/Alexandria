@@ -161,6 +161,8 @@ namespace alex
 
                 for (const auto& values = member_t::template get(instance).get(); const auto v : values)
                     statement(nullptr, uuid, sql::toText(v.getAsString()));
+
+                statement.clearBindings();
             }
 
         private:

@@ -44,7 +44,7 @@ namespace alex
             // Constructors.
             ////////////////////////////////////////////////////////////////
 
-             BlobArrayDeleterImpl(const type_descriptor_t&, std::string&) noexcept {}
+            BlobArrayDeleterImpl(const type_descriptor_t&, std::string&) noexcept {}
 
             ////////////////////////////////////////////////////////////////
             // Invoke.
@@ -157,7 +157,11 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()() { statement.bind(sql::BindParameters::Dynamic)(); }
+            void operator()()
+            {
+                statement.bind(sql::BindParameters::Dynamic)();
+                statement.clearBindings();
+            }
 
         private:
             [[nodiscard]] static statement_t compile(const type_descriptor_t& desc, std::string& uuidParam)

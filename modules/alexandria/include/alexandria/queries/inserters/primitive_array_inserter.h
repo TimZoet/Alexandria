@@ -160,13 +160,15 @@ namespace alex
                 const std::string uuidstr = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
                 const auto        uuid    = sql::toStaticText(uuidstr);
 
-                for (const auto& values = member_t::template get(instance).get(); const auto& v : values)
+                for (const auto& v : member_t::template get(instance))
                 {
                     if constexpr (member_t::is_string_array)
                         statement(nullptr, uuid, sql::toStaticText(v));
                     else
                         statement(nullptr, uuid, v);
                 }
+
+                statement.clearBindings();
             }
 
         private:

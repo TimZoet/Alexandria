@@ -163,6 +163,8 @@ namespace alex
                 auto& container = member_t::template get(instance).get();
                 container.clear();
                 for (auto v : statement.bind(sql::BindParameters::Dynamic)) { container.emplace_back(std::move(v)); }
+
+                statement.clearBindings();
             }
 
         private:

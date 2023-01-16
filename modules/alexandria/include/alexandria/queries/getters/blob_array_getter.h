@@ -160,9 +160,10 @@ namespace alex
 
             void operator()(object_t& instance)
             {
-                auto& container = member_t::template get(instance).get();
-                container.clear();
-                for (auto v : statement.bind(sql::BindParameters::Dynamic)) { container.emplace_back(std::move(v)); }
+                auto& blobArray = member_t::template get(instance);
+                blobArray.clear();
+                for (auto v : statement.bind(sql::BindParameters::Dynamic)) { blobArray.add(std::move(v)); }
+                statement.clearBindings();
             }
 
         private:

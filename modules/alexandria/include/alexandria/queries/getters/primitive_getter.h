@@ -83,7 +83,7 @@ namespace alex
         void operator()(object_t& instance)
         {
             const auto setter = [&instance]<typename M, typename V>(M, V&& val) {
-                if constexpr (M::is_primitive || M::is_string || M::is_reference)
+                if constexpr (M::is_instance_id || M::is_primitive || M::is_string || M::is_reference)
                     M::template get(instance) = std::forward<V>(val);
                 else if constexpr (M::is_primitive_blob || M::is_blob)
                     M::template get(instance).set(std::forward<V>(val));
@@ -102,6 +102,8 @@ namespace alex
             const auto f = [&]<typename... Ms>(std::tuple<Ms...>) { g(std::index_sequence_for<Ms...>{}); };
 
             f(members_t{});
+
+            statement.clearBindings();
         }
 
     private:

@@ -41,14 +41,19 @@
 #include "alexandria_test/insert/insert_string.h"
 #include "alexandria_test/insert/insert_string_array.h"
 #include "alexandria_test/library/create_library.h"
-//#include "alexandria_test/member_types/member_type_blob.h"
-//#include "alexandria_test/member_types/member_type_blob_array.h"
+#include "alexandria_test/member_types/member_type_blob.h"
+#include "alexandria_test/member_types/member_type_blob_custom.h"
+#include "alexandria_test/member_types/member_type_blob_array.h"
+#include "alexandria_test/member_types/member_type_blob_array_custom.h"
 //#include "alexandria_test/member_types/member_type_instance_id.h"
-//#include "alexandria_test/member_types/member_type_primitive_array.h"
-//#include "alexandria_test/member_types/member_type_primitive_blob.h"
+#include "alexandria_test/member_types/member_type_primitive_array.h"
+#include "alexandria_test/member_types/member_type_primitive_array_custom.h"
+#include "alexandria_test/member_types/member_type_primitive_blob.h"
+#include "alexandria_test/member_types/member_type_primitive_blob_custom.h"
 //#include "alexandria_test/member_types/member_type_reference.h"
 //#include "alexandria_test/member_types/member_type_reference_array.h"
-//#include "alexandria_test/member_types/member_type_string_array.h"
+#include "alexandria_test/member_types/member_type_string_array.h"
+#include "alexandria_test/member_types/member_type_string_array_custom.h"
 #include "alexandria_test/types/create_type.h"
 #include "alexandria_test/types/create_type_blob.h"
 #include "alexandria_test/types/create_type_blob_array.h"
@@ -125,14 +130,19 @@ int main(const int argc, char** argv)
       // library
       CreateLibrary,
       // member_types
-      //MemberTypeBlob,
-      //MemberTypeBlobArray,
+      MemberTypeBlob,
+      MemberTypeBlobCustom,
+      MemberTypeBlobArray,
+      MemberTypeBlobArrayCustom,
       //MemberTypeInstanceId,
-      //MemberTypePrimitiveArray,
-      //MemberTypePrimitiveBlob,
+      MemberTypePrimitiveArray,
+      MemberTypePrimitiveArrayCustom,
+      MemberTypePrimitiveBlob,
+      MemberTypePrimitiveBlobCustom,
       //MemberTypeReference,
       //MemberTypeReferenceArray,
-      //MemberTypeStringArray,
+      MemberTypeStringArray,
+      MemberTypeStringArrayCustom,
       // types
       CreateType,
       CreateTypeBlob,

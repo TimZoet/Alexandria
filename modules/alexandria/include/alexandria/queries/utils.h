@@ -33,16 +33,22 @@ namespace alex::detail
         using type = std::string;
     };
 
+    template<is_primitive T>
+    struct ValueToColumnType<T>
+    {
+        using type = T;
+    };
+
     template<is_primitive_array T>
     struct ValueToColumnType<T>
     {
-        using type = typename T::element_t;
+        using type = typename T::value_t;
     };
 
     template<is_primitive_blob T>
     struct ValueToColumnType<T>
     {
-        using type = typename T::value_t;
+        using type = std::vector<typename T::value_t>;
     };
 
     template<is_string_array T>
@@ -60,7 +66,7 @@ namespace alex::detail
     template<is_blob_array T>
     struct ValueToColumnType<T>
     {
-        using type = typename T::element_t;
+        using type = typename T::value_t;
     };
 
     template<is_reference T>

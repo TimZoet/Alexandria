@@ -8,10 +8,22 @@
 
 void MemberTypeStringArray::operator()()
 {
-    alex::StringArray strings;
-    expectNoThrow([&] {
-        strings.get().push_back("abc");
-        strings.get().push_back("def");
-    });
-    compareEQ(static_cast<size_t>(2), strings.get().size());
+    compareTrue(alex::_is_string_array<alex::StringArray>::value);
+    compareTrue(alex::is_string_array<alex::StringArray>);
+    compareTrue(std::same_as<std::string, alex::StringArray::value_t>);
+    compareTrue(requires(alex::StringArray array) {
+                    {
+                        array.get()
+                        } -> std::same_as<std::vector<std::string>&>;
+                });
+    compareTrue(requires(const alex::StringArray array) {
+                    {
+                        array.get()
+                        } -> std::same_as<const std::vector<std::string>&>;
+                });
+    compareTrue(requires(alex::StringArray array) {
+                    {
+                        array.add(std::declval<std::string>())
+                    };
+                });
 }

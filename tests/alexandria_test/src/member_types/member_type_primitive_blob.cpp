@@ -8,27 +8,26 @@
 
 void MemberTypePrimitiveBlob::operator()()
 {
-    // PrimitiveBlob with float.
-    {
-        alex::PrimitiveBlob<float> blob;
-        expectNoThrow([&] {
-            blob.get().push_back(1.0f);
-            blob.get().push_back(2.0f);
-        });
-        const auto staticBlob = blob.getStaticBlob();
-        compareEQ(blob.get().data(), staticBlob.data);
-        compareEQ(static_cast<size_t>(8), staticBlob.size);
-    }
-
-    // PrimitiveBlob with int.
-    {
-        alex::PrimitiveBlob<int64_t> blob;
-        expectNoThrow([&] {
-            blob.get().push_back(1);
-            blob.get().push_back(2);
-        });
-        const auto staticBlob = blob.getStaticBlob();
-        compareEQ(blob.get().data(), staticBlob.data);
-        compareEQ(static_cast<size_t>(16), staticBlob.size);
-    }
+    compareTrue(alex::_is_primitive_blob<alex::PrimitiveBlob<float>>::value);
+    compareTrue(alex::_is_primitive_blob<alex::PrimitiveBlob<uint64_t>>::value);
+    compareTrue(alex::is_primitive_blob<alex::PrimitiveBlob<float>>);
+    compareTrue(alex::is_primitive_blob<alex::PrimitiveBlob<uint64_t>>);
+    compareTrue(std::same_as<float, alex::PrimitiveBlob<float>::value_t>);
+    compareTrue(std::same_as<int32_t, alex::PrimitiveBlob<int32_t>::value_t>);
+    compareTrue(requires(alex::PrimitiveBlob<float> blob) {
+                    {
+                        blob.get()
+                        } -> std::same_as<std::vector<float>&>;
+                });
+    compareTrue(requires(const alex::PrimitiveBlob<float> blob) {
+                    {
+                        blob.get()
+                        } -> std::same_as<const std::vector<float>&>;
+                });
+    compareTrue(requires(alex::PrimitiveBlob<float> blob) {
+                    {
+                        blob.set(std::declval<std::vector<float>>())
+                    };
+                });
+    compareTrue(std::convertible_to<alex::PrimitiveBlob<float>, sql::StaticBlob>);
 }

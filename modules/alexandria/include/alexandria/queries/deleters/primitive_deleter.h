@@ -79,7 +79,11 @@ namespace alex
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void operator()() { statement.bind(sql::BindParameters::Dynamic)(); }
+        void operator()()
+        {
+            statement.bind(sql::BindParameters::Dynamic)();
+            statement.clearBindings();
+        }
 
     private:
         [[nodiscard]] static statement_t compile(const type_descriptor_t& desc, std::string& uuidParam)

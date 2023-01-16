@@ -45,9 +45,17 @@ namespace alex
 
         Blob& operator=(Blob&&) = default;
 
-        value_t& get() noexcept { return value; }
+        /**
+         * \brief Get value.
+         * \return Value.
+         */
+        [[nodiscard]] value_t& get() noexcept { return value; }
 
-        const value_t& get() const noexcept { return value; }
+        /**
+         * \brief Get value.
+         * \return Value.
+         */
+        [[nodiscard]] const value_t& get() const noexcept { return value; }
 
         template<typename U>
             requires(std::same_as<value_t, std::remove_cvref_t<U>>)
@@ -56,12 +64,10 @@ namespace alex
             value = std::forward<U>(v);
         }
 
-        // TODO: If this is an rvalue, the staticblob will refer deleted memory. Return TransientBlob instead?
-        // Same issues for other specializations and for BlobArray type.
-        [[nodiscard]] sql::StaticBlob getStaticBlob() const noexcept
-        {
-            return sql::StaticBlob{.data = &value, .size = sizeof value_t};
-        }
+        /**
+         * \brief Convert to sql::StaticBlob for binding.
+         */
+        [[nodiscard]] operator sql::StaticBlob() const { return sql::toStaticBlob(value); }
 
     private:
         value_t value;
@@ -76,8 +82,7 @@ namespace alex
     class Blob<std::vector<T>>
     {
     public:
-        using element_t = T;
-        using value_t   = std::vector<element_t>;
+        using value_t = std::vector<T>;
 
         Blob() = default;
 
@@ -91,9 +96,17 @@ namespace alex
 
         Blob& operator=(Blob&&) = default;
 
-        value_t& get() noexcept { return value; }
+        /**
+         * \brief Get vector of values.
+         * \return Vector of values.
+         */
+        [[nodiscard]] value_t& get() noexcept { return value; }
 
-        const value_t& get() const noexcept { return value; }
+        /**
+         * \brief Get vector of values.
+         * \return Vector of values.
+         */
+        [[nodiscard]] const value_t& get() const noexcept { return value; }
 
         template<typename U>
             requires(std::same_as<value_t, std::remove_cvref_t<U>>)
@@ -102,10 +115,10 @@ namespace alex
             value = std::forward<U>(v);
         }
 
-        [[nodiscard]] sql::StaticBlob getStaticBlob() const noexcept
-        {
-            return sql::StaticBlob{.data = value.data(), .size = value.size() * sizeof element_t};
-        }
+        /**
+         * \brief Convert to sql::StaticBlob for binding.
+         */
+        [[nodiscard]] operator sql::StaticBlob() const noexcept { return sql::toStaticBlob(value); }
 
     private:
         value_t value;
@@ -115,7 +128,7 @@ namespace alex
     // Type traits.
     ////////////////////////////////////////////////////////////////
 
-    template<typename T>
+    template<typename...>
     struct _is_blob : std::false_type
     {
     };
@@ -125,8 +138,18 @@ namespace alex
     {
     };
 
+    // clang-format off
     template<typename T>
-    concept is_blob = _is_blob<T>::value;
+    concept is_blob = _is_blob<T>::value &&
+                      (std::convertible_to<T, sql::StaticBlob> ||
+                       std::convertible_to<T, sql::TransientBlob> ||
+                       std::convertible_to<T, sql::Blob>) &&
+        requires (T blob)
+    {
+        typename T::value_t;
+        {blob.set(std::declval<typename T::value_t>())};
+    };
+    // clang-format on
 
     template<auto M>
     concept is_blob_mp = is_blob<member_pointer_value_t<decltype(M)>>;

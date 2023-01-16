@@ -159,7 +159,17 @@ namespace alex
                 const std::string uuidstr   = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
                 const auto        uuid      = sql::toStaticText(uuidstr);
                 const auto&       blobArray = member_t::template get(instance);
-                for (size_t i = 0; i < blobArray.size(); i++) statement(nullptr, uuid, blobArray.getStaticBlob(i));
+
+                // clang-format off
+                if constexpr (requires { { blobArray.getStaticBlob(std::declval<size_t>()) } -> std::same_as<sql::StaticBlob>;})
+                    for (size_t i = 0; i < blobArray.size(); i++) statement(nullptr, uuid, blobArray.getStaticBlob(i));
+                else if constexpr (requires { { blobArray.getTransientBlob(std::declval<size_t>()) } -> std::same_as<sql::TransientBlob>; })
+                    for (size_t i = 0; i < blobArray.size(); i++) statement(nullptr, uuid, blobArray.getTransientBlob(i));
+                else
+                    for (size_t i = 0; i < blobArray.size(); i++) statement(nullptr, uuid, blobArray.getBlob(i));
+                // clang-format on
+
+                statement.clearBindings();
             }
 
         private:

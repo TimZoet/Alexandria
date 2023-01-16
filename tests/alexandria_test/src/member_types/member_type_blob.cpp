@@ -10,47 +10,49 @@ namespace
 {
     struct Foo
     {
-        int32_t x;
+        float   x;
         int32_t y;
     };
 }  // namespace
 
 void MemberTypeBlob::operator()()
 {
-    // Blob with struct.
-    {
-        alex::Blob<Foo> blob;
-        expectNoThrow([&] {
-            blob.get().x = 10;
-            blob.get().y = 20;
-        });
-        const auto staticBlob = blob.getStaticBlob();
-        compareEQ(&blob.get(), staticBlob.data);
-        compareEQ(static_cast<size_t>(8), staticBlob.size);
-    }
-
-    // Blob with vector of floats.
-    {
-        alex::Blob<std::vector<float>> blob;
-        expectNoThrow([&] {
-            blob.get().push_back(1.0f);
-            blob.get().push_back(2.0f);
-            blob.get().push_back(3.0f);
-        });
-        const auto staticBlob = blob.getStaticBlob();
-        compareEQ(blob.get().data(), staticBlob.data);
-        compareEQ(static_cast<size_t>(12), staticBlob.size);
-    }
-
-    // Blob with vector of structs.
-    {
-        alex::Blob<std::vector<Foo>> blob;
-        expectNoThrow([&] {
-            blob.get().emplace_back(11, 22);
-            blob.get().emplace_back(33, 44);
-        });
-        const auto staticBlob = blob.getStaticBlob();
-        compareEQ(blob.get().data(), staticBlob.data);
-        compareEQ(static_cast<size_t>(16), staticBlob.size);
-    }
+    compareTrue(alex::_is_blob<alex::Blob<float>>::value);
+    compareTrue(alex::_is_blob<alex::Blob<uint64_t>>::value);
+    compareTrue(alex::is_blob<alex::Blob<float>>);
+    compareTrue(alex::is_blob<alex::Blob<uint64_t>>);
+    compareTrue(std::same_as<Foo, alex::Blob<Foo>::value_t>);
+    compareTrue(std::same_as<std::vector<Foo>, alex::Blob<std::vector<Foo>>::value_t>);
+    compareTrue(requires(alex::Blob<Foo> blob) {
+                    {
+                        blob.get()
+                        } -> std::same_as<Foo&>;
+                });
+    compareTrue(requires(const alex::Blob<Foo> blob) {
+                    {
+                        blob.get()
+                        } -> std::same_as<const Foo&>;
+                });
+    compareTrue(requires(alex::Blob<std::vector<Foo>> blob) {
+                    {
+                        blob.get()
+                        } -> std::same_as<std::vector<Foo>&>;
+                });
+    compareTrue(requires(const alex::Blob<std::vector<Foo>> blob) {
+                    {
+                        blob.get()
+                        } -> std::same_as<const std::vector<Foo>&>;
+                });
+    compareTrue(requires(alex::Blob<Foo> blob) {
+                    {
+                        blob.set(std::declval<Foo>())
+                    };
+                });
+    compareTrue(requires(alex::Blob<std::vector<Foo>> blob) {
+                    {
+                        blob.set(std::declval<std::vector<Foo>>())
+                    };
+                });
+    compareTrue(std::convertible_to<alex::Blob<Foo>, sql::StaticBlob>);
+    compareTrue(std::convertible_to<alex::Blob<std::vector<Foo>>, sql::StaticBlob>);
 }

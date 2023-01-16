@@ -31,8 +31,7 @@ namespace alex
     class BlobArray<T>
     {
     public:
-        using element_t = T;
-        using value_t   = std::vector<element_t>;
+        using value_t = T;
 
         BlobArray() = default;
 
@@ -46,9 +45,9 @@ namespace alex
 
         BlobArray& operator=(BlobArray&&) = default;
 
-        value_t& get() noexcept { return values; }
+        [[nodiscard]] std::vector<value_t>& get() noexcept { return values; }
 
-        const value_t& get() const noexcept { return values; }
+        [[nodiscard]] const std::vector<value_t>& get() const noexcept { return values; }
 
         /**
          * \brief Get number of elements.
@@ -56,13 +55,25 @@ namespace alex
          */
         [[nodiscard]] size_t size() const noexcept { return values.size(); }
 
-        [[nodiscard]] sql::StaticBlob getStaticBlob(const size_t index) const noexcept
+        /**
+         * \brief Clear vector.
+         */
+        void clear() { values.clear(); }
+
+        template<typename U>
+            requires(std::same_as<value_t, std::remove_cvref_t<U>>)
+        void add(U&& v)
         {
-            return sql::StaticBlob{.data = &values[index], .size = sizeof element_t};
+            values.push_back(std::forward<U>(v));
+        }
+
+        [[nodiscard]] sql::StaticBlob getStaticBlob(const size_t index) const
+        {
+            return sql::toStaticBlob(values[index]);
         }
 
     private:
-        value_t values;
+        std::vector<value_t> values;
     };
 
     /**
@@ -74,8 +85,7 @@ namespace alex
     class BlobArray<std::vector<T>>
     {
     public:
-        using element_t = std::vector<T>;
-        using value_t   = std::vector<element_t>;
+        using value_t = std::vector<T>;
 
         BlobArray() = default;
 
@@ -89,9 +99,9 @@ namespace alex
 
         BlobArray& operator=(BlobArray&&) = default;
 
-        value_t& get() noexcept { return values; }
+        [[nodiscard]] std::vector<value_t>& get() noexcept { return values; }
 
-        const value_t& get() const noexcept { return values; }
+        [[nodiscard]] const std::vector<value_t>& get() const noexcept { return values; }
 
         /**
          * \brief Get number of elements.
@@ -99,20 +109,32 @@ namespace alex
          */
         [[nodiscard]] size_t size() const noexcept { return values.size(); }
 
-        [[nodiscard]] sql::StaticBlob getStaticBlob(const size_t index) const noexcept
+        /**
+         * \brief Clear vector.
+         */
+        void clear() { values.clear(); }
+
+        template<typename U>
+            requires(std::same_as<value_t, std::remove_cvref_t<U>>)
+        void add(U&& v)
         {
-            return sql::StaticBlob{.data = values[index].data(), .size = values[index].size() * sizeof T};
+            values.push_back(std::forward<U>(v));
+        }
+
+        [[nodiscard]] sql::StaticBlob getStaticBlob(const size_t index) const
+        {
+            return sql::toStaticBlob(values[index]);
         }
 
     private:
-        value_t values;
+        std::vector<value_t> values;
     };
 
     ////////////////////////////////////////////////////////////////
     // Type traits.
     ////////////////////////////////////////////////////////////////
 
-    template<typename T>
+    template<typename...>
     struct _is_blob_array : std::false_type
     {
     };
@@ -122,8 +144,20 @@ namespace alex
     {
     };
 
+    // clang-format off
     template<typename T>
-    concept is_blob_array = _is_blob_array<T>::value;
+    concept is_blob_array = _is_blob_array<T>::value &&
+                            (requires (T blob) { {blob.getStaticBlob(std::declval<size_t>())} -> std::same_as<sql::StaticBlob>; } || 
+                             requires (T blob) { {blob.getTransientBlob(std::declval<size_t>())} -> std::same_as<sql::TransientBlob>; } ||
+                             requires (T blob) { {blob.getBlob(std::declval<size_t>())} -> std::same_as<sql::Blob>; }) &&
+        requires (T blob)
+    {
+        typename T::value_t;
+        {blob.size()} -> std::same_as<size_t>;
+        {blob.clear()};
+        {blob.add(std::declval<typename T::value_t>())};
+    };
+    // clang-format on
 
     template<auto M>
     concept is_blob_array_mp = is_blob_array<member_pointer_value_t<decltype(M)>>;

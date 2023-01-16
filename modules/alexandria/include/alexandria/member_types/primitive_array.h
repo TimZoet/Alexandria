@@ -20,8 +20,7 @@ namespace alex
     class PrimitiveArray
     {
     public:
-        using element_t = T;
-        using value_t   = std::vector<element_t>;
+        using value_t = T;
 
         PrimitiveArray() = default;
 
@@ -35,12 +34,32 @@ namespace alex
 
         PrimitiveArray& operator=(PrimitiveArray&&) noexcept = default;
 
-        value_t& get() noexcept { return container; }
+        [[nodiscard]] std::vector<value_t>& get() noexcept { return values; }
 
-        const value_t& get() const noexcept { return container; }
+        [[nodiscard]] const std::vector<value_t>& get() const noexcept { return values; }
+
+        /**
+         * \brief Clear vector.
+         */
+        void clear() { values.clear(); }
+
+        template<typename U>
+            requires(std::same_as<value_t, std::remove_cvref_t<U>>)
+        void add(U&& v)
+        {
+            values.push_back(std::forward<U>(v));
+        }
+
+        auto begin() noexcept { return values.begin(); }
+
+        auto end() noexcept { return values.end(); }
+
+        [[nodiscard]] auto cbegin() const noexcept { return values.cbegin(); }
+
+        [[nodiscard]] auto cend() const noexcept { return values.cend(); }
 
     private:
-        value_t container;
+        std::vector<value_t> values;
     };
 
     ////////////////////////////////////////////////////////////////
@@ -57,8 +76,18 @@ namespace alex
     {
     };
 
+    // clang-format off
     template<typename T>
-    concept is_primitive_array = _is_primitive_array<T>::value;
+    concept is_primitive_array = _is_primitive_array<T>::value && 
+        requires(T array)
+    {
+        typename T::value_t;
+        {array.begin()};
+        {array.end()};
+        {array.clear()};
+        {array.add(std::declval<typename T::value_t>())};
+    };
+    // clang-format on
 
     template<auto M>
     concept is_primitive_array_mp = is_primitive_array<member_pointer_value_t<decltype(M)>>;
