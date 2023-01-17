@@ -5,7 +5,6 @@
 ////////////////////////////////////////////////////////////////
 
 #include <string>
-#include <variant>
 
 ////////////////////////////////////////////////////////////////
 // Module includes.
@@ -27,9 +26,6 @@ namespace alex
     public:
         friend class Library;
         friend class Type;
-
-        using default_value_t =
-          std::variant<std::nullptr_t, int32_t, uint32_t, int64_t, uint64_t, float, double, std::string>;
 
         ////////////////////////////////////////////////////////////////
         // Constructors.
@@ -114,26 +110,6 @@ namespace alex
          */
         [[nodiscard]] bool isBlob() const noexcept;
 
-        [[nodiscard]] const default_value_t& getDefaultValue() const noexcept;
-
-        ////////////////////////////////////////////////////////////////
-        // Setters.
-        ////////////////////////////////////////////////////////////////
-
-        void setDefaultValue(int32_t value);
-
-        void setDefaultValue(uint32_t value);
-
-        void setDefaultValue(int64_t value);
-
-        void setDefaultValue(uint64_t value);
-
-        void setDefaultValue(float value);
-
-        void setDefaultValue(double value);
-
-        void setDefaultValue(std::string value);
-
         ////////////////////////////////////////////////////////////////
         // Commit.
         ////////////////////////////////////////////////////////////////
@@ -152,11 +128,17 @@ namespace alex
 
         void generate(sql::Table& instanceTable, const std::string& prefix) const;
 
-        void getPrimitiveArrayTables(std::vector<sql::Table*>& tables, const sql::Table& instanceTable, const std::string& prefix) const;
+        void getPrimitiveArrayTables(std::vector<sql::Table*>& tables,
+                                     const sql::Table&         instanceTable,
+                                     const std::string&        prefix) const;
 
-        void getBlobArrayTables(std::vector<sql::Table*>& tables, const sql::Table& instanceTable, const std::string& prefix) const;
+        void getBlobArrayTables(std::vector<sql::Table*>& tables,
+                                const sql::Table&         instanceTable,
+                                const std::string&        prefix) const;
 
-        void getReferenceArrayTables(std::vector<sql::Table*>& tables, const sql::Table& instanceTable, const std::string& prefix) const;
+        void getReferenceArrayTables(std::vector<sql::Table*>& tables,
+                                     const sql::Table&         instanceTable,
+                                     const std::string&        prefix) const;
 
         ////////////////////////////////////////////////////////////////
         // Member variables.
@@ -193,7 +175,5 @@ namespace alex
          * \brief Indicates property is a blob type.
          */
         bool blob;
-
-        default_value_t defaultValue;
     };
 }  // namespace alex

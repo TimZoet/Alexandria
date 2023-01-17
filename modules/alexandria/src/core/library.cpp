@@ -1,6 +1,12 @@
 #include "alexandria/core/library.h"
 
 ////////////////////////////////////////////////////////////////
+// Standard includes.
+////////////////////////////////////////////////////////////////
+
+#include <regex>
+
+////////////////////////////////////////////////////////////////
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
@@ -117,6 +123,10 @@ namespace alex
     {
         if (namespaces.contains(name))
             throw std::runtime_error(std::format(R"(A namespace with name "{}" already exists.)", name));
+
+        if (const std::regex regex("^[a-z][a-z0-9]*$"); !std::regex_match(name, regex))
+            throw std::runtime_error(std::format(
+              R"(Cannot create name with name "{}". It does not match the regex "^[a-z][a-z0-9_]*$".)", name));
 
         try
         {

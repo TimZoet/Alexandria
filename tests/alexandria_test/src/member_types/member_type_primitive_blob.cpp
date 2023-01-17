@@ -29,5 +29,5 @@ void MemberTypePrimitiveBlob::operator()()
                         blob.set(std::declval<std::vector<float>>())
                     };
                 });
-    compareTrue(std::convertible_to<alex::PrimitiveBlob<float>, sql::StaticBlob>);
+    compareTrue(explicitly_convertible_to<alex::PrimitiveBlob<float>, sql::StaticBlob>);
 }

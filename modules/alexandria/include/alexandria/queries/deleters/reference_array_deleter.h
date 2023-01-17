@@ -166,10 +166,9 @@ namespace alex
         private:
             [[nodiscard]] static statement_t compile(const type_descriptor_t& desc, std::string& uuidParam)
             {
-                const Type& type = desc.getType();
-                // TODO: This constructs the same vector for each inserter now. Somewhat inefficient.
-                const auto tables = type.getReferenceArrayTables();
-                const auto table  = table_t(*tables[I]);
+                const Type& type   = desc.getType();
+                const auto  tables = type.getReferenceArrayTables();
+                const auto  table  = table_t(*tables[I]);
                 return table.del().where(sql::like(table.template col<1>(), &uuidParam)).compile();
             }
 

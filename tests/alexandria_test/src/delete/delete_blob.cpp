@@ -45,13 +45,13 @@ namespace
 void DeleteBlob::operator()()
 {
     // Create type with 1 blob.
-    auto& fooType = nameSpace->createType("Foo");
-    fooType.createBlobProperty("blobProp1");
+    auto& fooType = nameSpace->createType("foo");
+    fooType.createBlobProperty("blobprop1");
 
     // Create type with 2 blobs.
-    auto& barType = nameSpace->createType("Bar");
-    barType.createBlobProperty("blobProp1");
-    barType.createBlobProperty("blobProp2");
+    auto& barType = nameSpace->createType("bar");
+    barType.createBlobProperty("blobprop1");
+    barType.createBlobProperty("blobprop2");
 
     // Commit types.
     expectNoThrow([&] {

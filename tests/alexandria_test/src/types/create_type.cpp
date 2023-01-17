@@ -6,19 +6,24 @@ void CreateType::operator()()
     alex::Type *type0 = nullptr, *type1 = nullptr, *type2 = nullptr;
     expectNoThrow([&] { type0 = &nameSpace->createType("type0"); });
     expectNoThrow([&] { type1 = &nameSpace->createType("type1"); });
-    expectNoThrow([&] { type2 = &nameSpace->createType("type2"); });
+    expectNoThrow([&] { type2 = &nameSpace->createType("type2_", false); });
+    expectNoThrow([&] { nameSpace->createType("type3_aaaa034"); });
 
     // Recreating types with same name should throw.
     expectThrow([&] { nameSpace->createType("type0"); });
     expectThrow([&] { nameSpace->createType("type1"); });
-    expectThrow([&] { nameSpace->createType("type2"); });
-    // TODO: Test creation of types with other forbidden names.
-    // Do the same for properties.
+    expectThrow([&] { nameSpace->createType("type2_"); });
+
+    // Creating some types with invalid names.
+    expectThrow([&] { nameSpace->createType("_abc"); });
+    expectThrow([&] { nameSpace->createType("0ad"); });
+    expectThrow([&] { nameSpace->createType("^%%*)"); });
+    expectThrow([&] { nameSpace->createType("ABD"); });
 
     // Check name and committed.
     compareEQ(type0->getName(), "type0");
     compareEQ(type1->getName(), "type1");
-    compareEQ(type2->getName(), "type2");
+    compareEQ(type2->getName(), "type2_");
     compareFalse(type0->isCommitted());
     compareFalse(type1->isCommitted());
     compareFalse(type2->isCommitted());

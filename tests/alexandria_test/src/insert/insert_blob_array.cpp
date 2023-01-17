@@ -45,11 +45,11 @@ namespace
 void InsertBlobArray::operator()()
 {
     // Create type with 1 blob.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createBlobArrayProperty("blob1");
 
     // Create type with 2 blobs.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createBlobArrayProperty("blob1");
     barType.createBlobArrayProperty("blob2");
 
@@ -62,7 +62,7 @@ void InsertBlobArray::operator()()
     // Insert Foo.
     {
         const sql::TypedTable<sql::row_id, std::string, Baz> arrayTable(
-          library->getDatabase().getTable("main_Foo_blob1"));
+          library->getDatabase().getTable("main_foo_blob1"));
 
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
 
@@ -107,9 +107,9 @@ void InsertBlobArray::operator()()
     // Insert Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, std::vector<Baz>> array0Table(
-          library->getDatabase().getTable("main_Bar_blob1"));
+          library->getDatabase().getTable("main_bar_blob1"));
         const sql::TypedTable<sql::row_id, std::string, std::vector<float>> array1Table(
-          library->getDatabase().getTable("main_Bar_blob2"));
+          library->getDatabase().getTable("main_bar_blob2"));
 
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
 

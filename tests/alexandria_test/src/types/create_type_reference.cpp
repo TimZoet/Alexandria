@@ -9,17 +9,19 @@ void CreateTypeReference::operator()()
     // type1  -> prop1(type2)
     //      \ -> prop2(type3)
     // type3  -> prop3
-    alex::Type *type0 = nullptr, *type1 = nullptr, *type2 = nullptr, *type3 = nullptr;
+    alex::Type *type0 = nullptr, *type1 = nullptr, *type2 = nullptr, *type3 = nullptr, *type4 = nullptr;
     expectNoThrow([&] { type0 = &nameSpace->createType("type0"); });
     expectNoThrow([&] { type1 = &nameSpace->createType("type1"); });
     expectNoThrow([&] { type2 = &nameSpace->createType("type2"); });
     expectNoThrow([&] { type3 = &nameSpace->createType("type3"); });
+    expectNoThrow([&] { type4 = &nameSpace->createType("type4", false); });
 
     expectNoThrow([&] { type0->createReferenceProperty("prop0", *type1); });
     expectNoThrow([&] {
         type1->createReferenceProperty("prop1", *type2);
         type1->createReferenceProperty("prop2", *type3);
     });
+    expectThrow([&] { type1->createReferenceProperty("prop3", *type4); });
     expectNoThrow([&] { type2->createPrimitiveProperty("prop3", alex::DataType::Int64); });
     expectNoThrow([&] { type3->createPrimitiveProperty("prop4", alex::DataType::Float); });
 

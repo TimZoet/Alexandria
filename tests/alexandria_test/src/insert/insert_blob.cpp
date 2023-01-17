@@ -44,13 +44,13 @@ namespace
 void InsertBlob::operator()()
 {
     // Create type with 1 blob.
-    auto& fooType = nameSpace->createType("Foo");
-    fooType.createBlobProperty("blobProp1");
+    auto& fooType = nameSpace->createType("foo");
+    fooType.createBlobProperty("blobprop1");
 
     // Create type with 2 blobs.
-    auto& barType = nameSpace->createType("Bar");
-    barType.createBlobProperty("blobProp1");
-    barType.createBlobProperty("blobProp2");
+    auto& barType = nameSpace->createType("bar");
+    barType.createBlobProperty("blobprop1");
+    barType.createBlobProperty("blobprop2");
 
     // Commit types.
     expectNoThrow([&] {
@@ -88,9 +88,9 @@ void InsertBlob::operator()()
         const auto foo1_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
-        compareEQ(foo0.id, std::get<0>(foo0_get));
+        compareEQ(foo0.id, alex::InstanceId(std::get<0>(foo0_get)));
         compareEQ(foo0.a.get(), std::get<1>(foo0_get));
-        compareEQ(foo1.id, std::get<0>(foo1_get));
+        compareEQ(foo1.id, alex::InstanceId(std::get<0>(foo1_get)));
         compareEQ(foo1.a.get(), std::get<1>(foo1_get));
     }
 
@@ -134,13 +134,13 @@ void InsertBlob::operator()()
         const auto bar2_get = stmt.bind(sql::BindParameters::All)();
 
         // Compare objects.
-        compareEQ(bar0.id, std::get<0>(bar0_get));
+        compareEQ(bar0.id, alex::InstanceId(std::get<0>(bar0_get)));
         compareEQ(bar0.a.get(), std::get<1>(bar0_get));
         compareEQ(bar0.b.get(), std::get<2>(bar0_get));
-        compareEQ(bar1.id, std::get<0>(bar1_get));
+        compareEQ(bar1.id, alex::InstanceId(std::get<0>(bar1_get)));
         compareEQ(bar1.a.get(), std::get<1>(bar1_get));
         compareEQ(bar1.b.get(), std::get<2>(bar1_get));
-        compareEQ(bar2.id, std::get<0>(bar2_get));
+        compareEQ(bar2.id, alex::InstanceId(std::get<0>(bar2_get)));
         compareEQ(bar2.a.get(), std::get<1>(bar2_get));
         compareEQ(bar2.b.get(), std::get<2>(bar2_get));
     }

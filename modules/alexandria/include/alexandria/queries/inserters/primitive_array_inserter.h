@@ -50,7 +50,7 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()(object_t&) const noexcept {}
+            void operator()(object_t&, const sql::StaticText&) const noexcept {}
         };
 
         /**
@@ -92,12 +92,12 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()(object_t& instance)
+            void operator()(object_t& instance, const sql::StaticText& uuid)
             {
                 // Call implementation for M.
-                static_cast<PrimitiveArrayInserterImpl<I, T, std::tuple<M>>&>(*this)(instance);
+                static_cast<PrimitiveArrayInserterImpl<I, T, std::tuple<M>>&>(*this)(instance, uuid);
                 // Recurse on Ms...
-                static_cast<PrimitiveArrayInserterImpl<I + 1, T, std::tuple<Ms...>>&>(*this)(instance);
+                static_cast<PrimitiveArrayInserterImpl<I + 1, T, std::tuple<Ms...>>&>(*this)(instance, uuid);
             }
         };
 
@@ -154,12 +154,8 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()(object_t& instance)
+            void operator()(object_t& instance, const sql::StaticText& uuid)
             {
-                // TODO: Construction of this uuid can be pulled into main inserter. Same for other classes.
-                const std::string uuidstr = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
-                const auto        uuid    = sql::toStaticText(uuidstr);
-
                 for (const auto& v : member_t::template get(instance))
                 {
                     if constexpr (member_t::is_string_array)
@@ -174,10 +170,9 @@ namespace alex
         private:
             [[nodiscard]] static statement_t compile(const type_descriptor_t& desc)
             {
-                const Type& type = desc.getType();
-                // TODO: This constructs the same vector for each inserter now. Somewhat inefficient.
-                const auto tables = type.getPrimitiveArrayTables();
-                const auto table  = table_t(*tables[I]);
+                const Type& type   = desc.getType();
+                const auto  tables = type.getPrimitiveArrayTables();
+                const auto  table  = table_t(*tables[I]);
                 return table.insert().compile();
             }
 
@@ -244,7 +239,7 @@ namespace alex
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void operator()(object_t& instance) { impl(instance); }
+        void operator()(object_t& instance, const sql::StaticText& uuid) { impl(instance, uuid); }
 
     private:
         ////////////////////////////////////////////////////////////////

@@ -38,7 +38,7 @@ namespace alex
 
         Type(Type&&) = default;
 
-        Type(Namespace& ns, std::string typeName);
+        Type(Namespace& ns, std::string typeName, bool instantiable);
 
         Type(sql::row_id rid, Namespace& ns, std::string typeName, bool isInst);
 

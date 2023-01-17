@@ -24,7 +24,7 @@ namespace alex
      * \brief Wrapper class that holds a list of references to an object by storing their IDs.
      * \tparam T Object type.
      */
-    template<typename T>
+    template<has_instance_id T>
     class ReferenceArray
     {
     public:

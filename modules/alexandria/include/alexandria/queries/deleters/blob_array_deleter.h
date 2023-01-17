@@ -167,7 +167,7 @@ namespace alex
             [[nodiscard]] static statement_t compile(const type_descriptor_t& desc, std::string& uuidParam)
             {
                 const Type& type = desc.getType();
-                // TODO: This constructs the same vector for each inserter now. Somewhat inefficient.
+                // TODO: This constructs the same vector for each deleteer/inserter/etc now. Somewhat inefficient.
                 const auto tables = type.getBlobArrayTables();
                 const auto table  = table_t(*tables[I]);
                 return table.del().where(sql::like(table.template col<1>(), &uuidParam)).compile();

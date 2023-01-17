@@ -57,15 +57,15 @@ namespace
 void UpdatePrimitiveArray::operator()()
 {
     // Create type with floats.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createPrimitiveArrayProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createPrimitiveArrayProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
-    auto& bazType = nameSpace->createType("Baz");
+    auto& bazType = nameSpace->createType("baz");
     bazType.createPrimitiveArrayProperty("uints", alex::DataType::Uint64);
     bazType.createPrimitiveArrayProperty("doubles", alex::DataType::Double);
 

@@ -57,15 +57,15 @@ namespace
 void DeletePrimitiveBlob::operator()()
 {
     // Create type with floats.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createPrimitiveBlobProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createPrimitiveBlobProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
-    auto& bazType = nameSpace->createType("Baz");
+    auto& bazType = nameSpace->createType("baz");
     bazType.createPrimitiveBlobProperty("uints", alex::DataType::Uint64);
     bazType.createPrimitiveBlobProperty("doubles", alex::DataType::Double);
 
@@ -79,7 +79,7 @@ void DeletePrimitiveBlob::operator()()
     // Delete Foo.
     {
         const sql::TypedTable<sql::row_id, std::string, std::vector<float>> table(
-          library->getDatabase().getTable("main_Foo"));
+          library->getDatabase().getTable("main_foo"));
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
         auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
 
@@ -112,7 +112,7 @@ void DeletePrimitiveBlob::operator()()
     // Delete Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, std::vector<int32_t>> table(
-          library->getDatabase().getTable("main_Bar"));
+          library->getDatabase().getTable("main_bar"));
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
         auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
 
@@ -145,7 +145,7 @@ void DeletePrimitiveBlob::operator()()
     // Delete Baz.
     {
         const sql::TypedTable<sql::row_id, std::string, std::vector<uint64_t>, std::vector<double>> table(
-          library->getDatabase().getTable("main_Baz"));
+          library->getDatabase().getTable("main_baz"));
 
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
         auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));

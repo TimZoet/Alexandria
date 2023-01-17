@@ -50,7 +50,7 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()(object_t&) const noexcept {}
+            void operator()(object_t&, const sql::StaticText&) const noexcept {}
         };
 
         /**
@@ -92,12 +92,12 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()(object_t& instance)
+            void operator()(object_t& instance, const sql::StaticText& uuid)
             {
                 // Call implementation for M.
-                static_cast<ReferenceArrayInserterImpl<I, T, std::tuple<M>>&>(*this)(instance);
+                static_cast<ReferenceArrayInserterImpl<I, T, std::tuple<M>>&>(*this)(instance, uuid);
                 // Recurse on Ms...
-                static_cast<ReferenceArrayInserterImpl<I + 1, T, std::tuple<Ms...>>&>(*this)(instance);
+                static_cast<ReferenceArrayInserterImpl<I + 1, T, std::tuple<Ms...>>&>(*this)(instance, uuid);
             }
         };
 
@@ -154,11 +154,8 @@ namespace alex
             // Invoke.
             ////////////////////////////////////////////////////////////////
 
-            void operator()(object_t& instance)
+            void operator()(object_t& instance, const sql::StaticText& uuid)
             {
-                const std::string uuidstr = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
-                const auto        uuid    = sql::toStaticText(uuidstr);
-
                 for (const auto& values = member_t::template get(instance).get(); const auto v : values)
                     statement(nullptr, uuid, sql::toText(v.getAsString()));
 
@@ -168,10 +165,9 @@ namespace alex
         private:
             [[nodiscard]] static statement_t compile(const type_descriptor_t& desc)
             {
-                const Type& type = desc.getType();
-                // TODO: This constructs the same vector for each inserter now. Somewhat inefficient.
-                const auto tables = type.getReferenceArrayTables();
-                const auto table  = table_t(*tables[I]);
+                const Type& type   = desc.getType();
+                const auto  tables = type.getReferenceArrayTables();
+                const auto  table  = table_t(*tables[I]);
                 return table.insert().compile();
             }
 
@@ -238,7 +234,7 @@ namespace alex
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void operator()(object_t& instance) { impl(instance); }
+        void operator()(object_t& instance, const sql::StaticText& uuid) { impl(instance, uuid); }
 
     private:
         ////////////////////////////////////////////////////////////////

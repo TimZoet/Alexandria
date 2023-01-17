@@ -57,15 +57,15 @@ namespace
 void DeletePrimitiveArray::operator()()
 {
     // Create type with floats.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createPrimitiveArrayProperty("floats", alex::DataType::Float);
 
     // Create type with integers.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createPrimitiveArrayProperty("ints", alex::DataType::Int32);
 
     // Create type with floats and integers.
-    auto& bazType = nameSpace->createType("Baz");
+    auto& bazType = nameSpace->createType("baz");
     bazType.createPrimitiveArrayProperty("uints", alex::DataType::Uint64);
     bazType.createPrimitiveArrayProperty("doubles", alex::DataType::Double);
 
@@ -79,7 +79,7 @@ void DeletePrimitiveArray::operator()()
     // Delete Foo.
     {
         const sql::TypedTable<sql::row_id, std::string, float> arrayTable(
-          library->getDatabase().getTable("main_Foo_floats"));
+          library->getDatabase().getTable("main_foo_floats"));
 
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
         auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
@@ -113,7 +113,7 @@ void DeletePrimitiveArray::operator()()
     // Delete Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, int32_t> arrayTable(
-          library->getDatabase().getTable("main_Bar_ints"));
+          library->getDatabase().getTable("main_bar_ints"));
 
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
         auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
@@ -147,9 +147,9 @@ void DeletePrimitiveArray::operator()()
     // Delete Baz.
     {
         const sql::TypedTable<sql::row_id, std::string, uint32_t> array0Table(
-          library->getDatabase().getTable("main_Baz_uints"));
+          library->getDatabase().getTable("main_baz_uints"));
         const sql::TypedTable<sql::row_id, std::string, double> array1Table(
-          library->getDatabase().getTable("main_Baz_doubles"));
+          library->getDatabase().getTable("main_baz_doubles"));
 
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
         auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));

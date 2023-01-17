@@ -15,7 +15,7 @@ namespace
         std::string      a;
 
         Foo() = default;
-        Foo(std::string sid, std::string sa) : id(std::move(sid)), a(std::move(sa)) {}
+        Foo(const std::string& sid, std::string sa) : id(sid), a(std::move(sa)) {}
     };
 
     struct Bar
@@ -25,7 +25,7 @@ namespace
         std::string      b;
 
         Bar() = default;
-        Bar(std::string sid, std::string sa, std::string sb) : id(std::move(sid)), a(std::move(sa)), b(std::move(sb)) {}
+        Bar(const std::string& sid, std::string sa, std::string sb) : id(sid), a(std::move(sa)), b(std::move(sb)) {}
     };
 
     using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
@@ -37,11 +37,11 @@ namespace
 void InsertString::operator()()
 {
     // Create type with 1 string.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createStringProperty("prop1");
 
     // Create type with 2 strings.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createStringProperty("prop1");
     barType.createStringProperty("prop2");
 

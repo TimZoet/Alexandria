@@ -22,7 +22,7 @@ namespace
 void GetInvalid::operator()()
 {
     // Create type.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createPrimitiveProperty("a", alex::DataType::Int32);
     expectNoThrow([&] { fooType.commit(); }).fatal("Failed to commit types");
 
@@ -38,7 +38,7 @@ void GetInvalid::operator()()
     expectNoThrow([&] { getter(foo); });
     compareTrue(foo.id.valid());
 
-    // Retrieving non-existent object should throuw.
+    // Retrieving non-existent object should throw.
     foo.id.regenerate();
     expectThrow([&] { getter(foo); });
 }

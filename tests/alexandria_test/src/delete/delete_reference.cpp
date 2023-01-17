@@ -24,7 +24,7 @@ namespace
         alex::Reference<Foo> foo;
 
         Bar() = default;
-        Bar(std::string iid, std::string fooid) : id(std::move(iid)), foo(std::move(fooid)) {}
+        Bar(const std::string& iid, const std::string& fooid) : id(iid), foo(alex::InstanceId(fooid)) {}
     };
 
     struct Baz
@@ -34,8 +34,8 @@ namespace
         alex::Reference<Bar> bar;
 
         Baz() = default;
-        Baz(std::string iid, std::string fooid, std::string barid) :
-            id(std::move(iid)), foo(std::move(fooid)), bar(std::move(barid))
+        Baz(const std::string& iid, const std::string& fooid, const std::string& barid) :
+            id(iid), foo(alex::InstanceId(fooid)), bar(alex::InstanceId(barid))
         {
         }
     };
@@ -52,16 +52,16 @@ namespace
 void DeleteReference::operator()()
 {
     // Create types.
-    auto& fooType = nameSpace->createType("Foo");
-    auto& barType = nameSpace->createType("Bar");
-    auto& bazType = nameSpace->createType("Baz");
+    auto& fooType = nameSpace->createType("foo");
+    auto& barType = nameSpace->createType("bar");
+    auto& bazType = nameSpace->createType("baz");
 
     // Add properties to types.
-    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
-    fooType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    barType.createReferenceProperty("fooProp", fooType);
-    bazType.createReferenceProperty("fooProp", fooType);
-    bazType.createReferenceProperty("barProp", barType);
+    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
+    fooType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
+    barType.createReferenceProperty("fooprop", fooType);
+    bazType.createReferenceProperty("fooprop", fooType);
+    bazType.createReferenceProperty("barprop", barType);
 
     // Commit types.
     expectNoThrow([&] {
@@ -87,7 +87,7 @@ void DeleteReference::operator()()
 
     // Delete Bar.
     {
-        const sql::TypedTable<sql::row_id, std::string, std::string> table(library->getDatabase().getTable("main_Bar"));
+        const sql::TypedTable<sql::row_id, std::string, std::string> table(library->getDatabase().getTable("main_bar"));
 
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
         auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
@@ -112,7 +112,7 @@ void DeleteReference::operator()()
     // Delete Baz.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string, std::string> table(
-          library->getDatabase().getTable("main_Baz"));
+          library->getDatabase().getTable("main_baz"));
 
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
         auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));

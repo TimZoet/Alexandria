@@ -68,68 +68,6 @@ namespace alex
 
     bool Property::isBlob() const noexcept { return blob; }
 
-    auto Property::getDefaultValue() const noexcept -> const default_value_t& { return defaultValue; }
-
-    ////////////////////////////////////////////////////////////////
-    // Setters.
-    ////////////////////////////////////////////////////////////////
-
-    void Property::setDefaultValue(const int32_t value)
-    {
-        requireNotCommitted();
-        if (dataType != DataType::Int32)
-            throw std::runtime_error("Cannot set int32 default value if DataType != int32");
-        defaultValue = value;
-    }
-
-    void Property::setDefaultValue(const uint32_t value)
-    {
-        requireNotCommitted();
-        if (dataType != DataType::Uint32)
-            throw std::runtime_error("Cannot set uint32 default value if DataType != uint32");
-        defaultValue = value;
-    }
-
-    void Property::setDefaultValue(const int64_t value)
-    {
-        requireNotCommitted();
-        if (dataType != DataType::Int64)
-            throw std::runtime_error("Cannot set int64 default value if DataType != int64");
-        defaultValue = value;
-    }
-
-    void Property::setDefaultValue(const uint64_t value)
-    {
-        requireNotCommitted();
-        if (dataType != DataType::Uint64)
-            throw std::runtime_error("Cannot set uint64 default value if DataType != uint64");
-        defaultValue = value;
-    }
-
-    void Property::setDefaultValue(const float value)
-    {
-        requireNotCommitted();
-        if (dataType != DataType::Float)
-            throw std::runtime_error("Cannot set float default value if DataType != float");
-        defaultValue = value;
-    }
-
-    void Property::setDefaultValue(const double value)
-    {
-        requireNotCommitted();
-        if (dataType != DataType::Double)
-            throw std::runtime_error("Cannot set double default value if DataType != double");
-        defaultValue = value;
-    }
-
-    void Property::setDefaultValue(std::string value)
-    {
-        requireNotCommitted();
-        if (dataType != DataType::String)
-            throw std::runtime_error("Cannot set string default value if DataType != String");
-        defaultValue = std::move(value);
-    }
-
     ////////////////////////////////////////////////////////////////
     // Commit.
     ////////////////////////////////////////////////////////////////

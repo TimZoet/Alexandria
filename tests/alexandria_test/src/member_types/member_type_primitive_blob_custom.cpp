@@ -40,13 +40,13 @@ namespace
             for (size_t i = std::min(I, v.size()); i < I; ++i) value[i] = 0;
         }
 
-        [[nodiscard]] operator sql::StaticBlob() const
+        [[nodiscard]] explicit operator sql::StaticBlob() const
         {
             return sql::StaticBlob{.data = static_cast<const void*>(value.data()),
                                    .size = value.size() * sizeof value_t};
         }
 
-        [[nodiscard]] operator sql::Blob() const { return sql::toBlob(value); }
+        [[nodiscard]] explicit operator sql::Blob() const { return sql::toBlob(value); }
 
     private:
         std::array<float, I> value{};

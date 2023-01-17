@@ -42,16 +42,16 @@ namespace
 void InsertReferenceArray::operator()()
 {
     // Create types.
-    auto& fooType = nameSpace->createType("Foo");
-    auto& barType = nameSpace->createType("Bar");
-    auto& bazType = nameSpace->createType("Baz");
+    auto& fooType = nameSpace->createType("foo");
+    auto& barType = nameSpace->createType("bar");
+    auto& bazType = nameSpace->createType("baz");
 
     // Add properties to types.
-    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
-    fooType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    barType.createReferenceArrayProperty("fooProp", fooType);
-    bazType.createReferenceArrayProperty("fooProp", fooType);
-    bazType.createReferenceArrayProperty("barProp", barType);
+    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
+    fooType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
+    barType.createReferenceArrayProperty("fooprop", fooType);
+    bazType.createReferenceArrayProperty("fooprop", fooType);
+    bazType.createReferenceArrayProperty("barprop", barType);
 
     // Commit types.
     expectNoThrow([&] {
@@ -78,7 +78,7 @@ void InsertReferenceArray::operator()()
     // Insert Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
-          library->getDatabase().getTable("main_Bar_fooProp"));
+          library->getDatabase().getTable("main_bar_fooprop"));
 
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
 
@@ -109,9 +109,9 @@ void InsertReferenceArray::operator()()
     // Insert Baz.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string> array0Table(
-          library->getDatabase().getTable("main_Baz_fooProp"));
+          library->getDatabase().getTable("main_baz_fooprop"));
         const sql::TypedTable<sql::row_id, std::string, std::string> array1Table(
-          library->getDatabase().getTable("main_Baz_barProp"));
+          library->getDatabase().getTable("main_baz_barprop"));
 
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
 

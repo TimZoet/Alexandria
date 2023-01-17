@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <format>
+#include <regex>
 
 namespace alex
 {
@@ -51,23 +52,17 @@ namespace alex
     // Types.
     ////////////////////////////////////////////////////////////////
 
-    Type& Namespace::createType(const std::string& typeName)
+    Type& Namespace::createType(const std::string& typeName, const bool instantiable)
     {
         if (types.contains(typeName))
             throw std::runtime_error(
               std::format(R"(A type with name "{}" already exists in namespace "{}".)", typeName, name));
-        // TODO: Also check for other forbidden names:
-        // Types, Properties, etc. built-in tables.
-        // Table names forbidden by sqlite.
-        // Existing generated tables.
-        // Type names such as float, double, int32 etc.
-        // ...
 
+        if (const std::regex regex("^[a-z][a-z0-9_]*$"); !std::regex_match(typeName, regex))
+            throw std::runtime_error(std::format(
+              R"(Cannot create type with name "{}". It does not match the regex "^[a-z][a-z0-9_]*$".)", typeName));
 
-
-        // Create type.
-        auto type = std::make_unique<Type>(*this, typeName);
+        auto type = std::make_unique<Type>(*this, typeName, instantiable);
         return *types.emplace(typeName, std::move(type)).first->second;
     }
-
 }  // namespace alex

@@ -39,16 +39,16 @@ namespace
 void GetPrimitive::operator()()
 {
     // Create type with floats.
-    auto& fooType = nameSpace->createType("Foo");
-    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
-    fooType.createPrimitiveProperty("doubleProp", alex::DataType::Double);
+    auto& fooType = nameSpace->createType("foo");
+    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
+    fooType.createPrimitiveProperty("doubleprop", alex::DataType::Double);
 
     // Create type with integers.
-    auto& barType = nameSpace->createType("Bar");
-    barType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    barType.createPrimitiveProperty("int64Prop", alex::DataType::Int64);
-    barType.createPrimitiveProperty("uint32Prop", alex::DataType::Uint32);
-    barType.createPrimitiveProperty("uint64Prop", alex::DataType::Uint64);
+    auto& barType = nameSpace->createType("bar");
+    barType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
+    barType.createPrimitiveProperty("int64prop", alex::DataType::Int64);
+    barType.createPrimitiveProperty("uint32prop", alex::DataType::Uint32);
+    barType.createPrimitiveProperty("uint64prop", alex::DataType::Uint64);
 
     // Commit types.
     expectNoThrow([&] {

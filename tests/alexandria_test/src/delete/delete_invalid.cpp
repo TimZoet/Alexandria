@@ -22,7 +22,7 @@ namespace
 void DeleteInvalid::operator()()
 {
     // Create type.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createPrimitiveProperty("a", alex::DataType::Int32);
     expectNoThrow([&] { fooType.commit(); }).fatal("Failed to commit types");
 

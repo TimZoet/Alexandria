@@ -49,11 +49,11 @@ namespace
 void UpdateStringArray::operator()()
 {
     // Create type with 1 string.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createStringArrayProperty("strings");
 
     // Create type with 2 strings.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createStringArrayProperty("strings1");
     barType.createStringArrayProperty("strings2");
 
@@ -71,12 +71,12 @@ void UpdateStringArray::operator()()
 
         // Create objects.
         Foo foo0;
-        foo0.strings.get().push_back("abc");
-        foo0.strings.get().push_back("def");
+        foo0.strings.get().emplace_back("abc");
+        foo0.strings.get().emplace_back("def");
         Foo foo1;
-        foo1.strings.get().push_back("10");
-        foo1.strings.get().push_back("1111");
-        foo1.strings.get().push_back("%^&*&(*U");
+        foo1.strings.get().emplace_back("10");
+        foo1.strings.get().emplace_back("1111");
+        foo1.strings.get().emplace_back("%^&*&(*U");
 
         // Try to insert.
         expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
@@ -84,7 +84,7 @@ void UpdateStringArray::operator()()
 
         // Modify objects.
         foo0.strings.get().clear();
-        foo1.strings.get().push_back("dgesrfd");
+        foo1.strings.get().emplace_back("dgesrfd");
 
         // Try to update.
         expectNoThrow([&] { updater(foo0); }).fatal("Failed to update object");
@@ -111,21 +111,21 @@ void UpdateStringArray::operator()()
         // Create objects.
         Bar bar0;
         Bar bar1;
-        bar1.strings1.get().push_back("");
-        bar1.strings1.get().push_back("");
-        bar1.strings1.get().push_back("hntfdrgtef");
-        bar1.strings2.get().push_back("dbsfdcesw");
-        bar1.strings2.get().push_back("utikrt");
-        bar1.strings2.get().push_back("hntfdrgtef");
+        bar1.strings1.get().emplace_back("");
+        bar1.strings1.get().emplace_back("");
+        bar1.strings1.get().emplace_back("hntfdrgtef");
+        bar1.strings2.get().emplace_back("dbsfdcesw");
+        bar1.strings2.get().emplace_back("utikrt");
+        bar1.strings2.get().emplace_back("hntfdrgtef");
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
         expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
 
         // Modify objects.
-        bar0.strings2.get().push_back("oiuqdq");
+        bar0.strings2.get().emplace_back("oiuqdq");
         bar1.strings1.get().clear();
-        bar1.strings1.get().push_back("erge");
+        bar1.strings1.get().emplace_back("erge");
 
         // Try to update.
         expectNoThrow([&] { updater(bar0); }).fatal("Failed to update object");

@@ -67,16 +67,22 @@ namespace alex
             try
             {
                 // Generate UUID.
-                type_descriptor_t::uuid_member_t::template get(instance).regenerate();
+                InstanceId id;
+                id.regenerate();
+                const std::string uuidstr = id.getAsString();
+                const auto        uuid    = sql::toStaticText(uuidstr);
 
-                sql::Transaction transaction(db, sql::Transaction::Type::Deferred);
+                auto transaction = db.beginTransaction(sql::Transaction::Type::Deferred);
 
-                primitiveInserter(instance);
-                primitiveArrayInserter(instance);
-                blobArrayInserter(instance);
-                referenceArrayInserter(instance);
+                primitiveInserter(instance, uuid);
+                primitiveArrayInserter(instance, uuid);
+                blobArrayInserter(instance, uuid);
+                referenceArrayInserter(instance, uuid);
 
                 transaction.commit();
+
+                // Assign UUID.
+                type_descriptor_t::uuid_member_t::template get(instance) = id;
             }
             catch (...)
             {

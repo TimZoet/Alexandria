@@ -7,6 +7,12 @@
 #include <type_traits>
 
 ////////////////////////////////////////////////////////////////
+// Module includes.
+////////////////////////////////////////////////////////////////
+
+#include "common/type_traits.h"
+
+////////////////////////////////////////////////////////////////
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
@@ -32,7 +38,7 @@ namespace alex
         struct UpdateStatementGenerator<sql::TypedTable<C, Cs...>>
         {
             using table_t              = sql::TypedTable<C, Cs...>;
-            static constexpr auto func = []<size_t I, size_t... Is>(std::index_sequence<I, Is...>)
+            static constexpr auto func = []<size_t I, size_t J, size_t... Is>(std::index_sequence<I, J, Is...>)
                                            -> decltype(std::declval<table_t>().template update<Is...>())
             {
                 return std::declval<table_t>().template update<Is...>();
@@ -78,8 +84,7 @@ namespace alex
         /**
          * \brief Update query type.
          */
-        using query_t = typename detail::UpdateStatementGenerator<
-          table_t>::type;  //std::remove_cvref_t<decltype(std::declval<table_t>().update())>;
+        using query_t = typename detail::UpdateStatementGenerator<table_t>::type;
 
         /**
          * \brief Update statement type.
@@ -112,34 +117,30 @@ namespace alex
         {
             statement.bind(sql::BindParameters::Dynamic);
 
-            // TODO: This getter needs to be moved out of here.
-            const auto getter = [&]<typename M>(M) {
-                // TODO: All these toText copy data. Might not always be necessary.
-                if constexpr (M::is_instance_id)
-                    return sql::toText(M::template get(instance).getAsString());
-                else if constexpr (M::is_primitive_blob || M::is_blob)
+            const auto getter = [&]<is_member M>(M) {
+                if constexpr (M::is_primitive_blob || M::is_blob)
                 {
-                    if constexpr (std::convertible_to<decltype(M::template get(instance)), sql::StaticBlob>)
+                    if constexpr (explicitly_convertible_to<decltype(M::template get(instance)), sql::StaticBlob>)
                         return static_cast<sql::StaticBlob>(M::template get(instance));
-                    else if constexpr (std::convertible_to<decltype(M::template get(instance)), sql::TransientBlob>)
+                    else if constexpr (explicitly_convertible_to<decltype(M::template get(instance)),
+                                                                 sql::TransientBlob>)
                         return static_cast<sql::TransientBlob>(M::template get(instance));
                     else
                         return static_cast<sql::Blob>(M::template get(instance));
                 }
                 else if constexpr (M::is_reference)
-                    // TODO: What if no object was assigned? Turn return type into std::optional and rely on cppql to insert nullptr?
                     return sql::toText(M::template get(instance).getId().getAsString());
                 else if constexpr (M::is_primitive)
                     return M::template get(instance);
                 else if constexpr (M::is_string)
-                    return sql::toText(M::template get(instance));
+                    return sql::toStaticText(M::template get(instance));
                 else
                     constexpr_static_assert();
             };
 
-            const auto f = [&]<typename... Ms>(std::tuple<Ms...>) {
+            const auto f = [&]<is_member M, is_member... Ms>(std::tuple<M, Ms...>) {
                 // Retrieve member values from instance for each column.
-                statement(getter(Ms())...);
+                if constexpr (sizeof...(Ms) > 0) statement(getter(Ms())...);
             };
 
             f(members_t{});
@@ -152,7 +153,7 @@ namespace alex
         {
             const auto table = table_t(desc.getType().getInstanceTable());
 
-            const auto f = [&]<size_t I, size_t... Is>(std::index_sequence<I, Is...>)
+            const auto f = [&]<size_t I, size_t J, size_t... Is>(std::index_sequence<I, J, Is...>)
             {
                 return table.template update<Is...>().where(sql::like(table.template col<1>(), &uuidParam)).compile();
             };
@@ -162,8 +163,6 @@ namespace alex
             };
 
             return g(table);
-            //return f(std::index_sequence_for<>)
-            //return table.update().where(sql::like(table.template col<1>(), &uuidParam)).compile();
         }
 
         ////////////////////////////////////////////////////////////////

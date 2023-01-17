@@ -7,6 +7,12 @@
 #include <type_traits>
 
 ////////////////////////////////////////////////////////////////
+// Module includes.
+////////////////////////////////////////////////////////////////
+
+#include "common/type_traits.h"
+
+////////////////////////////////////////////////////////////////
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
@@ -80,24 +86,20 @@ namespace alex
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void operator()(object_t& instance)
+        void operator()(object_t& instance, const sql::StaticText& uuid)
         {
-            // TODO: This getter needs to be moved out of here.
-            const auto getter = [&]<typename M>(M) {
-                // TODO: All these toText copy data. Might not always be necessary.
-                if constexpr (M::is_instance_id)
-                    return sql::toText(M::template get(instance).getAsString());
-                else if constexpr (M::is_primitive_blob || M::is_blob)
+            const auto getter = [&]<is_member M>(M) {
+                if constexpr (M::is_primitive_blob || M::is_blob)
                 {
-                    if constexpr (std::convertible_to<decltype(M::template get(instance)), sql::StaticBlob>)
+                    if constexpr (explicitly_convertible_to<decltype(M::template get(instance)), sql::StaticBlob>)
                         return static_cast<sql::StaticBlob>(M::template get(instance));
-                    else if constexpr (std::convertible_to<decltype(M::template get(instance)), sql::TransientBlob>)
+                    else if constexpr (explicitly_convertible_to<decltype(M::template get(instance)),
+                                                                 sql::TransientBlob>)
                         return static_cast<sql::TransientBlob>(M::template get(instance));
                     else
                         return static_cast<sql::Blob>(M::template get(instance));
                 }
                 else if constexpr (M::is_reference)
-                    // TODO: What if no object was assigned? Turn return type into std::optional and rely on cppql to insert nullptr?
                     return sql::toText(M::template get(instance).getId().getAsString());
                 else if constexpr (M::is_primitive)
                     return M::template get(instance);
@@ -107,9 +109,10 @@ namespace alex
                     constexpr_static_assert();
             };
 
-            const auto f = [&]<typename... Ms>(std::tuple<Ms...>) {
+            const auto f = [&]<is_member M, is_member... Ms>(std::tuple<M, Ms...>)
+            {
                 // Insert nullptr for autoincrement rowid, retrieve member values from instance for other columns.
-                statement(nullptr, getter(Ms())...);
+                statement(nullptr, uuid, getter(Ms())...);
             };
 
             f(members_t{});

@@ -38,7 +38,7 @@ namespace
             std::memcpy(value1.data(), v.data() + sizeof value0, sizeof value1);
         }
 
-        [[nodiscard]] operator sql::Blob() const& noexcept
+        [[nodiscard]] explicit operator sql::Blob() const& noexcept
         {
             auto* x = new int32_t[value0.size() + value1.size()];
             std::memcpy(x, value0.data(), sizeof value0);

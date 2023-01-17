@@ -64,9 +64,11 @@ namespace alex
         /**
          * \brief Create a new type.
          * \param typeName Unique type name.
+         * \param instantiable Whether instances of this type can be created, or if it is only to be used as a nested type.
+         * If false, no tables are generated when committing this type.
          * \return Type.
          */
-        Type& createType(const std::string& typeName);
+        Type& createType(const std::string& typeName, bool instantiable = true);
 
     private:
         ////////////////////////////////////////////////////////////////

@@ -31,14 +31,14 @@ namespace alex
 
         InstanceId(const InstanceId&) = default;
 
-        InstanceId(InstanceId&&) = default;
+        InstanceId(InstanceId&&) noexcept = default;
 
-        InstanceId(const uuids::uuid iid) : id(iid) {}
+        explicit InstanceId(const uuids::uuid iid) : id(iid) {}
 
         // TODO: Dereferencing might throw.
-        InstanceId(const std::string& iid) : id(*uuids::uuid::from_string(iid)) {}
+        explicit InstanceId(const std::string& iid) : id(*uuids::uuid::from_string(iid)) {}
 
-        ~InstanceId() = default;
+        ~InstanceId() noexcept = default;
 
         ////////////////////////////////////////////////////////////////
         // Assignment operators.
@@ -46,11 +46,18 @@ namespace alex
 
         InstanceId& operator=(const InstanceId&) = default;
 
-        InstanceId& operator=(InstanceId&&) = default;
+        InstanceId& operator=(InstanceId&&) noexcept = default;
 
         InstanceId& operator=(const uuids::uuid iid) noexcept
         {
             id = iid;
+            return *this;
+        }
+
+        InstanceId& operator=(const std::string& iid) noexcept
+        {
+            // TODO: What if empty.
+            if (const auto i = uuids::uuid::from_string(iid); i.has_value()) id = *i;
             return *this;
         }
 
@@ -70,9 +77,9 @@ namespace alex
         // Conversion operators.
         ////////////////////////////////////////////////////////////////
 
-        [[nodiscard]] operator uuids::uuid() const noexcept { return id; }
+        [[nodiscard]] explicit operator uuids::uuid() const noexcept { return id; }
 
-        [[nodiscard]] operator std::string() const { return getAsString(); }
+        [[nodiscard]] explicit operator std::string() const { return getAsString(); }
 
         ////////////////////////////////////////////////////////////////
         // Getters.
@@ -93,6 +100,15 @@ namespace alex
 
     template<auto M>
     concept is_instance_id_mp = is_instance_id<member_pointer_value_t<decltype(M)>>;
+
+    // clang-format off
+    template<typename T>
+    concept has_instance_id = requires (T obj)
+    {
+        {obj.id} -> std::same_as<InstanceId&>;
+    };
+    // clang-format on
+
 }  // namespace alex
 
 template<>

@@ -42,16 +42,16 @@ namespace
 void GetReferenceArray::operator()()
 {
     // Create types.
-    auto& fooType = nameSpace->createType("Foo");
-    auto& barType = nameSpace->createType("Bar");
-    auto& bazType = nameSpace->createType("Baz");
+    auto& fooType = nameSpace->createType("foo");
+    auto& barType = nameSpace->createType("bar");
+    auto& bazType = nameSpace->createType("baz");
 
     // Add properties to types.
-    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
-    fooType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    barType.createReferenceArrayProperty("fooProp", fooType);
-    bazType.createReferenceArrayProperty("fooProp", fooType);
-    bazType.createReferenceArrayProperty("barProp", barType);
+    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
+    fooType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
+    barType.createReferenceArrayProperty("fooprop", fooType);
+    bazType.createReferenceArrayProperty("fooprop", fooType);
+    bazType.createReferenceArrayProperty("barprop", barType);
 
     // Commit types.
     expectNoThrow([&] {

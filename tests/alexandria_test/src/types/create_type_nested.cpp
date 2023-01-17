@@ -19,9 +19,9 @@ void CreateTypeNested::operator()()
     expectNoThrow([&] { type0->createNestedTypeProperty("prop1", *type1); });
     expectNoThrow([&] { type0->createNestedTypeProperty("prop3", *type3); });
     expectNoThrow([&] { type1->createNestedTypeProperty("prop2", *type2); });
-    expectNoThrow([&] { type2->createPrimitiveProperty("propA", alex::DataType::Float); });
-    expectNoThrow([&] { type3->createPrimitiveProperty("propB", alex::DataType::Double); });
-    expectNoThrow([&] { type3->createPrimitiveProperty("propC", alex::DataType::Int32); });
+    expectNoThrow([&] { type2->createPrimitiveProperty("propa", alex::DataType::Float); });
+    expectNoThrow([&] { type3->createPrimitiveProperty("propb", alex::DataType::Double); });
+    expectNoThrow([&] { type3->createPrimitiveProperty("propc", alex::DataType::Int32); });
 
     // Referenced types must be committed first.
     expectThrow([&] { type0->commit(); });
@@ -38,9 +38,9 @@ void CreateTypeNested::operator()()
     const std::vector<alex::TypeRow>      types      = {
       {1, 1, "type3", true}, {2, 1, "type2", true}, {3, 1, "type1", true}, {4, 1, "type0", true}};
     const std::vector<alex::PropertyRow> properties = {
-      {1, 1, "propB", toString(alex::DataType::Double), 0, false, false},
-      {2, 1, "propC", toString(alex::DataType::Int32), 0, false, false},
-      {3, 2, "propA", toString(alex::DataType::Float), 0, false, false},
+      {1, 1, "propb", toString(alex::DataType::Double), 0, false, false},
+      {2, 1, "propc", toString(alex::DataType::Int32), 0, false, false},
+      {3, 2, "propa", toString(alex::DataType::Float), 0, false, false},
       {4, 3, "prop2", toString(alex::DataType::Nested), 2, false, false},
       {5, 4, "prop1", toString(alex::DataType::Nested), 3, false, false},
       {6, 4, "prop3", toString(alex::DataType::Nested), 1, false, false}};

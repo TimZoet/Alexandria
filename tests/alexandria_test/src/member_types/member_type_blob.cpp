@@ -53,6 +53,6 @@ void MemberTypeBlob::operator()()
                         blob.set(std::declval<std::vector<Foo>>())
                     };
                 });
-    compareTrue(std::convertible_to<alex::Blob<Foo>, sql::StaticBlob>);
-    compareTrue(std::convertible_to<alex::Blob<std::vector<Foo>>, sql::StaticBlob>);
+    compareTrue(explicitly_convertible_to<alex::Blob<Foo>, sql::StaticBlob>);
+    compareTrue(explicitly_convertible_to<alex::Blob<std::vector<Foo>>, sql::StaticBlob>);
 }

@@ -14,6 +14,10 @@ namespace
         alex::InstanceId id;
         float            a = 0;
         double           b = 0;
+
+        Foo(const float aa, const double bb) : a(aa), b(bb) {}
+
+        Foo(const std::string& iid, const float aa, const double bb) : id(iid), a(aa), b(bb) {}
     };
 
     struct Bar
@@ -23,6 +27,13 @@ namespace
         int64_t          b = 0;
         uint32_t         c = 0;
         uint64_t         d = 0;
+
+        Bar(const int32_t aa, const int64_t bb, const uint32_t cc, const uint64_t dd) : a(aa), b(bb), c(cc), d(dd) {}
+
+        Bar(const std::string& iid, const int32_t aa, const int64_t bb, const uint32_t cc, const uint64_t dd) :
+            id(iid), a(aa), b(bb), c(cc), d(dd)
+        {
+        }
     };
 
     using FooDescriptor =
@@ -38,16 +49,16 @@ namespace
 void InsertPrimitive::operator()()
 {
     // Create type with floats.
-    auto& fooType = nameSpace->createType("Foo");
-    fooType.createPrimitiveProperty("floatProp", alex::DataType::Float);
-    fooType.createPrimitiveProperty("doubleProp", alex::DataType::Double);
+    auto& fooType = nameSpace->createType("foo");
+    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
+    fooType.createPrimitiveProperty("doubleprop", alex::DataType::Double);
 
     // Create type with integers.
-    auto& barType = nameSpace->createType("Bar");
-    barType.createPrimitiveProperty("int32Prop", alex::DataType::Int32);
-    barType.createPrimitiveProperty("int64Prop", alex::DataType::Int64);
-    barType.createPrimitiveProperty("uint32Prop", alex::DataType::Uint32);
-    barType.createPrimitiveProperty("uint64Prop", alex::DataType::Uint64);
+    auto& barType = nameSpace->createType("bar");
+    barType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
+    barType.createPrimitiveProperty("int64prop", alex::DataType::Int64);
+    barType.createPrimitiveProperty("uint32prop", alex::DataType::Uint32);
+    barType.createPrimitiveProperty("uint64prop", alex::DataType::Uint64);
 
     // Commit types.
     expectNoThrow([&] {
@@ -61,8 +72,8 @@ void InsertPrimitive::operator()()
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
 
         // Create objects.
-        Foo foo0{.a = 0.5f, .b = 1.5};
-        Foo foo1{.a = -0.5f, .b = -1.5};
+        Foo foo0(0.5f, 1.5);
+        Foo foo1(-0.5f, -1.5);
 
         // Try to insert.
         expectNoThrow([&] { inserter(foo0); }).fatal("Failed to insert object");
@@ -96,8 +107,8 @@ void InsertPrimitive::operator()()
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
 
         // Create objects.
-        Bar bar0{.a = 1, .b = 2, .c = 3, .d = 4};
-        Bar bar1{.a = -1, .b = -2, .c = 123456, .d = 1234567};
+        Bar bar0(1, 2, 3, 4);
+        Bar bar1(-1, -2, 123456, 1234567);
 
         // Try to insert.
         expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");

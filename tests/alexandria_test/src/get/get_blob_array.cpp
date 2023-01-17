@@ -45,11 +45,11 @@ namespace
 void GetBlobArray::operator()()
 {
     // Create type with 1 blob.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createBlobArrayProperty("blob1");
 
     // Create type with 2 blobs.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createBlobArrayProperty("blob1");
     barType.createBlobArrayProperty("blob2");
 

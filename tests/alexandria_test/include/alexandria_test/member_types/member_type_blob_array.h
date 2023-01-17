@@ -8,7 +8,7 @@
 #include "bettertest/mixins/exception_mixin.h"
 #include "bettertest/tests/unit_test.h"
 
-class MemberTypeBlobArray : public bt::UnitTest<MemberTypeBlobArray, bt::CompareMixin, bt::ExceptionMixin>
+class MemberTypeBlobArray final : public bt::UnitTest<MemberTypeBlobArray, bt::CompareMixin, bt::ExceptionMixin>
 {
 public:
     void operator()() override;

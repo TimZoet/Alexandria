@@ -24,7 +24,7 @@ namespace alex
      * \brief Wrapper class that holds a reference to an object by storing its ID.
      * \tparam T Object type.
      */
-    template<typename T>  //TODO: Require T to have an InstanceId member with name 'id'.
+    template<has_instance_id T>
     class Reference
     {
     public:
@@ -39,11 +39,11 @@ namespace alex
 
         Reference(Reference&& other) noexcept { *this = std::move(other); }
 
-        Reference(const InstanceId instanceId) : id(instanceId) {}
+        explicit Reference(const InstanceId instanceId) : id(instanceId) {}
 
-        Reference(const object_t& instance) : id(instance.id) {}
+        explicit Reference(const object_t& instance) : id(instance.id) {}
 
-        ~Reference() = default;
+        ~Reference() noexcept = default;
 
         ////////////////////////////////////////////////////////////////
         // Getters.
@@ -60,32 +60,6 @@ namespace alex
          * \return InstanceId.
          */
         [[nodiscard]] InstanceId getId() const noexcept { return id; }
-
-        /**
-         * \brief Returns whether this reference is still pointing to an existing object.
-         * \tparam O ObjectHandler type.
-         * \param objectHandler ObjectHandler.
-         * \return True if referenced object exists, false if it does not or when this reference is empty.
-         */
-        template<typename O>  // TODO: Constrain O to valid ObjectHandler.
-        [[nodiscard]] bool isValid(O& objectHandler) const
-        {
-            if (isNone()) return false;
-            return objectHandler.exists(id);
-        }
-
-        /**
-         * \brief Retrieve the referenced instance using the given ObjectHandler.
-         * \tparam O ObjectHandler type.
-         * \param objectHandler ObjectHandler.
-         * \return Instance.
-         */
-        template<typename O>  // TODO: Constrain O to valid ObjectHandler.
-        [[nodiscard]] std::shared_ptr<object_t> get(O& objectHandler) const
-        {
-            if (isNone()) throw std::runtime_error("This reference does not point to an object");
-            return objectHandler.get(id);
-        }
 
         ////////////////////////////////////////////////////////////////
         // Setters.

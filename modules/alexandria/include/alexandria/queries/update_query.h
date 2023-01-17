@@ -83,7 +83,9 @@ namespace alex
             try
             {
                 // Update parameter.
-                *uuidParam = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
+                *uuidParam                = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
+                const std::string uuidstr = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
+                const auto        uuid    = sql::toStaticText(uuidstr);
 
                 // Start transaction.
                 sql::Transaction transaction(db, sql::Transaction::Type::Deferred);
@@ -93,11 +95,10 @@ namespace alex
                 blobArrayDeleter();
                 referenceArrayDeleter();
                 primitiveUpdater(instance);
-                primitiveArrayInserter(instance);
-                blobArrayInserter(instance);
-                referenceArrayInserter(instance);
+                primitiveArrayInserter(instance, uuid);
+                blobArrayInserter(instance, uuid);
+                referenceArrayInserter(instance, uuid);
 
-                // TODO: What if the object didn't exist? Should that throw or return some kind of error code?
                 transaction.commit();
             }
             catch (...)

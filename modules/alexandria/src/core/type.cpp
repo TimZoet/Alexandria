@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <format>
+#include <regex>
 #include <stdexcept>
 
 ////////////////////////////////////////////////////////////////
@@ -27,7 +28,10 @@ namespace alex
     // Constructors.
     ////////////////////////////////////////////////////////////////
 
-    Type::Type(Namespace& ns, std::string typeName) : nameSpace(&ns), name(std::move(typeName)) {}
+    Type::Type(Namespace& ns, std::string typeName, const bool instantiable) :
+        nameSpace(&ns), name(std::move(typeName)), isInstance(instantiable)
+    {
+    }
 
     Type::Type(const sql::row_id rid, Namespace& ns, std::string typeName, const bool isInst) :
         id(rid), nameSpace(&ns), name(std::move(typeName)), isInstance(isInst)
@@ -121,13 +125,28 @@ namespace alex
     {
         requireNotCommitted();
 
+        if (!refType.isInstance)
+            throw std::runtime_error(std::format(
+              R"(Cannot add reference property to type {}::{}. Referenced type {}::{} is not an instantiable type.)",
+              nameSpace->getName(),
+              name,
+              refType.nameSpace->getName(),
+              refType.name));
+
         return createProperty(propName, DataType::Reference, &refType, false, false);
     }
 
     Property& Type::createReferenceArrayProperty(const std::string& propName, Type& refType)
     {
         requireNotCommitted();
-        // TODO: Verify that refType.isInstance == true. Same for createReferenceProperty.
+
+        if (!refType.isInstance)
+            throw std::runtime_error(std::format("Cannot add reference array property to type {}::{}. Referenced type "
+                                                 "{}::{} is not an instantiable type.",
+                                                 nameSpace->getName(),
+                                                 name,
+                                                 refType.nameSpace->getName(),
+                                                 refType.name));
 
         return createProperty(propName, DataType::Reference, &refType, true, false);
     }
@@ -192,8 +211,8 @@ namespace alex
 
         for (const auto& prop : properties) prop->requireReferencedTypesCommitted();
 
-        auto&       library   = nameSpace->getLibrary();
-        auto&       db        = library.getDatabase();
+        auto& library = nameSpace->getLibrary();
+        auto& db      = library.getDatabase();
 
         try
         {
@@ -231,9 +250,9 @@ namespace alex
         // Create instance table.
         auto& instanceTable = db.createTable(getInstanceTableName());
         instanceTable.createColumn("id", sql::Column::Type::Int).primaryKey(true);
-        instanceTable.createColumn("uuid", sql::Column::Type::Text).unique();  // .primaryKey().unique().notNull();
+        instanceTable.createColumn("uuid", sql::Column::Type::Text).unique();
 
-        // Add columns and reference tables for all properties.
+        // Add columns and array tables for all properties.
         for (const auto& prop : properties) prop->generate(instanceTable, "");
 
         // Commit instance table.
@@ -243,10 +262,15 @@ namespace alex
     Property& Type::createProperty(
       const std::string& propName, const DataType dataType, Type* refType, const bool isArray, const bool isBlob)
     {
-        //if (properties.contains(propName)) throw std::runtime_error("A property with this name already exists");
-        // TODO: Also check for other forbidden names:
-        // Type names such as float, double, int32 etc.
-        // ...
+        if (const auto it =
+              std::ranges::find_if(properties, [&propName](const auto& prop) { return prop->getName() == propName; });
+            it != properties.end())
+            throw std::runtime_error(std::format(
+              R"(Type "{}::{}" already has a property with name "{}".)", nameSpace->getName(), name, propName));
+
+        if (const std::regex regex("^[a-z][a-z0-9_]*$"); !std::regex_match(propName, regex))
+            throw std::runtime_error(std::format(
+              R"(Cannot create property with name "{}". It does not match the regex "^[a-z][a-z0-9_]*$".)", propName));
 
         return *properties.emplace_back(
           std::make_unique<Property>(*this, -1, propName, dataType, refType, isArray, isBlob));

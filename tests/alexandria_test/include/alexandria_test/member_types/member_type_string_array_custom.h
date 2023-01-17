@@ -8,7 +8,7 @@
 #include "bettertest/mixins/exception_mixin.h"
 #include "bettertest/tests/unit_test.h"
 
-class MemberTypeStringArrayCustom
+class MemberTypeStringArrayCustom final
     : public bt::UnitTest<MemberTypeStringArrayCustom, bt::CompareMixin, bt::ExceptionMixin>
 {
 public:

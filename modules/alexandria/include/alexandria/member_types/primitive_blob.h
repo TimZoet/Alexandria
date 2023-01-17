@@ -68,7 +68,7 @@ namespace alex
         /**
          * \brief Convert to sql::StaticBlob for binding.
          */
-        [[nodiscard]] operator sql::StaticBlob() const { return sql::toStaticBlob(value); }
+        [[nodiscard]] explicit operator sql::StaticBlob() const { return sql::toStaticBlob(value); }
 
     private:
         std::vector<value_t> value;
@@ -92,9 +92,9 @@ namespace alex
     // clang-format off
     template<typename T>
     concept is_primitive_blob = _is_primitive_blob<T>::value && 
-                               (std::convertible_to<T, sql::StaticBlob> ||
-                                std::convertible_to<T, sql::TransientBlob> ||
-                                std::convertible_to<T, sql::Blob>) &&
+                               (explicitly_convertible_to<T, sql::StaticBlob> ||
+                                explicitly_convertible_to<T, sql::TransientBlob> ||
+                                explicitly_convertible_to<T, sql::Blob>) &&
         requires (T blob)
     {
         typename T::value_t;

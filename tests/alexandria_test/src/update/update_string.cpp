@@ -17,7 +17,8 @@ namespace
         std::string      a;
 
         Foo() = default;
-        Foo(std::string sid, std::string sa) : id(std::move(sid)), a(std::move(sa)) {}
+        explicit Foo(const alex::InstanceId& iid) : id(iid) {}
+        Foo(const std::string& sid, std::string sa) : id(sid), a(std::move(sa)) {}
     };
 
     struct Bar
@@ -27,7 +28,8 @@ namespace
         std::string      b;
 
         Bar() = default;
-        Bar(std::string sid, std::string sa, std::string sb) : id(std::move(sid)), a(std::move(sa)), b(std::move(sb)) {}
+        explicit Bar(const alex::InstanceId& iid) : id(iid) {}
+        Bar(const std::string& sid, std::string sa, std::string sb) : id(sid), a(std::move(sa)), b(std::move(sb)) {}
     };
 
     using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
@@ -39,11 +41,11 @@ namespace
 void UpdateString::operator()()
 {
     // Create type with 1 string.
-    auto& fooType = nameSpace->createType("Foo");
+    auto& fooType = nameSpace->createType("foo");
     fooType.createStringProperty("prop1");
 
     // Create type with 2 strings.
-    auto& barType = nameSpace->createType("Bar");
+    auto& barType = nameSpace->createType("bar");
     barType.createStringProperty("prop1");
     barType.createStringProperty("prop2");
 
@@ -77,8 +79,8 @@ void UpdateString::operator()()
         expectNoThrow([&] { updater(foo1); }).fatal("Failed to update object");
 
         // Try to retrieve.
-        Foo foo0_get(foo0.id, "");
-        Foo foo1_get(foo1.id, "");
+        Foo foo0_get(foo0.id);
+        Foo foo1_get(foo1.id);
         expectNoThrow([&] { getter(foo0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(foo1_get); }).fatal("Failed to retrieve object");
 
@@ -115,8 +117,8 @@ void UpdateString::operator()()
         expectNoThrow([&] { updater(bar1); }).fatal("Failed to update object");
 
         // Try to retrieve.
-        Bar bar0_get(bar0.id, "", "");
-        Bar bar1_get(bar1.id, "", "");
+        Bar bar0_get(bar0.id);
+        Bar bar1_get(bar1.id);
         expectNoThrow([&] { getter(bar0_get); }).fatal("Failed to retrieve object");
         expectNoThrow([&] { getter(bar1_get); }).fatal("Failed to retrieve object");
 
