@@ -122,7 +122,21 @@ namespace alex
          */
         [[nodiscard]] const PropertyTable& getPropertyTable() const noexcept;
 
+        /**
+         * \brief Get table containing generated table names.
+         * \return Name table.
+         */
+        [[nodiscard]] GeneratedTablesTable& getGeneratedTablesTable() noexcept;
+
+        /**
+         * \brief Get table containing generated table names.
+         * \return Name table.
+         */
+        [[nodiscard]] const GeneratedTablesTable& getGeneratedTablesTable() const noexcept;
+
         [[nodiscard]] TypeTableInsert& getTypeTableInsert() noexcept;
+
+        [[nodiscard]] GeneratedTablesInsert& getGeneratedTablesInsert() noexcept;
 
         ////////////////////////////////////////////////////////////////
         // Namespaces.
@@ -170,6 +184,11 @@ namespace alex
         PropertyTable propertyTable;
 
         /**
+         * \brief Sqlite table containing generated table names.
+         */
+        GeneratedTablesTable genTablesTable;
+
+        /**
          * \brief Sqlite statement for inserting new namespaces.
          */
         NamespaceTableInsert namespaceInsert;
@@ -178,5 +197,10 @@ namespace alex
          * \brief Sqlite statement for inserting new types.
          */
         TypeTableInsert typeInsert;
+
+        /**
+         * \brief Sqlite statement for inserting generated table names.
+         */
+        GeneratedTablesInsert genTablesInsert;
     };
 }  // namespace alex

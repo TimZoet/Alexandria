@@ -29,8 +29,10 @@ namespace alex
         namespaceTable(database->getTable("namespaces")),
         typeTable(database->getTable("types")),
         propertyTable(database->getTable("properties")),
+        genTablesTable(database->getTable("tables")),
         namespaceInsert(namespaceTable.insert().compile()),
-        typeInsert(typeTable.insert().compile())
+        typeInsert(typeTable.insert().compile()),
+        genTablesInsert(genTablesTable.insert().compile())
     {
     }
 
@@ -75,6 +77,16 @@ namespace alex
         propsTable.createColumn("is_blob", sql::Column::Type::Int);
         propsTable.commit();
 
+        // Create table holding generated table names.
+        auto& namesTable = db->createTable("tables");
+        namesTable.createColumn("id", sql::Column::Type::Int).primaryKey(true).notNull();
+        namesTable.createColumn("type", sql::Column::Type::Int)
+          .foreignKey(typesCol, sql::ForeignKeyAction::Restrict)
+          .notNull();
+        namesTable.createColumn("name", sql::Column::Type::Text);
+        namesTable.createColumn("kind", sql::Column::Type::Text);
+        namesTable.commit();
+
         return std::make_unique<Library>(std::move(db));
     }
 
@@ -114,6 +126,12 @@ namespace alex
     const PropertyTable& Library::getPropertyTable() const noexcept { return propertyTable; }
 
     TypeTableInsert& Library::getTypeTableInsert() noexcept { return typeInsert; }
+
+    GeneratedTablesTable& Library::getGeneratedTablesTable() noexcept { return genTablesTable; }
+
+    const GeneratedTablesTable& Library::getGeneratedTablesTable() const noexcept { return genTablesTable; }
+
+    GeneratedTablesInsert& Library::getGeneratedTablesInsert() noexcept { return genTablesInsert; }
 
     ////////////////////////////////////////////////////////////////
     // Namespaces.
@@ -264,6 +282,21 @@ namespace alex
                 type.addProperty(std::make_unique<Property>(
                   type, row.id, std::move(row.name), dataType, nullptr, row.isArray, row.isBlob));
             }
+        }
+
+        // Read generated table names.
+        for (auto select = genTablesTable.selectAs<TableRow>().orderBy(ascending(genTablesTable.col<0>())).compile();
+             TableRow row : select)
+        {
+            auto& type = *typemap.find(row.type)->second;
+            if (row.kind == "instance")
+                type.instanceTable = &database->getTable(row.name);
+            else if (row.kind == "blob_array")
+                type.blobArrayTables.emplace_back(&database->getTable(row.name));
+            else if (row.kind == "primitive_array")
+                type.primitiveArrayTables.emplace_back(&database->getTable(row.name));
+            else if (row.kind == "reference_array")
+                type.referenceArrayTables.emplace_back(&database->getTable(row.name));
         }
     }
 }  // namespace alex

@@ -52,12 +52,28 @@ namespace alex
 
     const std::string& Type::getName() const noexcept { return name; }
 
-    std::string Type::getInstanceTableName() const noexcept { return nameSpace->getName() + "_" + name; }
-
     sql::Table& Type::getInstanceTable() const
     {
         requireCommitted();
-        return nameSpace->getLibrary().getDatabase().getTable(getInstanceTableName());
+        return *instanceTable;
+    }
+
+    const std::vector<sql::Table*>& Type::getPrimitiveArrayTables() const
+    {
+        requireCommitted();
+        return primitiveArrayTables;
+    }
+
+    const std::vector<sql::Table*>& Type::getBlobArrayTables() const
+    {
+        requireCommitted();
+        return blobArrayTables;
+    }
+
+    const std::vector<sql::Table*>& Type::getReferenceArrayTables() const
+    {
+        requireCommitted();
+        return referenceArrayTables;
     }
 
     const PropertyList& Type::getProperties() const noexcept { return properties; }
@@ -158,33 +174,6 @@ namespace alex
         return createProperty(propName, DataType::Nested, &nestedType, false, false);
     }
 
-    std::vector<sql::Table*> Type::getPrimitiveArrayTables() const
-    {
-        requireCommitted();
-
-        std::vector<sql::Table*> tables;
-        for (const auto& prop : properties) prop->getPrimitiveArrayTables(tables, getInstanceTable(), "");
-        return tables;
-    }
-
-    std::vector<sql::Table*> Type::getBlobArrayTables() const
-    {
-        requireCommitted();
-
-        std::vector<sql::Table*> tables;
-        for (const auto& prop : properties) prop->getBlobArrayTables(tables, getInstanceTable(), "");
-        return tables;
-    }
-
-    std::vector<sql::Table*> Type::getReferenceArrayTables() const
-    {
-        requireCommitted();
-
-        std::vector<sql::Table*> tables;
-        for (const auto& prop : properties) prop->getReferenceArrayTables(tables, getInstanceTable(), "");
-        return tables;
-    }
-
     ////////////////////////////////////////////////////////////////
     // Commit.
     ////////////////////////////////////////////////////////////////
@@ -234,6 +223,10 @@ namespace alex
         {
             id = -1;
             for (const auto& prop : properties) prop->id = -1;
+            instanceTable = nullptr;
+            primitiveArrayTables.clear();
+            blobArrayTables.clear();
+            referenceArrayTables.clear();
             throw;
         }
     }
@@ -242,21 +235,22 @@ namespace alex
     // Private methods.
     ////////////////////////////////////////////////////////////////
 
-    void Type::generate() const
+    void Type::generate()
     {
         auto& library = nameSpace->getLibrary();
         auto& db      = library.getDatabase();
 
         // Create instance table.
-        auto& instanceTable = db.createTable(getInstanceTableName());
-        instanceTable.createColumn("id", sql::Column::Type::Int).primaryKey(true);
-        instanceTable.createColumn("uuid", sql::Column::Type::Text).unique();
+        instanceTable = &db.createTable(nameSpace->getName() + "_" + name);
+        instanceTable->createColumn("id", sql::Column::Type::Int).primaryKey(true);
+        instanceTable->createColumn("uuid", sql::Column::Type::Text).unique();
+        library.getGeneratedTablesInsert()(nullptr, id, sql::toText(instanceTable->getName()), sql::toText("instance"));
 
         // Add columns and array tables for all properties.
-        for (const auto& prop : properties) prop->generate(instanceTable, "");
+        for (const auto& prop : properties) prop->generate(*this, *instanceTable, "");
 
         // Commit instance table.
-        instanceTable.commit();
+        instanceTable->commit();
     }
 
     Property& Type::createProperty(

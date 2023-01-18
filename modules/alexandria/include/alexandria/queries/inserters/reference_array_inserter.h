@@ -166,7 +166,7 @@ namespace alex
             [[nodiscard]] static statement_t compile(const type_descriptor_t& desc)
             {
                 const Type& type   = desc.getType();
-                const auto  tables = type.getReferenceArrayTables();
+                const auto& tables = type.getReferenceArrayTables();
                 const auto  table  = table_t(*tables[I]);
                 return table.insert().compile();
             }

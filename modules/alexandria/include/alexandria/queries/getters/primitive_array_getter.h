@@ -171,7 +171,7 @@ namespace alex
             [[nodiscard]] static statement_t compile(const type_descriptor_t& desc, std::string& uuidParam)
             {
                 const Type& type   = desc.getType();
-                const auto  tables = type.getPrimitiveArrayTables();
+                const auto& tables = type.getPrimitiveArrayTables();
                 const auto  table  = table_t(*tables[I]);
                 return table.template selectAs<sql::col_t<2, table_t>, 2>()
                   .where(sql::like(table.template col<1>(), &uuidParam))

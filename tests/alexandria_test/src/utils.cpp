@@ -47,7 +47,8 @@ namespace utils
 
     void LibraryMember::checkTypeTables(const std::vector<alex::NamespaceRow>& namespaces,
                                         const std::vector<alex::TypeRow>&      types,
-                                        const std::vector<alex::PropertyRow>&  properties)
+                                        const std::vector<alex::PropertyRow>&  properties,
+                                        const std::vector<alex::TableRow>&     tables)
     {
         {
             const auto& table  = library->getNamespaceTable();
@@ -66,6 +67,12 @@ namespace utils
             auto        select = table.selectAs<alex::PropertyRow>().orderBy(ascending(table.col<0>())).compile();
             const std::vector<alex::PropertyRow> rows(select.begin(), select.end());
             compareEQ(properties, rows);
+        }
+        {
+            const auto& table  = library->getGeneratedTablesTable();
+            auto        select = table.selectAs<alex::TableRow>().orderBy(ascending(table.col<0>())).compile();
+            const std::vector<alex::TableRow> rows(select.begin(), select.end());
+            compareEQ(tables, rows);
         }
     }
 }  // namespace utils

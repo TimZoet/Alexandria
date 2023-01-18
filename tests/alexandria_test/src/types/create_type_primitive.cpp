@@ -27,5 +27,6 @@ void CreateTypePrimitive::operator()()
                                                         {2, 1, "p1", toString(alex::DataType::Int64), 0, false, false},
                                                         {3, 1, "p2", toString(alex::DataType::Float), 0, false, false},
                                                         {4, 1, "p3", toString(alex::DataType::Double), 0, false, false}};
-    checkTypeTables(namespaces, types, properties);
+    const std::vector<alex::TableRow>     tables     = {{1, 1, "main_type", "instance"}};
+    checkTypeTables(namespaces, types, properties, tables);
 }

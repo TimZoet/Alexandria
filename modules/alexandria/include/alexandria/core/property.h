@@ -126,9 +126,9 @@ namespace alex
          */
         void commit();
 
-        void generate(sql::Table& instanceTable, const std::string& prefix) const;
+        void generate(Type& currentType, sql::Table& instanceTable, const std::string& prefix) const;
 
-        void getPrimitiveArrayTables(std::vector<sql::Table*>& tables,
+        /*void getPrimitiveArrayTables(std::vector<sql::Table*>& tables,
                                      const sql::Table&         instanceTable,
                                      const std::string&        prefix) const;
 
@@ -138,7 +138,7 @@ namespace alex
 
         void getReferenceArrayTables(std::vector<sql::Table*>& tables,
                                      const sql::Table&         instanceTable,
-                                     const std::string&        prefix) const;
+                                     const std::string&        prefix) const;*/
 
         ////////////////////////////////////////////////////////////////
         // Member variables.

@@ -103,6 +103,25 @@ namespace alex
         }
     };
 
+    struct TableRow
+    {
+        sql::row_id id;
+        sql::row_id type;
+        std::string name;
+        std::string kind;
+
+        [[nodiscard]] bool operator==(const TableRow& rhs) const noexcept
+        {
+            return id == rhs.id && type == rhs.type && name == rhs.name && kind == rhs.kind;
+        }
+
+        friend std::ostream& operator<<(std::ostream& out, const TableRow& table)
+        {
+            return out << std::format(
+                     "Generated Table(id={}, type={}, name={}, kind={})", table.id, table.type, table.name, table.kind);
+        }
+    };
+
     using NamespaceTable = sql::TypedTable<decltype(NamespaceRow::id), decltype(NamespaceRow::name)>;
 
     using TypeTable = sql::TypedTable<decltype(TypeRow::id),
@@ -118,7 +137,12 @@ namespace alex
                                           decltype(PropertyRow::isBlob),
                                           decltype(PropertyRow::isArray)>;
 
+    using GeneratedTablesTable = sql::
+      TypedTable<decltype(TableRow::id), decltype(TableRow::type), decltype(TableRow::name), decltype(TableRow::kind)>;
+
     using NamespaceTableInsert = std::remove_cvref_t<decltype(std::declval<NamespaceTable>().insert().compile())>;
 
     using TypeTableInsert = std::remove_cvref_t<decltype(std::declval<TypeTable>().insert().compile())>;
+
+    using GeneratedTablesInsert = std::remove_cvref_t<decltype(std::declval<GeneratedTablesTable>().insert().compile())>;
 }  // namespace alex

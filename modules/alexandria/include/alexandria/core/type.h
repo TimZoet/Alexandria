@@ -82,9 +82,13 @@ namespace alex
          */
         [[nodiscard]] const std::string& getName() const noexcept;
 
-        [[nodiscard]] std::string getInstanceTableName() const noexcept;
+        [[nodiscard]] sql::Table& getInstanceTable() const;
 
-        [[nodiscard]] sql::Table& getInstanceTable() const ;
+        [[nodiscard]] const std::vector<sql::Table*>& getPrimitiveArrayTables() const;
+
+        [[nodiscard]] const std::vector<sql::Table*>& getBlobArrayTables() const;
+
+        [[nodiscard]] const std::vector<sql::Table*>& getReferenceArrayTables() const;
 
         /**
          * \brief Get the list of all top-level properties added to this type.
@@ -172,12 +176,6 @@ namespace alex
          */
         Property& createNestedTypeProperty(const std::string& propName, Type& nestedType);
 
-        [[nodiscard]] std::vector<sql::Table*> getPrimitiveArrayTables() const;
-
-        [[nodiscard]] std::vector<sql::Table*> getBlobArrayTables() const;
-
-        [[nodiscard]] std::vector<sql::Table*> getReferenceArrayTables() const;
-
         ////////////////////////////////////////////////////////////////
         // Commit.
         ////////////////////////////////////////////////////////////////
@@ -200,7 +198,7 @@ namespace alex
         // Private methods.
         ////////////////////////////////////////////////////////////////
 
-        void generate() const;
+        void generate();
 
         Property&
           createProperty(const std::string& propName, DataType dataType, Type* refType, bool isArray, bool isBlob);
@@ -228,5 +226,13 @@ namespace alex
          * \brief Properties.
          */
         PropertyList properties;
+
+        sql::Table* instanceTable = nullptr;
+
+        std::vector<sql::Table*> primitiveArrayTables;
+
+        std::vector<sql::Table*> blobArrayTables;
+
+        std::vector<sql::Table*> referenceArrayTables;
     };
 }  // namespace alex

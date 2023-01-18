@@ -120,9 +120,10 @@ namespace alex
         id = db.getLastInsertRowId();
     }
 
-    void Property::generate(sql::Table& instanceTable, const std::string& prefix) const
+    void Property::generate(Type& currentType, sql::Table& instanceTable, const std::string& prefix) const
     {
-        auto& db = instanceTable.getDatabase();
+        auto& db      = instanceTable.getDatabase();
+        auto& library = type->getNamespace().getLibrary();
 
         if (isPrimitiveDataType(dataType) || dataType == DataType::String || dataType == DataType::Blob)
         {
@@ -136,6 +137,19 @@ namespace alex
                   .notNull();
                 arrayTable.createColumn("value", toColumnType(dataType));
                 arrayTable.commit();
+
+                if (dataType == DataType::Blob)
+                {
+                    currentType.blobArrayTables.emplace_back(&arrayTable);
+                    library.getGeneratedTablesInsert()(
+                      nullptr, currentType.getId(), sql::toText(arrayTable.getName()), sql::toText("blob_array"));
+                }
+                else
+                {
+                    currentType.primitiveArrayTables.emplace_back(&arrayTable);
+                    library.getGeneratedTablesInsert()(
+                      nullptr, currentType.getId(), sql::toText(arrayTable.getName()), sql::toText("primitive_array"));
+                }
             }
             else if (blob)
             {
@@ -152,11 +166,11 @@ namespace alex
         {
             // Recurse.
             const auto prefix2 = prefix + "_" + name;
-            for (const auto& prop : referenceType->getProperties()) prop->generate(instanceTable, prefix2);
+            for (const auto& prop : referenceType->getProperties()) prop->generate(currentType, instanceTable, prefix2);
         }
         else if (dataType == DataType::Reference)
         {
-            auto& refColumn = db.getTable(referenceType->getInstanceTableName()).getColumn("uuid");
+            auto& refColumn = db.getTable(referenceType->getInstanceTable().getName()).getColumn("uuid");
 
             if (array)
             {
@@ -169,6 +183,10 @@ namespace alex
                 arrayTable.createColumn("value", sql::Column::Type::Text)
                   .foreignKey(refColumn, sql::ForeignKeyAction::Cascade);
                 arrayTable.commit();
+
+                currentType.referenceArrayTables.emplace_back(&arrayTable);
+                library.getGeneratedTablesInsert()(
+                  nullptr, currentType.getId(), sql::toText(arrayTable.getName()), sql::toText("reference_array"));
             }
             else
             {
@@ -179,64 +197,64 @@ namespace alex
         }
     }
 
-    void Property::getPrimitiveArrayTables(std::vector<sql::Table*>& tables,
-                                           const sql::Table&         instanceTable,
-                                           const std::string&        prefix) const
-    {
-        if (isPrimitiveDataType(dataType) || dataType == DataType::String || dataType == DataType::Blob)
-        {
-            if (array)
-            {
-                auto& db         = instanceTable.getDatabase();
-                auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
-                tables.push_back(&arrayTable);
-            }
-        }
-        else if (dataType == DataType::Nested)
-        {
-            // Recurse.
-            const auto prefix2 = prefix + "_" + name;
-            for (const auto& prop : referenceType->getProperties())
-                prop->getPrimitiveArrayTables(tables, instanceTable, prefix2);
-        }
-    }
+    //void Property::getPrimitiveArrayTables(std::vector<sql::Table*>& tables,
+    //                                       const sql::Table&         instanceTable,
+    //                                       const std::string&        prefix) const
+    //{
+    //    if (isPrimitiveDataType(dataType) || dataType == DataType::String || dataType == DataType::Blob)
+    //    {
+    //        if (array)
+    //        {
+    //            auto& db         = instanceTable.getDatabase();
+    //            auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
+    //            tables.push_back(&arrayTable);
+    //        }
+    //    }
+    //    else if (dataType == DataType::Nested)
+    //    {
+    //        // Recurse.
+    //        const auto prefix2 = prefix + "_" + name;
+    //        for (const auto& prop : referenceType->getProperties())
+    //            prop->getPrimitiveArrayTables(tables, instanceTable, prefix2);
+    //    }
+    //}
 
-    void Property::getBlobArrayTables(std::vector<sql::Table*>& tables,
-                                      const sql::Table&         instanceTable,
-                                      const std::string&        prefix) const
-    {
-        if (dataType == DataType::Blob && array)
-        {
-            auto& db         = instanceTable.getDatabase();
-            auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
-            tables.push_back(&arrayTable);
-        }
-        else if (dataType == DataType::Nested)
-        {
-            // Recurse.
-            const auto prefix2 = prefix + "_" + name;
-            for (const auto& prop : referenceType->getProperties())
-                prop->getBlobArrayTables(tables, instanceTable, prefix2);
-        }
-    }
+    //void Property::getBlobArrayTables(std::vector<sql::Table*>& tables,
+    //                                  const sql::Table&         instanceTable,
+    //                                  const std::string&        prefix) const
+    //{
+    //    if (dataType == DataType::Blob && array)
+    //    {
+    //        auto& db         = instanceTable.getDatabase();
+    //        auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
+    //        tables.push_back(&arrayTable);
+    //    }
+    //    else if (dataType == DataType::Nested)
+    //    {
+    //        // Recurse.
+    //        const auto prefix2 = prefix + "_" + name;
+    //        for (const auto& prop : referenceType->getProperties())
+    //            prop->getBlobArrayTables(tables, instanceTable, prefix2);
+    //    }
+    //}
 
-    void Property::getReferenceArrayTables(std::vector<sql::Table*>& tables,
-                                           const sql::Table&         instanceTable,
-                                           const std::string&        prefix) const
-    {
-        if (dataType == DataType::Reference && array)
-        {
-            auto& db         = instanceTable.getDatabase();
-            auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
-            tables.push_back(&arrayTable);
-        }
-        else if (dataType == DataType::Nested)
-        {
-            // Recurse.
-            const auto prefix2 = prefix + "_" + name;
-            for (const auto& prop : referenceType->getProperties())
-                prop->getReferenceArrayTables(tables, instanceTable, prefix2);
-        }
-    }
+    //void Property::getReferenceArrayTables(std::vector<sql::Table*>& tables,
+    //                                       const sql::Table&         instanceTable,
+    //                                       const std::string&        prefix) const
+    //{
+    //    if (dataType == DataType::Reference && array)
+    //    {
+    //        auto& db         = instanceTable.getDatabase();
+    //        auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
+    //        tables.push_back(&arrayTable);
+    //    }
+    //    else if (dataType == DataType::Nested)
+    //    {
+    //        // Recurse.
+    //        const auto prefix2 = prefix + "_" + name;
+    //        for (const auto& prop : referenceType->getProperties())
+    //            prop->getReferenceArrayTables(tables, instanceTable, prefix2);
+    //    }
+    //}
 
 }  // namespace alex

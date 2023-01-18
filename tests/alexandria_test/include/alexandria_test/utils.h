@@ -37,7 +37,8 @@ namespace utils
 
         void checkTypeTables(const std::vector<alex::NamespaceRow>& namespaces,
                              const std::vector<alex::TypeRow>&      types,
-                             const std::vector<alex::PropertyRow>&  properties);
+                             const std::vector<alex::PropertyRow>&  properties,
+                             const std::vector<alex::TableRow>&     tables);
 
     protected:
         alex::LibraryPtr library;

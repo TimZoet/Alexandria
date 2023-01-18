@@ -27,5 +27,10 @@ void CreateTypePrimitiveArray::operator()()
                                                         {2, 1, "p1", toString(alex::DataType::Int64), 0, true, false},
                                                         {3, 1, "p2", toString(alex::DataType::Float), 0, true, false},
                                                         {4, 1, "p3", toString(alex::DataType::Double), 0, true, false}};
-    checkTypeTables(namespaces, types, properties);
+    const std::vector<alex::TableRow>     tables     = {{1, 1, "main_type", "instance"},
+                                                        {2, 1, "main_type_p0", "primitive_array"},
+                                                        {3, 1, "main_type_p1", "primitive_array"},
+                                                        {4, 1, "main_type_p2", "primitive_array"},
+                                                        {5, 1, "main_type_p3", "primitive_array"}};
+    checkTypeTables(namespaces, types, properties, tables);
 }

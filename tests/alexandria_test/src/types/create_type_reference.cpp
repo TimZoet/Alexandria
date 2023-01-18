@@ -45,5 +45,9 @@ void CreateTypeReference::operator()()
       {3, 3, "prop1", toString(alex::DataType::Reference), 2, false, false},
       {4, 3, "prop2", toString(alex::DataType::Reference), 1, false, false},
       {5, 4, "prop0", toString(alex::DataType::Reference), 3, false, false}};
-    checkTypeTables(namespaces, types, properties);
+    const std::vector<alex::TableRow> tables = {{1, 1, "main_type3", "instance"},
+                                                {2, 2, "main_type2", "instance"},
+                                                {3, 3, "main_type1", "instance"},
+                                                {4, 4, "main_type0", "instance"}};
+    checkTypeTables(namespaces, types, properties, tables);
 }

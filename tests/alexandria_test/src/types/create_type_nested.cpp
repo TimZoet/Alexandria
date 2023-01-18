@@ -44,5 +44,9 @@ void CreateTypeNested::operator()()
       {4, 3, "prop2", toString(alex::DataType::Nested), 2, false, false},
       {5, 4, "prop1", toString(alex::DataType::Nested), 3, false, false},
       {6, 4, "prop3", toString(alex::DataType::Nested), 1, false, false}};
-    checkTypeTables(namespaces, types, properties);
+    const std::vector<alex::TableRow> tables = {{1, 1, "main_type3", "instance"},
+                                                {2, 2, "main_type2", "instance"},
+                                                {3, 3, "main_type1", "instance"},
+                                                {4, 4, "main_type0", "instance"}};
+    checkTypeTables(namespaces, types, properties, tables);
 }
