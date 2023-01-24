@@ -87,7 +87,7 @@ namespace alex
             catch (...)
             {
                 // Transaction failed (or something else went wrong). Reset UUID.
-                type_descriptor_t::uuid_member_t::template get(instance).clear();
+                type_descriptor_t::uuid_member_t::template get(instance).reset();
                 throw;
             }
         }

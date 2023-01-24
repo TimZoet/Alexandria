@@ -6,8 +6,10 @@
 
 #include "alexandria/core/library.h"
 #include "alexandria/core/type_descriptor.h"
+#include "alexandria/queries/delete_query.h"
 #include "alexandria/queries/insert_query.h"
 
+#include "sqlite3.h"
 namespace
 {
     struct Foo
@@ -174,5 +176,15 @@ void InsertReference::operator()()
         compareEQ(baz4.id, baz4_get.id);
         compareEQ(baz4.foo.getId(), baz4_get.foo.getId());
         compareEQ(baz4.bar.getId(), baz4_get.bar.getId());
+    }
+
+    // Insert reference to already deleted object.
+    {
+        auto inserter = alex::InsertQuery(BarDescriptor(barType));
+        auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
+        Bar  bar;
+        bar.foo = foo0;
+        expectNoThrow([&] { deleter(foo0); });
+        expectThrow([&] { inserter(bar); });
     }
 }

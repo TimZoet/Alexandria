@@ -7,6 +7,12 @@
 #include <regex>
 
 ////////////////////////////////////////////////////////////////
+// External includes.
+////////////////////////////////////////////////////////////////
+
+#include "sqlite3.h"
+
+////////////////////////////////////////////////////////////////
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
@@ -17,6 +23,25 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria/core/namespace.h"
+
+namespace
+{
+    void enableForeignKeyConstraints(sql::Database& db)
+    {
+        int32_t enabled = 0;
+        sqlite3_db_config(db.get(), SQLITE_DBCONFIG_ENABLE_FKEY, 1, &enabled);
+        if (!enabled) throw std::runtime_error("Failed to enable foreign key constraints.");
+
+        if (const auto stmt0 = db.createStatement("PRAGMA foreign_keys=ON;", true); !stmt0.step())
+            throw std::runtime_error("Failed to enable foreign key constraints.");
+
+        const auto stmt1 = db.createStatement("PRAGMA foreign_keys;", true);
+        if (!stmt1.step()) throw std::runtime_error("Failed to enable foreign key constraints.");
+        int32_t res = 0;
+        stmt1.column(0, res);
+        if (res != 1) throw std::runtime_error("Failed to enable foreign key constraints.");
+    }
+}  // namespace
 
 namespace alex
 {
@@ -47,6 +72,7 @@ namespace alex
         if (exists(file)) throw std::runtime_error("Library file already exists");
 
         auto db = sql::Database::create(file);
+        enableForeignKeyConstraints(*db);
 
         // Create table holding namespace definitions.
         auto& nsTable      = db->createTable("namespaces");
@@ -94,7 +120,8 @@ namespace alex
     {
         if (!exists(file)) throw std::runtime_error("Library file does not exist");
 
-        auto db  = sql::Database::open(file);
+        auto db = sql::Database::open(file);
+        enableForeignKeyConstraints(*db);
         auto lib = std::make_unique<Library>(std::move(db));
         lib->readSpecification();
         return lib;

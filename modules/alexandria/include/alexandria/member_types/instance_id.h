@@ -35,8 +35,9 @@ namespace alex
 
         explicit InstanceId(const uuids::uuid iid) : id(iid) {}
 
-        // TODO: Dereferencing might throw.
-        explicit InstanceId(const std::string& iid) : id(*uuids::uuid::from_string(iid)) {}
+        explicit InstanceId(const std::string& iid) : id(iid.empty() ? uuids::uuid{} : *uuids::uuid::from_string(iid))
+        {
+        }
 
         ~InstanceId() noexcept = default;
 
@@ -63,7 +64,7 @@ namespace alex
 
         void regenerate();
 
-        void clear() noexcept { id = invalid_id; }
+        void reset() noexcept { id = invalid_id; }
 
         ////////////////////////////////////////////////////////////////
         // Comparison operators.
@@ -87,7 +88,11 @@ namespace alex
 
         [[nodiscard]] uuids::uuid get() const noexcept { return id; }
 
-        [[nodiscard]] std::string getAsString() const noexcept { return to_string(id); }
+        [[nodiscard]] std::string getAsString() const noexcept
+        {
+            if (id.is_nil()) return {};
+            return to_string(id);
+        }
 
         [[nodiscard]] bool valid() const noexcept { return id != invalid_id; }
 

@@ -192,69 +192,8 @@ namespace alex
             {
                 // Add a column with a foreign key to the instance table of referenceType.
                 instanceTable.createColumn(prefix + name, sql::Column::Type::Text)
-                  .foreignKey(refColumn, sql::ForeignKeyAction::SetNull);
+                  .foreignKey(refColumn, sql::ForeignKeyAction::SetNull).check("");
             }
         }
     }
-
-    //void Property::getPrimitiveArrayTables(std::vector<sql::Table*>& tables,
-    //                                       const sql::Table&         instanceTable,
-    //                                       const std::string&        prefix) const
-    //{
-    //    if (isPrimitiveDataType(dataType) || dataType == DataType::String || dataType == DataType::Blob)
-    //    {
-    //        if (array)
-    //        {
-    //            auto& db         = instanceTable.getDatabase();
-    //            auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
-    //            tables.push_back(&arrayTable);
-    //        }
-    //    }
-    //    else if (dataType == DataType::Nested)
-    //    {
-    //        // Recurse.
-    //        const auto prefix2 = prefix + "_" + name;
-    //        for (const auto& prop : referenceType->getProperties())
-    //            prop->getPrimitiveArrayTables(tables, instanceTable, prefix2);
-    //    }
-    //}
-
-    //void Property::getBlobArrayTables(std::vector<sql::Table*>& tables,
-    //                                  const sql::Table&         instanceTable,
-    //                                  const std::string&        prefix) const
-    //{
-    //    if (dataType == DataType::Blob && array)
-    //    {
-    //        auto& db         = instanceTable.getDatabase();
-    //        auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
-    //        tables.push_back(&arrayTable);
-    //    }
-    //    else if (dataType == DataType::Nested)
-    //    {
-    //        // Recurse.
-    //        const auto prefix2 = prefix + "_" + name;
-    //        for (const auto& prop : referenceType->getProperties())
-    //            prop->getBlobArrayTables(tables, instanceTable, prefix2);
-    //    }
-    //}
-
-    //void Property::getReferenceArrayTables(std::vector<sql::Table*>& tables,
-    //                                       const sql::Table&         instanceTable,
-    //                                       const std::string&        prefix) const
-    //{
-    //    if (dataType == DataType::Reference && array)
-    //    {
-    //        auto& db         = instanceTable.getDatabase();
-    //        auto& arrayTable = db.getTable(instanceTable.getName() + "_" + prefix + name);
-    //        tables.push_back(&arrayTable);
-    //    }
-    //    else if (dataType == DataType::Nested)
-    //    {
-    //        // Recurse.
-    //        const auto prefix2 = prefix + "_" + name;
-    //        for (const auto& prop : referenceType->getProperties())
-    //            prop->getReferenceArrayTables(tables, instanceTable, prefix2);
-    //    }
-    //}
-
 }  // namespace alex

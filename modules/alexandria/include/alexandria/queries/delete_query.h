@@ -57,16 +57,31 @@ namespace alex
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void operator()(const object_t& instance)
+        /**
+         * \brief Delete instance and all its data from the database. If instance was successfully deleted, its identifier is reset.
+         * \param instance Instance.
+         * \return True if instance was deleted, false if something failed.
+         */
+        bool operator()(object_t& instance)
         {
             // Cannot delete an object that does not have a valid ID.
             if (!type_descriptor_t::uuid_member_t::template get(instance).valid())
                 throw std::runtime_error("Cannot delete instance. It does not have a valid UUID.");
 
+            const bool deleted = this->operator()(type_descriptor_t::uuid_member_t::template get(instance));
+
+            // Reset ID only upon success.
+            if (deleted) type_descriptor_t::uuid_member_t::template get(instance).reset();
+
+            return deleted;
+        }
+
+        bool operator()(const InstanceId& id)
+        {
             try
             {
                 // Update parameter.
-                *uuidParam            = type_descriptor_t::uuid_member_t::template get(instance).getAsString();
+                *uuidParam = id.getAsString();
 
                 // Start transaction.
                 Type&            type = descriptor.getType();
@@ -80,6 +95,8 @@ namespace alex
                 referenceArrayDeleter();
 
                 transaction.commit();
+
+                return db.getChanges() > 0;
             }
             catch (...)
             {

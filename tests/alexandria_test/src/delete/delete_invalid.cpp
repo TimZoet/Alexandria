@@ -28,6 +28,7 @@ void DeleteInvalid::operator()()
 
     auto inserter = alex::InsertQuery(FooDescriptor(fooType));
     auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
+    bool deleted  = false;
     Foo  foo;
 
     // Deleting uninitialized object should throw.
@@ -36,10 +37,13 @@ void DeleteInvalid::operator()()
 
     // Deleting after insert should work.
     expectNoThrow([&] { inserter(foo); });
-    expectNoThrow([&] { deleter(foo); });
-    compareTrue(foo.id.valid());
+    expectNoThrow([&] { deleted = deleter(foo); });
+    compareTrue(deleted);
+    compareFalse(foo.id.valid());
 
-    // Deleting non-existent object should 'fail' silently.
+    // Deleting non-existent object should fail.
     foo.id.regenerate();
-    expectNoThrow([&] { deleter(foo); });
+    expectNoThrow([&] { deleted = deleter(foo); });
+    compareFalse(deleted);
+    compareTrue(foo.id.valid());
 }

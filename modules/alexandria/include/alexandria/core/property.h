@@ -128,18 +128,6 @@ namespace alex
 
         void generate(Type& currentType, sql::Table& instanceTable, const std::string& prefix) const;
 
-        /*void getPrimitiveArrayTables(std::vector<sql::Table*>& tables,
-                                     const sql::Table&         instanceTable,
-                                     const std::string&        prefix) const;
-
-        void getBlobArrayTables(std::vector<sql::Table*>& tables,
-                                const sql::Table&         instanceTable,
-                                const std::string&        prefix) const;
-
-        void getReferenceArrayTables(std::vector<sql::Table*>& tables,
-                                     const sql::Table&         instanceTable,
-                                     const std::string&        prefix) const;*/
-
         ////////////////////////////////////////////////////////////////
         // Member variables.
         ////////////////////////////////////////////////////////////////

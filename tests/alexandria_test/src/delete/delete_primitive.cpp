@@ -76,10 +76,12 @@ void DeletePrimitive::operator()()
         id               = foo0.id.getAsString();
         compareEQ(1, stmt.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(foo0); });
+        compareFalse(foo0.id.valid());
         compareEQ(0, stmt.bind(sql::BindParameters::All)());
         id = foo1.id.getAsString();
         compareEQ(1, stmt.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(foo1); });
+        compareFalse(foo1.id.valid());
         compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 
@@ -104,10 +106,12 @@ void DeletePrimitive::operator()()
         id               = bar0.id.getAsString();
         compareEQ(1, stmt.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(bar0); });
+        compareFalse(bar0.id.valid());
         compareEQ(0, stmt.bind(sql::BindParameters::All)());
         id = bar1.id.getAsString();
         compareEQ(1, stmt.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(bar1); });
+        compareFalse(bar1.id.valid());
         compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 }

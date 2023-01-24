@@ -72,7 +72,12 @@ namespace alex
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void operator()(object_t& instance)
+        /**
+         * \brief Overwrite all data of the instance in the database.
+         * \param instance Instance.
+         * \return True if instance was updated, false if something failed.
+         */
+        bool operator()(object_t& instance)
         {
             // Cannot update an object that does not have valid ID.
             if (!type_descriptor_t::uuid_member_t::template get(instance).valid())
@@ -100,6 +105,8 @@ namespace alex
                 referenceArrayInserter(instance, uuid);
 
                 transaction.commit();
+
+                return db.getChanges() > 0;
             }
             catch (...)
             {

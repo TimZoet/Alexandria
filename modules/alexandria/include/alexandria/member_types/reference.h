@@ -68,7 +68,7 @@ namespace alex
         /**
          * \brief Reset this reference to point to no object.
          */
-        void clear() noexcept { id.clear(); }
+        void clear() noexcept { id.reset(); }
 
         /**
          * \brief Assign an object to this reference.

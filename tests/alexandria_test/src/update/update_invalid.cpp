@@ -29,6 +29,7 @@ void UpdateInvalid::operator()()
 
     auto inserter = alex::InsertQuery(FooDescriptor(fooType));
     auto updater  = alex::UpdateQuery(FooDescriptor(fooType));
+    bool updated  = false;
     Foo  foo;
 
     // Updating uninitialized object should throw.
@@ -36,9 +37,11 @@ void UpdateInvalid::operator()()
 
     // Updating initialized object should work.
     expectNoThrow([&] { inserter(foo); });
-    expectNoThrow([&] { updater(foo); });
+    expectNoThrow([&] { updated = updater(foo); });
+    compareTrue(updated);
 
-    // Updating non-existent object should 'fail' silently.
+    // Updating non-existent object should fail.
     foo.id.regenerate();
-    expectNoThrow([&] { updater(foo); });
+    expectNoThrow([&] { updated = updater(foo); });
+    compareFalse(updated);
 }

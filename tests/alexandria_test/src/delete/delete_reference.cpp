@@ -70,70 +70,49 @@ void DeleteReference::operator()()
         bazType.commit();
     }).fatal("Failed to commit types");
 
-    // Create objects.
+    // Create Foo.
     Foo foo0{.a = 0.5f, .b = 4};
     Foo foo1{.a = -0.5f, .b = -10};
-
-    // Insert Foo.
     expectNoThrow([&] {
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
         inserter(foo0);
         inserter(foo1);
     }).fatal("Failed to insert object");
 
+    // Create Bar.
     Bar bar0, bar1;
     bar0.foo = foo0;
     bar1.foo = foo1;
-
-    // Delete Bar.
-    {
-        const sql::TypedTable<sql::row_id, std::string, std::string> table(library->getDatabase().getTable("main_bar"));
-
+    expectNoThrow([&] {
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
-        auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
+        inserter(bar0);
+        inserter(bar1);
+    }).fatal("Failed to insert object");
 
-        // Try to insert.
-        expectNoThrow([&] { inserter(bar0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { inserter(bar1); }).fatal("Failed to insert object");
-
-        // Verify existence of objects before and after delete.
-        std::string id;
-        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
-        id               = bar0.id.getAsString();
-        compareEQ(1, stmt.bind(sql::BindParameters::All)());
-        expectNoThrow([&] { deleter(bar0); });
-        compareEQ(0, stmt.bind(sql::BindParameters::All)());
-        id = bar1.id.getAsString();
-        compareEQ(1, stmt.bind(sql::BindParameters::All)());
-        expectNoThrow([&] { deleter(bar1); });
-        compareEQ(0, stmt.bind(sql::BindParameters::All)());
-    }
+    // Create Baz.
+    Baz baz0, baz1, baz2, baz3, baz4;
+    baz0.foo = foo0;
+    baz0.bar = bar0;
+    baz1.foo = foo0;
+    baz1.bar = bar1;
+    baz2.foo = foo1;
+    baz2.bar = bar0;
+    baz3.foo = foo1;
+    baz3.bar = bar1;
+    expectNoThrow([&] {
+        auto inserter = alex::InsertQuery(BazDescriptor(bazType));
+        inserter(baz0);
+        inserter(baz1);
+        inserter(baz2);
+        inserter(baz3);
+        inserter(baz4);
+    }).fatal("Failed to insert object");
 
     // Delete Baz.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string, std::string> table(
           library->getDatabase().getTable("main_baz"));
-
-        auto inserter = alex::InsertQuery(BazDescriptor(bazType));
-        auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));
-
-        // Create objects.
-        Baz baz0, baz1, baz2, baz3, baz4;
-        baz0.foo = foo0;
-        baz0.bar = bar0;
-        baz1.foo = foo0;
-        baz1.bar = bar1;
-        baz2.foo = foo1;
-        baz2.bar = bar0;
-        baz3.foo = foo1;
-        baz3.bar = bar1;
-
-        // Try to insert.
-        expectNoThrow([&] { inserter(baz0); }).fatal("Failed to insert object");
-        expectNoThrow([&] { inserter(baz1); }).fatal("Failed to insert object");
-        expectNoThrow([&] { inserter(baz2); }).fatal("Failed to insert object");
-        expectNoThrow([&] { inserter(baz3); }).fatal("Failed to insert object");
-        expectNoThrow([&] { inserter(baz4); }).fatal("Failed to insert object");
+        auto deleter = alex::DeleteQuery(BazDescriptor(bazType));
 
         // Verify existence of objects before and after delete.
         std::string id;
@@ -157,6 +136,24 @@ void DeleteReference::operator()()
         id = baz4.id.getAsString();
         compareEQ(1, stmt.bind(sql::BindParameters::All)());
         expectNoThrow([&] { deleter(baz4); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+    }
+
+    // Delete Bar.
+    {
+        const sql::TypedTable<sql::row_id, std::string, std::string> table(library->getDatabase().getTable("main_bar"));
+        auto deleter = alex::DeleteQuery(BarDescriptor(barType));
+
+        // Verify existence of objects before and after delete.
+        std::string id;
+        auto        stmt = table.count().where(like(table.col<1>(), &id)).compile();
+        id               = bar0.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar0); });
+        compareEQ(0, stmt.bind(sql::BindParameters::All)());
+        id = bar1.id.getAsString();
+        compareEQ(1, stmt.bind(sql::BindParameters::All)());
+        expectNoThrow([&] { deleter(bar1); });
         compareEQ(0, stmt.bind(sql::BindParameters::All)());
     }
 }
