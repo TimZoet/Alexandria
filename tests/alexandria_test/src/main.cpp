@@ -54,6 +54,15 @@
 //#include "alexandria_test/member_types/member_type_reference_array.h"
 #include "alexandria_test/member_types/member_type_string_array.h"
 #include "alexandria_test/member_types/member_type_string_array_custom.h"
+#include "alexandria_test/table_sets/table_sets_blob.h"
+#include "alexandria_test/table_sets/table_sets_blob_array.h"
+#include "alexandria_test/table_sets/table_sets_primitive.h"
+#include "alexandria_test/table_sets/table_sets_primitive_array.h"
+#include "alexandria_test/table_sets/table_sets_primitive_blob.h"
+#include "alexandria_test/table_sets/table_sets_reference.h"
+#include "alexandria_test/table_sets/table_sets_reference_array.h"
+#include "alexandria_test/table_sets/table_sets_string.h"
+#include "alexandria_test/table_sets/table_sets_string_array.h"
 #include "alexandria_test/types/create_type.h"
 #include "alexandria_test/types/create_type_blob.h"
 #include "alexandria_test/types/create_type_blob_array.h"
@@ -143,6 +152,16 @@ int main(const int argc, char** argv)
       //MemberTypeReferenceArray,
       MemberTypeStringArray,
       MemberTypeStringArrayCustom,
+      // table sets
+      TableSetsBlob,
+      TableSetsBlobArray,
+      TableSetsPrimitive,
+      TableSetsPrimitiveArray,
+      TableSetsPrimitiveBlob,
+      TableSetsReference,
+      TableSetsReferenceArray,
+      TableSetsString,
+      TableSetsStringArray,
       // types
       CreateType,
       CreateTypeBlob,

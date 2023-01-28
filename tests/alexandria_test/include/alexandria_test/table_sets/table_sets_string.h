@@ -1,0 +1,13 @@
+#pragma once
+
+////////////////////////////////////////////////////////////////
+// Current target includes.
+////////////////////////////////////////////////////////////////
+
+#include "alexandria_test/utils.h"
+
+class TableSetsString final : public utils::LibraryMember
+{
+public:
+    void operator()() override;
+};
