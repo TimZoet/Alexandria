@@ -63,7 +63,7 @@ namespace alex
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void get() noexcept { return table; }
+        auto& get() noexcept { return table; }
 
     private:
         [[nodiscard]] static table_t compile(const type_descriptor_t& desc)

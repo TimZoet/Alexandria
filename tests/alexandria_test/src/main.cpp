@@ -59,6 +59,7 @@
 #include "alexandria_test/table_sets/table_sets_primitive.h"
 #include "alexandria_test/table_sets/table_sets_primitive_array.h"
 #include "alexandria_test/table_sets/table_sets_primitive_blob.h"
+#include "alexandria_test/table_sets/table_sets_query.h"
 #include "alexandria_test/table_sets/table_sets_reference.h"
 #include "alexandria_test/table_sets/table_sets_reference_array.h"
 #include "alexandria_test/table_sets/table_sets_string.h"
@@ -158,6 +159,7 @@ int main(const int argc, char** argv)
       TableSetsPrimitive,
       TableSetsPrimitiveArray,
       TableSetsPrimitiveBlob,
+      TableSetsQuery,
       TableSetsReference,
       TableSetsReferenceArray,
       TableSetsString,
