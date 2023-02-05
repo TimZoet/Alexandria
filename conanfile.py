@@ -1,4 +1,5 @@
-from conans import ConanFile
+from conan import ConanFile
+from conan.tools.files import copy
 
 class AlexandriaConan(ConanFile):
     ############################################################################
@@ -39,13 +40,13 @@ class AlexandriaConan(ConanFile):
     ############################################################################
     
     def export_sources(self):
-        self.copy("alexandriaVersionString.cmake")
-        self.copy("CMakeLists.txt")
-        self.copy("license")
-        self.copy("readme.md")
-        self.copy("applications/*")
-        self.copy("cmake/*")
-        self.copy("modules/*")
+        copy(self, "alexandriaVersionString.cmake", self.recipe_folder, self.export_sources_folder)
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        copy(self, "license", self.recipe_folder, self.export_sources_folder)
+        copy(self, "readme.md", self.recipe_folder, self.export_sources_folder)
+        copy(self, "applications/*", self.recipe_folder, self.export_sources_folder)
+        copy(self, "cmake/*", self.recipe_folder, self.export_sources_folder)
+        copy(self, "modules/*", self.recipe_folder, self.export_sources_folder)
     
     def config_options(self):
         base = self.python_requires["pyreq"].module.BaseConan
@@ -69,8 +70,8 @@ class AlexandriaConan(ConanFile):
             self.requires("bettertest/1.0.0@timzoet/stable")
 
     def package_info(self):
-        self.cpp_info.components["alexandria"].libs = ["alexandria"]
-        self.cpp_info.components["alexandria"].requires = ["common::common", "cppql::cppql", "dot::dot"]
+        self.cpp_info.components["core"].libs = ["alexandria"]
+        self.cpp_info.components["core"].requires = ["common::common", "cppql::cppql", "dot::dot"]
     
     def generate(self):
         base = self.python_requires["pyreq"].module.BaseConan
@@ -80,6 +81,11 @@ class AlexandriaConan(ConanFile):
         
         deps = base.generate_deps(self)
         deps.generate()
+    
+    def configure_cmake(self):
+        base = self.python_requires["pyreq"].module.BaseConan
+        cmake = base.configure_cmake(self)
+        return cmake
 
     def build(self):
         base = self.python_requires["pyreq"].module.BaseConan
