@@ -11,7 +11,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
 #include "alexandria/core/type_descriptor.h"
 #include "alexandria/member_types/blob.h"
 #include "alexandria/member_types/reference.h"
