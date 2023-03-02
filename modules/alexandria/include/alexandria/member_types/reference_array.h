@@ -65,6 +65,12 @@ namespace alex
             ids.push_back(instance.id);
         }
 
+        void add(const InstanceId& id)
+        {
+            if (!id.valid()) throw std::runtime_error("Invalid identifier");
+            ids.push_back(id);
+        }
+
         bool remove(const object_t& instance)
         {
             if (!instance.id.valid()) throw std::runtime_error("Instance was not yet inserted");
@@ -74,7 +80,7 @@ namespace alex
             return true;
         }
 
-        bool contains(const object_t& instance) const noexcept
+        [[nodiscard]] bool contains(const object_t& instance) const noexcept
         {
             return std::find(ids.begin(), ids.end(), instance.id) != ids.end();
         }

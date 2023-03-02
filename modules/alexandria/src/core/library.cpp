@@ -136,6 +136,22 @@ namespace alex
     // Getters.
     ////////////////////////////////////////////////////////////////
 
+    Namespace& Library::getNamespace(const std::string& namespaceName)
+    {
+        const auto it = namespaces.find(namespaceName);
+        if (it == namespaces.end())
+            throw std::runtime_error(std::format(R"(Namespace with name "{}" does not exist".)", namespaceName));
+        return *it->second;
+    }
+
+    const Namespace& Library::getNamespace(const std::string& namespaceName) const
+    {
+        const auto it = namespaces.find(namespaceName);
+        if (it == namespaces.end())
+            throw std::runtime_error(std::format(R"(Namespace with name "{}" does not exist".)", namespaceName));
+        return *it->second;
+    }
+
     sql::Database& Library::getDatabase() noexcept { return *database; }
 
     const sql::Database& Library::getDatabase() const noexcept { return *database; }
@@ -270,22 +286,21 @@ namespace alex
         // Read namespaces.
         for (auto select =
                namespaceTable.selectAs<NamespaceRow>().orderBy(ascending(namespaceTable.col<0>())).compile();
-             NamespaceRow row : select)
+             const NamespaceRow row : select)
         {
-            auto& ns = *namespaces.emplace(row.name, std::make_unique<Namespace>(*this, row.id, std::move(row.name)))
-                          .first->second;
+            auto& ns =
+              *namespaces.emplace(row.name, std::make_unique<Namespace>(*this, row.id, row.name)).first->second;
             namespacemap.insert({ns.id, &ns});
         }
 
         // Read types.
-        for (auto    select = typeTable.selectAs<TypeRow>().orderBy(ascending(typeTable.col<0>())).compile();
-             TypeRow row : select)
+        for (auto          select = typeTable.selectAs<TypeRow>().orderBy(ascending(typeTable.col<0>())).compile();
+             const TypeRow row : select)
         {
             auto& ns = *namespacemap.find(row.nameSpace)->second;
             auto& type =
               *ns.types
-                 .emplace(row.name,
-                          std::make_unique<Type>(row.id, ns, std::move(row.name), row.isInstance > 0 ? true : false))
+                 .emplace(row.name, std::make_unique<Type>(row.id, ns, row.name, row.isInstance > 0 ? true : false))
                  .first->second;
             typemap.insert({type.id, &type});
         }

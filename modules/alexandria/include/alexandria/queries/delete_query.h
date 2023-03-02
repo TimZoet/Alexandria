@@ -88,6 +88,7 @@ namespace alex
                 auto&            db   = type.getNamespace().getLibrary().getDatabase();
                 sql::Transaction transaction(db, sql::Transaction::Type::Deferred);
 
+                // TODO: Hold up. Why do we need to run any array delete statements? Those all have FKs with cascade...
                 // Run all statements.
                 primitiveDeleter();
                 primitiveArrayDeleter();

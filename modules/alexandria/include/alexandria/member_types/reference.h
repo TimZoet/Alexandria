@@ -111,6 +111,12 @@ namespace alex
             return *this;
         }
 
+        Reference<object_t>& operator=(InstanceId uuid) noexcept
+        {
+            id = std::move(uuid);
+            return *this;
+        }
+
     private:
         InstanceId id;
     };

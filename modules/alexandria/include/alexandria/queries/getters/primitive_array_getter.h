@@ -173,6 +173,7 @@ namespace alex
                 const Type& type   = desc.getType();
                 const auto& tables = type.getPrimitiveArrayTables();
                 const auto  table  = table_t(*tables[I]);
+                // TODO: Should this not be ordered by rowid? Same for other array getters.
                 return table.template selectAs<sql::col_t<2, table_t>, 2>()
                   .where(sql::like(table.template col<1>(), &uuidParam))
                   .compile();

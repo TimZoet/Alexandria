@@ -100,6 +100,8 @@ namespace alex
         uuids::uuid id = invalid_id;
     };
 
+    inline std::ostream& operator<<(std::ostream& out, const InstanceId& id) { return out << id.get(); }
+
     template<typename T>
     concept is_instance_id = std::same_as<InstanceId, T>;
 

@@ -74,6 +74,10 @@ namespace alex
         // Getters.
         ////////////////////////////////////////////////////////////////
 
+        Namespace& getNamespace(const std::string& namespaceName);
+
+        const Namespace& getNamespace(const std::string& namespaceName) const;
+
         /**
          * \brief Get the sqlite database.
          * \return Database.
