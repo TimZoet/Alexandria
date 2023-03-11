@@ -12,22 +12,24 @@
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
-// TODO: Try and get rid of these query parameters.
 void exportObj(const Scene&           scene,
+               std::filesystem::path  path,
                Cube::get_query_t&     getCube,
                Material::get_query_t& getMaterial,
                Mesh::get_query_t&     getMesh,
                Sphere::get_query_t&   getSphere)
 {
-    auto file    = std::ofstream("model.obj");
-    auto mtlfile = std::ofstream("model.mtl");
-    file << "mtllib model.mtl\n";
+    std::cout << "Exporting to " << path << '\n';
+    auto file = std::ofstream(path);
+    path.replace_extension(".mtl");
+    auto mtlfile = std::ofstream(path);
+    file << "mtllib " << path.filename() << '\n';
 
-    const auto writeVertex = [&](const float x, const float y, const float z) {
-        file << "v " << x << " " << y << " " << z << "\n";
+    const auto writeVertex = [&](const float x, const float y, const float z, const float3& translation) {
+        file << "v " << (x + translation.x) << " " << (y + translation.y) << " " << (z + translation.z) << '\n';
     };
     const auto writeFace = [&](const int32_t x, const int32_t y, const int32_t z) {
-        file << "f " << x << " " << y << " " << z << "\n";
+        file << "f " << x << " " << y << " " << z << '\n';
     };
     int32_t vertexIndex = 1;
 
@@ -41,7 +43,9 @@ void exportObj(const Scene&           scene,
 
     for (const auto& node : scene.nodes.getAll())
     {
-        if (!exportedMtls.contains(node.material.getId()))
+        std::cout << "Node = " << node.id << '\n';
+
+        if (!node.material.isNone() && !exportedMtls.contains(node.material.getId()))
         {
             Material mtl;
             mtl.id = node.material.getId();
@@ -57,33 +61,33 @@ void exportObj(const Scene&           scene,
 
         // Use default material if there is none or reference material.
         if (node.material.isNone())
+        {
             file << "usemtl default\n";
+            std::cout << "  Material = default\n";
+        }
         else
+        {
             file << "usemtl " << node.material.getId() << '\n';
+            std::cout << "  Material = " << node.material.getId() << '\n';
+        }
 
         if (!node.cube.isNone())
         {
+            std::cout << "  Cube = " << node.cube.getId() << '\n';
+
             Cube cube;
             cube.id = node.cube.getId();
             getCube(cube);
 
             // Write 8 corner vertices.
-            writeVertex(
-              node.translation.x - cube.size.x, node.translation.y - cube.size.y, node.translation.z - cube.size.z);
-            writeVertex(
-              node.translation.x + cube.size.x, node.translation.y - cube.size.y, node.translation.z - cube.size.z);
-            writeVertex(
-              node.translation.x + cube.size.x, node.translation.y + cube.size.y, node.translation.z - cube.size.z);
-            writeVertex(
-              node.translation.x - cube.size.x, node.translation.y + cube.size.y, node.translation.z - cube.size.z);
-            writeVertex(
-              node.translation.x - cube.size.x, node.translation.y - cube.size.y, node.translation.z + cube.size.z);
-            writeVertex(
-              node.translation.x + cube.size.x, node.translation.y - cube.size.y, node.translation.z + cube.size.z);
-            writeVertex(
-              node.translation.x + cube.size.x, node.translation.y + cube.size.y, node.translation.z + cube.size.z);
-            writeVertex(
-              node.translation.x - cube.size.x, node.translation.y + cube.size.y, node.translation.z + cube.size.z);
+            writeVertex(-cube.size.x, -cube.size.y, -cube.size.z, node.translation);
+            writeVertex(+cube.size.x, -cube.size.y, -cube.size.z, node.translation);
+            writeVertex(+cube.size.x, +cube.size.y, -cube.size.z, node.translation);
+            writeVertex(-cube.size.x, +cube.size.y, -cube.size.z, node.translation);
+            writeVertex(-cube.size.x, -cube.size.y, +cube.size.z, node.translation);
+            writeVertex(+cube.size.x, -cube.size.y, +cube.size.z, node.translation);
+            writeVertex(+cube.size.x, +cube.size.y, +cube.size.z, node.translation);
+            writeVertex(-cube.size.x, +cube.size.y, +cube.size.z, node.translation);
 
             // -Z
             writeFace(vertexIndex, vertexIndex + 2, vertexIndex + 1);
@@ -108,12 +112,14 @@ void exportObj(const Scene&           scene,
         }
         else if (!node.mesh.isNone())
         {
+            std::cout << "  Mesh = " << node.mesh.getId() << '\n';
+
             Mesh mesh;
             mesh.id = node.mesh.getId();
             getMesh(mesh);
 
             // Write vertices.
-            for (const auto& [x, y, z] : mesh.vertices.get()) writeVertex(x, y, z);
+            for (const auto& [x, y, z] : mesh.vertices.get()) writeVertex(x, y, z, node.translation);
             // Write triangle indices.
             for (const auto& [x, y, z] : mesh.indices.get())
                 writeFace(vertexIndex + x, vertexIndex + y, vertexIndex + z);
@@ -122,12 +128,14 @@ void exportObj(const Scene&           scene,
         }
         else if (!node.sphere.isNone())
         {
+            std::cout << "  Sphere = " << node.sphere.getId() << '\n';
+
             Sphere sphere;
             sphere.id = node.sphere.getId();
             getSphere(sphere);
 
             // Write +Z tip vertex.
-            writeVertex(0, 0, sphere.radius);
+            writeVertex(0, 0, sphere.radius, node.translation);
 
             // Write ring vertices.
             constexpr int32_t rings       = 6;
@@ -145,13 +153,13 @@ void exportObj(const Scene&           scene,
                     const float x = std::sinf(theta) * std::cosf(phi);
                     const float y = std::sinf(theta) * std::sinf(phi);
                     const float z = std::cosf(theta);
-                    writeVertex(x * sphere.radius, y * sphere.radius, z * sphere.radius);
+                    writeVertex(x * sphere.radius, y * sphere.radius, z * sphere.radius, node.translation);
                     phi += dphi;
                 }
             }
 
             // Write -Z tip vertex.
-            writeVertex(0, 0, -sphere.radius);
+            writeVertex(0, 0, -sphere.radius, node.translation);
 
             // Write bottom cap.
             for (int32_t i = 0; i < segments - 1; i++)
@@ -191,5 +199,6 @@ void exportObj(const Scene&           scene,
 
             vertexIndex += vertexCount;
         }
+        else { std::cout << "  Empty\n"; }
     }
 }

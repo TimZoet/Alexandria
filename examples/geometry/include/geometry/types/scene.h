@@ -4,6 +4,8 @@
 // Standard includes.
 ////////////////////////////////////////////////////////////////
 
+#include <format>
+#include <iostream>
 #include <string>
 
 ////////////////////////////////////////////////////////////////
@@ -14,6 +16,7 @@
 #include "alexandria/core/type_descriptor.h"
 #include "alexandria/member_types/instance_id.h"
 #include "alexandria/member_types/reference_array.h"
+#include "alexandria/queries/delete_query.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
 
@@ -40,6 +43,7 @@ struct QueryableReferenceArray : alex::ReferenceArray<typename T::object_t>
         for (const auto& id : this->get())
         {
             object_t o{.id = id};
+            (*getQuery)(o);
             objects.emplace_back(std::move(o));
         }
 
@@ -47,6 +51,11 @@ struct QueryableReferenceArray : alex::ReferenceArray<typename T::object_t>
     }
 
     get_query_t* getQuery = nullptr;
+};
+
+template<typename T>
+struct alex::_is_reference_array<QueryableReferenceArray<T>> : std::true_type
+{
 };
 
 struct Scene
@@ -58,6 +67,35 @@ struct Scene
     using descriptor_t =
       alex::GenerateTypeDescriptor<alex::Member<&Scene::id>, alex::Member<&Scene::name>, alex::Member<&Scene::nodes>>;
 
+    using delete_query_t = alex::DeleteQuery<descriptor_t>;
     using get_query_t    = alex::GetQuery<descriptor_t>;
-    using insert_query_t = alex::InsertQuery<descriptor_t>;
+
+    friend std::ostream& operator<<(std::ostream& out, const Scene& obj)
+    {
+        return out << std::format("Scene{{name={}, length(nodes)={}}}", obj.name, obj.nodes.get().size());
+    }
+};
+
+struct SceneInsertQuery final : alex::InsertQuery<Scene::descriptor_t>
+{
+    SceneInsertQuery() = delete;
+
+    SceneInsertQuery(const SceneInsertQuery&) = delete;
+
+    SceneInsertQuery(SceneInsertQuery&&) noexcept = delete;
+
+    explicit SceneInsertQuery(type_descriptor_t desc) : InsertQuery(std::move(desc)) {}
+
+    ~SceneInsertQuery() noexcept override = default;
+
+    SceneInsertQuery& operator=(const SceneInsertQuery&) = delete;
+
+    SceneInsertQuery& operator=(SceneInsertQuery&&) noexcept = delete;
+
+    void operator()(object_t& instance) override
+    {
+        if (instance.name.empty()) throw std::runtime_error("Cannot insert scene without name.");
+
+        return InsertQuery::operator()(instance);
+    }
 };

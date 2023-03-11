@@ -5,14 +5,18 @@
 ////////////////////////////////////////////////////////////////
 
 #include <filesystem>
-#include <functional>
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
-#include "geometry/types.h"
+#include "geometry/types/material.h"
+#include "geometry/types/mesh.h"
+#include "geometry/types/node.h"
+#include "geometry/types/scene.h"
 
-bool importModel(const std::filesystem::path&                          path,
-                 const std::function<void(std::shared_ptr<Mesh>)>&     insertMeshFunc,
-                 const std::function<void(std::shared_ptr<Material>)>& insertMaterialFunc);
+bool importObj(const std::filesystem::path& path,
+               MaterialInsertQuery&         insertMaterial,
+               MeshInsertQuery&             insertMesh,
+               NodeInsertQuery&             insertNode,
+               SceneInsertQuery&            insertScene);

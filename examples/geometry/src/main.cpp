@@ -13,8 +13,8 @@
 
 #include "alexandria/core/library.h"
 #include "alexandria/core/namespace.h"
+#include "alexandria/queries/delete_query.h"
 #include "alexandria/queries/get_query.h"
-#include "alexandria/queries/insert_query.h"
 #include "alexandria/queries/table_sets.h"
 #include "parsertongue/parser.h"
 
@@ -23,6 +23,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "geometry/export.h"
+#include "geometry/import.h"
 #include "geometry/library.h"
 #include "geometry/types/cube.h"
 #include "geometry/types/float3.h"
@@ -43,6 +44,7 @@ int main(int, char**)
     setWinWorkDir();
 #endif
 
+    // Setup library, types and queries.
     auto                     library      = createLibrary();
     auto&                    mainSpace    = library->getNamespace("main");
     auto&                    typeCube     = mainSpace.getType("cube");
@@ -63,27 +65,29 @@ int main(int, char**)
     auto                     tablesNode     = alex::TableSets(descNode);
     auto                     tablesScene    = alex::TableSets(descScene);
     auto                     tablesSphere   = alex::TableSets(descSphere);
+    Cube::delete_query_t     deleteCube(descCube);
+    Material::delete_query_t deleteMaterial(descMaterial);
+    Mesh::delete_query_t     deleteMesh(descMesh);
+    Node::delete_query_t     deleteNode(descNode);
+    Scene::delete_query_t    deleteScene(descScene);
+    Sphere::delete_query_t   deleteSphere(descSphere);
     Cube::get_query_t        getCube(descCube);
     Material::get_query_t    getMaterial(descMaterial);
     Mesh::get_query_t        getMesh(descMesh);
     Node::get_query_t        getNode(descNode);
     Scene::get_query_t       getScene(descScene);
     Sphere::get_query_t      getSphere(descSphere);
-    Cube::insert_query_t     insertCube(descCube);
-    Material::insert_query_t insertMaterial(descMaterial);
-    Mesh::insert_query_t     insertMesh(descMesh);
-    Node::insert_query_t     insertNode(descNode);
-    Scene::insert_query_t    insertScene(descScene);
-    Sphere::insert_query_t   insertSphere(descSphere);
+    CubeInsertQuery          insertCube(descCube);
+    MaterialInsertQuery      insertMaterial(descMaterial);
+    MeshInsertQuery          insertMesh(descMesh);
+    NodeInsertQuery          insertNode(descNode);
+    SceneInsertQuery         insertScene(descScene);
+    SphereInsertQuery        insertSphere(descSphere);
 
     std::unordered_map<std::string, alex::InstanceId> cache;
 
+    // Setup parser.
     pt::parser parser(0, nullptr, true);
-
-    auto flagClear = parser.add_flag('\0', "clear");
-    flagClear->set_help(
-      "Clear instances in the database.",
-      "Clear instances in the database. You can either clear --all instances, or instances of a specific --type.");
 
     auto flagCreate = parser.add_flag('c', "create");
     flagCreate->set_help("Create a new instance.");
@@ -105,22 +109,22 @@ int main(int, char**)
       "List instances in the database.",
       "List instances in the database. You can either list --all instances, or instances of a specific --type.");
 
-    auto flagAll       = parser.add_flag('\0', "all");
-    auto flagCache     = parser.add_flag('\0', "cache");
-    auto flagCube      = parser.add_flag('\0', "cube");
-    auto flagMaterial  = parser.add_flag('\0', "material");
-    auto flagMesh      = parser.add_flag('\0', "mesh");
-    auto flagNode      = parser.add_flag('\0', "node");
-    auto flagScene     = parser.add_flag('\0', "scene");
-    auto flagSphere    = parser.add_flag('\0', "sphere");
+    auto flagAll      = parser.add_flag('\0', "all");
+    auto flagCache    = parser.add_flag('\0', "cache");
+    auto flagCube     = parser.add_flag('\0', "cube");
+    auto flagMaterial = parser.add_flag('\0', "material");
+    auto flagMesh     = parser.add_flag('\0', "mesh");
+    auto flagNode     = parser.add_flag('\0', "node");
+    auto flagScene    = parser.add_flag('\0', "scene");
+    auto flagSphere   = parser.add_flag('\0', "sphere");
+    auto valueFile    = parser.add_value<std::string>('\0', "file");
+    valueFile->set_help("File to export to.");
+    auto valueIdentifier = parser.add_value<std::string>('\0', "identifier");
+    valueIdentifier->set_help("Identifier or variable name pointing to an instance.");
     auto valueMaterial = parser.add_value<std::string>('\0', "mtl");
     valueMaterial->set_help("Identifier or variable name pointing to a material.");
-    auto valueName   = parser.add_value<std::string>('\0', "name");
-    auto valueRadius = parser.add_value<float>('\0', "radius");
-    auto valueScene  = parser.add_value<std::string>('\0', "sc");
-    valueScene->set_help("Identifier or variable name pointing to a scene.");
-    auto valueShape = parser.add_value<std::string>('\0', "shape");
-    valueShape->set_help("Identifier or variable name pointing to a shape.");
+    auto valueName     = parser.add_value<std::string>('\0', "name");
+    auto valueRadius   = parser.add_value<float>('\0', "radius");
     auto valueSpecular = parser.add_value<float>('\0', "specular");
     auto valueVariable = parser.add_value<std::string>('\0', "variable");
     valueVariable->set_help("Assign an identifier to, or read one from, a named variable.");
@@ -131,12 +135,14 @@ int main(int, char**)
     auto listTranslation = parser.add_list<float>('\0', "translation");
     listTranslation->set_help("List of floating point values.");
 
+    // Loop.
     std::string line, error;
     while (true)
     {
+        std::cout << "> ";
         std::getline(std::cin, line);
         if (line.empty()) continue;
-        if (line == "exit") return 0;
+        if (line == "exit" || line == "quit" || line == "q") return 0;
         parser.reset(line, true);
         if (!parser(error))
         {
@@ -152,13 +158,9 @@ int main(int, char**)
 
         try
         {
-            if (flagClear->is_set())
+            if (flagCreate->is_set())
             {
-                // TODO
-            }
-            else if (flagCreate->is_set())
-            {
-                if (flagCube->is_set())
+                if (flagCube->is_set() && !flagNode->is_set())
                 {
                     if (listSize->get_values().size() < 3) throw std::runtime_error("Need 3 size values.");
 
@@ -207,10 +209,10 @@ int main(int, char**)
 
                     // Retrieve shape from cache variable or assign identifier directly.
                     alex::InstanceId shapeId;
-                    if (auto it = cache.find(valueShape->get_value()); it != cache.end())
+                    if (auto it = cache.find(valueIdentifier->get_value()); it != cache.end())
                         shapeId = it->second;
                     else
-                        shapeId = valueShape->get_value();
+                        shapeId = valueIdentifier->get_value();
                     if (flagCube->is_set())
                         node.cube = shapeId;
                     else if (flagMesh->is_set())
@@ -242,7 +244,7 @@ int main(int, char**)
 
                     std::cout << "Created scene with id=" << scene.id << std::endl;
                 }
-                else if (flagSphere->is_set())
+                else if (flagSphere->is_set() && !flagNode->is_set())
                 {
                     Sphere sphere;
                     sphere.name   = valueName->get_value();
@@ -253,36 +255,131 @@ int main(int, char**)
 
                     std::cout << "Created sphere with id=" << sphere.id << std::endl;
                 }
-                else { std::cout << "Missing appropriate arguments, no new isntances were created" << std::endl; }
+                else { std::cout << "Missing appropriate arguments, no new instances were created" << std::endl; }
             }
             else if (flagDelete->is_set())
             {
-                // TODO
+                if (!valueIdentifier->is_set()) throw std::runtime_error("Need an identifier.");
+                const alex::InstanceId id(valueIdentifier->get_value());
+
+                if (flagCube->is_set())
+                {
+                    if (deleteCube(id))
+                        std::cout << "Deleted cube with id=" << id << std::endl;
+                    else
+                        std::cout << "Could not delete cube with id=" << id << std::endl;
+                }
+                else if (flagMaterial->is_set())
+                {
+                    if (deleteMaterial(id))
+                        std::cout << "Deleted material with id=" << id << std::endl;
+                    else
+                        std::cout << "Could not delete material with id=" << id << std::endl;
+                }
+                else if (flagMesh->is_set())
+                {
+                    if (deleteMesh(id))
+                        std::cout << "Deleted mesh with id=" << id << std::endl;
+                    else
+                        std::cout << "Could not delete mesh with id=" << id << std::endl;
+                }
+                else if (flagNode->is_set())
+                {
+                    if (deleteNode(id))
+                        std::cout << "Deleted node with id=" << id << std::endl;
+                    else
+                        std::cout << "Could not delete node with id=" << id << std::endl;
+                }
+                else if (flagScene->is_set())
+                {
+                    if (deleteScene(id))
+                        std::cout << "Deleted scene with id=" << id << std::endl;
+                    else
+                        std::cout << "Could not delete scene with id=" << id << std::endl;
+                }
+                else if (flagSphere->is_set())
+                {
+                    if (deleteSphere(id))
+                        std::cout << "Deleted sphere with id=" << id << std::endl;
+                    else
+                        std::cout << "Could not delete sphere with id=" << id << std::endl;
+                }
+                else { std::cout << "Missing appropriate arguments, no instances were deleted" << std::endl; }
             }
             else if (flagExport->is_set())
             {
                 Scene scene;
-                if (auto it = cache.find(valueScene->get_value()); it != cache.end())
+                if (auto it = cache.find(valueIdentifier->get_value()); it != cache.end())
                     scene.id = it->second;
                 else
-                    scene.id = valueScene->get_value();
+                    scene.id = valueIdentifier->get_value();
                 getScene(scene);
                 scene.nodes.getQuery = &getNode;
 
-                exportObj(scene, getCube, getMaterial, getMesh, getSphere);
+                std::filesystem::path file = valueFile->is_set() ? valueFile->get_value() : "model.obj";
+                exportObj(scene, std::move(file), getCube, getMaterial, getMesh, getSphere);
             }
             else if (flagImport->is_set())
             {
-                // TODO
+                importObj(valueFile->get_value(), insertMaterial, insertMesh, insertNode, insertScene);
+            }
+            else if (flagInspect->is_set())
+            {
+                if (!valueIdentifier->is_set()) throw std::runtime_error("Need an identifier.");
+                const alex::InstanceId id(valueIdentifier->get_value());
+
+                if (flagCube->is_set())
+                {
+                    Cube cube;
+                    cube.id = id;
+                    getCube(cube);
+                    std::cout << cube << std::endl;
+                }
+                else if (flagMaterial->is_set())
+                {
+                    Material material;
+                    material.id = id;
+                    getMaterial(material);
+                    std::cout << material << std::endl;
+                }
+                else if (flagMesh->is_set())
+                {
+                    Mesh mesh;
+                    mesh.id = id;
+                    getMesh(mesh);
+                    std::cout << mesh << std::endl;
+                }
+                else if (flagNode->is_set())
+                {
+                    Node node;
+                    node.id = id;
+                    getNode(node);
+                    std::cout << node << std::endl;
+                }
+                else if (flagScene->is_set())
+                {
+                    Scene scene;
+                    scene.id = id;
+                    getScene(scene);
+                    std::cout << scene << std::endl;
+                }
+                else if (flagSphere->is_set())
+                {
+                    Sphere sphere;
+                    sphere.id = id;
+                    getSphere(sphere);
+                    std::cout << sphere << std::endl;
+                }
+                else { std::cout << "Missing appropriate arguments, no instances were deleted" << std::endl; }
             }
             else if (flagList->is_set())
             {
                 // Constructs a query that selects the identifier and name of the instance table.
                 constexpr auto lister = [](auto&& tableSets) {
-                    for (const auto row :
-                         tableSets.getInstanceTable()
-                           .select(tableSets.getInstanceTable().col<1>(), tableSets.getInstanceTable().col<2>())
-                           .compile())
+                    for (const auto row : tableSets.getInstanceTable()
+                                            .select(tableSets.getInstanceTable().template col<1>(),
+                                                    tableSets.getInstanceTable().template col<2>())
+                                            .compile())
                         std::cout << "name=" << std::get<1>(row) << " id=" << std::get<0>(row) << std::endl;
                 };
 
@@ -327,14 +424,6 @@ int main(int, char**)
                     std::cout << "Spheres:" << std::endl;
                     lister(tablesSphere);
                 }
-            }
-            else if (flagImport->is_set())
-            {
-                // TODO
-            }
-            else if (flagInspect->is_set())
-            {
-                // TODO
             }
         }
         catch (const pt::parser_tongue_exception& e)

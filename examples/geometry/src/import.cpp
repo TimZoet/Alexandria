@@ -10,12 +10,17 @@
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
+#define TINYOBJLOADER_IMPLEMENTATION
 #include "geometry/tiny_obj_loader.h"
 
-bool importModel(const std::filesystem::path&                          path,
-                 const std::function<void(std::shared_ptr<Mesh>)>&     insertMeshFunc,
-                 const std::function<void(std::shared_ptr<Material>)>& insertMaterialFunc)
+bool importObj(const std::filesystem::path& path,
+               MaterialInsertQuery&         insertMaterial,
+               MeshInsertQuery&             insertMesh,
+               NodeInsertQuery&             insertNode,
+               SceneInsertQuery&            insertScene)
 {
+    std::cout << "Importing " << path << '\n';
+
     // Try to load obj file.
     auto                             inputfile = path.string();
     tinyobj::attrib_t                attrib;
@@ -34,58 +39,60 @@ bool importModel(const std::filesystem::path&                          path,
     std::vector<alex::InstanceId> materialList;
     for (const auto& mat : materials)
     {
-        // Create new material.
-        auto material      = std::make_shared<Material>();
-        material->name     = mat.name;
-        material->color    = float3{.x = mat.diffuse[0], .y = mat.diffuse[1], .z = mat.diffuse[2]};
-        material->specular = mat.specular[0];
+        Material material;
+        material.name     = mat.name;
+        material.color    = float3{.x = mat.diffuse[0], .y = mat.diffuse[1], .z = mat.diffuse[2]};
+        material.specular = mat.specular[0];
 
-        insertMaterialFunc(material);
+        insertMaterial(material);
 
-        materialList.push_back(material->id);
+        std::cout << "  Created material " << material.id << '\n';
+
+        materialList.push_back(material.id);
     }
 
-    // Load all shapes and create a mesh for each.
+    Scene scene;
+    scene.name = path.stem().string();
+
+    // Load all shapes and create a mesh and node for each.
     for (const auto& shape : shapes)
     {
-        // Create new mesh.
-        auto mesh  = std::make_shared<Mesh>();
-        mesh->name = shape.name;
+        Mesh mesh;
+        mesh.name = shape.name;
 
-        // Get material from first triangle.
-        mesh->material = materialList[static_cast<size_t>(shape.mesh.material_ids[0])];
-
-        auto& vertices = mesh->vertices.get();
-        vertices.reserve(shape.mesh.num_face_vertices.size() * 3);
-
-        // Get all vertices.
-        for (size_t i = 0; i < shape.mesh.num_face_vertices.size() * 3; i++)
+        // While there is a global vertex array shared by all shapes,
+        // we just extract the vertices used by this particular shape.
+        // Obviously, this can cause quite a bit of duplication of data.
+        auto& vertices = mesh.vertices.get();
+        for (auto [vertex_index, normal_index, texcoord_index] : shape.mesh.indices)
         {
-            const auto& idx = shape.mesh.indices[i];
-
-            Vertex v;
-
-            // Get vertex position.
-            v.position = float3{.x = attrib.vertices[static_cast<size_t>(idx.vertex_index) * 3 + 0],
-                                .y = attrib.vertices[static_cast<size_t>(idx.vertex_index) * 3 + 1],
-                                .z = attrib.vertices[static_cast<size_t>(idx.vertex_index) * 3 + 2]};
-
-            // Get vertex normal.
-            if (idx.normal_index >= 0)
-                v.normal = float3{.x = attrib.normals[static_cast<size_t>(idx.normal_index) * 3 + 0],
-                                  .y = attrib.normals[static_cast<size_t>(idx.normal_index) * 3 + 1],
-                                  .z = attrib.normals[static_cast<size_t>(idx.normal_index) * 3 + 2]};
-
-            // Get vertex UV coords.
-            if (idx.texcoord_index >= 0)
-                v.uv = float2{.x = attrib.texcoords[static_cast<size_t>(idx.texcoord_index) * 2 + 0],
-                              .y = attrib.texcoords[static_cast<size_t>(idx.texcoord_index) * 2 + 1]};
-
-            vertices.push_back(v);
+            vertices.emplace_back(attrib.vertices[static_cast<size_t>(vertex_index) * 3 + 0],
+                                  attrib.vertices[static_cast<size_t>(vertex_index) * 3 + 1],
+                                  attrib.vertices[static_cast<size_t>(vertex_index) * 3 + 2]);
         }
 
-        insertMeshFunc(std::move(mesh));
+        auto& indices = mesh.indices.get();
+        for (int32_t i = 0; i < shape.mesh.indices.size() / 3; i++) indices.emplace_back(i * 3, i * 3 + 1, i * 3 + 2);
+
+        insertMesh(mesh);
+
+        std::cout << "  Created mesh " << mesh.id << '\n';
+
+        Node node;
+        node.name = shape.name;
+        // Get material from first triangle.
+        node.material = materialList[static_cast<size_t>(shape.mesh.material_ids[0])];
+        node.mesh     = mesh;
+        insertNode(node);
+
+        std::cout << "  Created node " << node.id << '\n';
+
+        scene.nodes.add(node);
     }
+
+    insertScene(scene);
+
+    std::cout << "Created scene " << scene.id << '\n';
 
     return true;
 }
