@@ -60,7 +60,7 @@ class AlexandriaConan(ConanFile):
         base.requirements(self)
         
         self.requires("common/1.0.0@timzoet/stable")
-        self.requires("cppql/0.1.0@timzoet/stable")
+        self.requires("cppql/[>=0.2.0 <1]@timzoet/stable")
         self.requires("dot/1.0.0@timzoet/stable")
         self.requires("parsertongue/[>=1.2 <2]@timzoet/stable")
         self.requires("stduuid/1.0.0@timzoet/stable")
