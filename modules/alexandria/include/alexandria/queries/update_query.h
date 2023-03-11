@@ -55,6 +55,12 @@ namespace alex
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
+        UpdateQuery() = delete;
+
+        UpdateQuery(const UpdateQuery&) = delete;
+
+        UpdateQuery(UpdateQuery&&) noexcept = delete;
+
         explicit UpdateQuery(type_descriptor_t desc) :
             descriptor(desc),
             uuidParam(std::make_unique<std::string>()),
@@ -68,6 +74,12 @@ namespace alex
         {
         }
 
+        virtual ~UpdateQuery() noexcept = default;
+
+        UpdateQuery& operator=(const UpdateQuery&) = delete;
+
+        UpdateQuery& operator=(UpdateQuery&&) noexcept = delete;
+
         ////////////////////////////////////////////////////////////////
         // Invoke.
         ////////////////////////////////////////////////////////////////
@@ -77,7 +89,7 @@ namespace alex
          * \param instance Instance.
          * \return True if instance was updated, false if something failed.
          */
-        bool operator()(object_t& instance)
+        virtual bool operator()(object_t& instance)
         {
             // Cannot update an object that does not have valid ID.
             if (!type_descriptor_t::uuid_member_t::template get(instance).valid())

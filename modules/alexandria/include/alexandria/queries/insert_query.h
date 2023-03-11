@@ -43,6 +43,12 @@ namespace alex
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
+        InsertQuery() = delete;
+
+        InsertQuery(const InsertQuery&) = delete;
+
+        InsertQuery(InsertQuery&&) noexcept = delete;
+
         explicit InsertQuery(type_descriptor_t desc) :
             descriptor(desc),
             primitiveInserter(desc),
@@ -52,11 +58,17 @@ namespace alex
         {
         }
 
+        virtual ~InsertQuery() noexcept = default;
+
+        InsertQuery& operator=(const InsertQuery&) = delete;
+
+        InsertQuery& operator=(InsertQuery&&) noexcept = delete;
+
         ////////////////////////////////////////////////////////////////
         // Invoke.
         ////////////////////////////////////////////////////////////////
 
-        void operator()(object_t& instance)
+        virtual void operator()(object_t& instance)
         {
             // Cannot insert an object that already has a valid ID.
             if (type_descriptor_t::uuid_member_t::template get(instance).valid())

@@ -43,6 +43,12 @@ namespace alex
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
+        DeleteQuery() = delete;
+
+        DeleteQuery(const DeleteQuery&) = delete;
+
+        DeleteQuery(DeleteQuery&&) noexcept = delete;
+
         explicit DeleteQuery(type_descriptor_t desc) :
             descriptor(desc),
             uuidParam(std::make_unique<std::string>()),
@@ -52,6 +58,12 @@ namespace alex
             referenceArrayDeleter(desc, *uuidParam)
         {
         }
+
+        virtual ~DeleteQuery() noexcept = default;
+
+        DeleteQuery& operator=(const DeleteQuery&) = delete;
+
+        DeleteQuery& operator=(DeleteQuery&&) noexcept = delete;
 
         ////////////////////////////////////////////////////////////////
         // Invoke.
@@ -76,7 +88,7 @@ namespace alex
             return deleted;
         }
 
-        bool operator()(const InstanceId& id)
+        virtual bool operator()(const InstanceId& id)
         {
             try
             {

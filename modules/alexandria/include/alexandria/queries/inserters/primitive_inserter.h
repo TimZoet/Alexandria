@@ -4,6 +4,7 @@
 // Standard includes.
 ////////////////////////////////////////////////////////////////
 
+#include <format>
 #include <type_traits>
 
 ////////////////////////////////////////////////////////////////
@@ -111,8 +112,30 @@ namespace alex
 
             const auto f = [&]<is_member M, is_member... Ms>(std::tuple<M, Ms...>)
             {
-                // Insert nullptr for autoincrement rowid, retrieve member values from instance for other columns.
-                statement(nullptr, uuid, getter(Ms())...);
+                try
+                {
+                    // Insert nullptr for autoincrement rowid, retrieve member values from instance for other columns.
+                    statement(nullptr, uuid, getter(Ms())...);
+                }
+                catch (const sql::SqliteError& e)
+                {
+                    if (e.getExtendedErrorCode() == 787)
+                        throw std::runtime_error(std::format(
+                          "Failed to insert instance into main instance table. Most likely cause: instance has a "
+                          "reference property that references an object that no longer exists. Internal error message: "
+                          "\"{}\"",
+                          e.what()));
+
+                    throw std::runtime_error(std::format("Failed to insert instance into main instance table. Most "
+                                                         "likely cause unknown. Internal error message: \"{}\"",
+                                                         e.what()));
+                }
+                catch (const std::exception& e)
+                {
+                    throw std::runtime_error(std::format("Failed to insert instance into main instance table. Most "
+                                                         "likely cause unknown. Internal error message: \"{}\"",
+                                                         e.what()));
+                }
             };
 
             f(members_t{});

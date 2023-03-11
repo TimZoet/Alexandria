@@ -50,6 +50,12 @@ namespace alex
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
+        GetQuery() = delete;
+
+        GetQuery(const GetQuery&) = delete;
+
+        GetQuery(GetQuery&&) noexcept = delete;
+
         explicit GetQuery(type_descriptor_t desc) :
             descriptor(desc),
             uuidParam(std::make_unique<std::string>()),
@@ -59,6 +65,12 @@ namespace alex
             referenceArrayGetter(desc, *uuidParam)
         {
         }
+
+        virtual ~GetQuery() noexcept = default;
+
+        GetQuery& operator=(const GetQuery&) = delete;
+
+        GetQuery& operator=(GetQuery&&) noexcept = delete;
 
         ////////////////////////////////////////////////////////////////
         // Invoke.
@@ -88,7 +100,7 @@ namespace alex
             return instance;
         }
 
-        void operator()(object_t& instance)
+        virtual void operator()(object_t& instance)
         {
             // Cannot retrieve an object without a valid ID.
             if (!type_descriptor_t::uuid_member_t::template get(instance).valid())

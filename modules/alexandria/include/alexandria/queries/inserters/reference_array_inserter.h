@@ -156,8 +156,30 @@ namespace alex
 
             void operator()(object_t& instance, const sql::StaticText& uuid)
             {
-                for (const auto& values = member_t::template get(instance).get(); const auto v : values)
-                    statement(nullptr, uuid, sql::toText(v.getAsString()));
+                try
+                {
+                    for (const auto& values = member_t::template get(instance).get(); const auto v : values)
+                        statement(nullptr, uuid, sql::toText(v.getAsString()));
+                }
+                catch (const sql::SqliteError& e)
+                {
+                    if (e.getExtendedErrorCode() == 787)
+                        throw std::runtime_error(std::format(
+                          "Failed to insert instance into reference array table. Most likely cause: instance has a "
+                          "reference array property that references an object that no longer exists. Internal error "
+                          "message: \"{}\"",
+                          e.what()));
+
+                    throw std::runtime_error(std::format("Failed to insert instance into reference array table. Most "
+                                                         "likely cause unknown. Internal error message: \"{}\"",
+                                                         e.what()));
+                }
+                catch (const std::exception& e)
+                {
+                    throw std::runtime_error(std::format("Failed to insert instance into reference array table. Most "
+                                                         "likely cause unknown. Internal error message: \"{}\"",
+                                                         e.what()));
+                }
 
                 statement.clearBindings();
             }
