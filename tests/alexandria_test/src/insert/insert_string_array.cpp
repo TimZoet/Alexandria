@@ -39,10 +39,12 @@ namespace
         }
     };
 
-    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::strings>>;
+    using FooDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"strings", &Foo::strings>>;
 
-    using BarDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::strings1>, alex::Member<&Bar::strings2>>;
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Bar::id>,
+                                                       alex::Member<"strings1", &Bar::strings1>,
+                                                       alex::Member<"strings2", &Bar::strings2>>;
 }  // namespace
 
 void InsertStringArray::operator()()

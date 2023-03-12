@@ -46,12 +46,14 @@ namespace
         }
     };
 
-    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>;
+    using FooDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"floats", &Foo::floats>>;
 
-    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>;
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Bar::id>, alex::Member<"ints", &Bar::ints>>;
 
-    using BazDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::uints>, alex::Member<&Baz::doubles>>;
+    using BazDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Baz::id>,
+                                                       alex::Member<"uints", &Baz::uints>,
+                                                       alex::Member<"doubles", &Baz::doubles>>;
 }  // namespace
 
 void UpdatePrimitiveBlob::operator()()

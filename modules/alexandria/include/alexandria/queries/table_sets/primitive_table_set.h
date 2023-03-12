@@ -60,10 +60,16 @@ namespace alex
         PrimitiveTableSet& operator=(PrimitiveTableSet&&) = default;
 
         ////////////////////////////////////////////////////////////////
-        // Invoke.
+        // Getters.
         ////////////////////////////////////////////////////////////////
 
         auto& get() noexcept { return table; }
+
+        template<detail::MemberName Name>
+        auto col() const noexcept
+        {
+            return table.template col<detail::getColumnIndex<Name, members_t>()>();
+        }
 
     private:
         [[nodiscard]] static table_t compile(const type_descriptor_t& desc)

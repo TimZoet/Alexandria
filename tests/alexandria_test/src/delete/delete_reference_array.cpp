@@ -31,13 +31,14 @@ namespace
         alex::ReferenceArray<Bar> bar;
     };
 
-    using FooDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>;
+    using FooDescriptor = alex::
+      GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"a", &Foo::a>, alex::Member<"b", &Foo::b>>;
 
-    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::foo>>;
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Bar::id>, alex::Member<"foo", &Bar::foo>>;
 
-    using BazDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>;
+    using BazDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Baz::id>,
+                                                       alex::Member<"foo", &Baz::foo>,
+                                                       alex::Member<"bar", &Baz::bar>>;
 }  // namespace
 
 void DeleteReferenceArray::operator()()

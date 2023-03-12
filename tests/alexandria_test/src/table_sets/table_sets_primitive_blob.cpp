@@ -44,12 +44,14 @@ namespace
         }
     };
 
-    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::floats>>;
+    using FooDescriptor =
+      alex::GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"floats", &Foo::floats>>;
 
-    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::ints>>;
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Bar::id>, alex::Member<"ints", &Bar::ints>>;
 
-    using BazDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::uints>, alex::Member<&Baz::doubles>>;
+    using BazDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Baz::id>,
+                                                       alex::Member<"uints", &Baz::uints>,
+                                                       alex::Member<"doubles", &Baz::doubles>>;
 }  // namespace
 
 void TableSetsPrimitiveBlob::operator()()
@@ -82,6 +84,11 @@ void TableSetsPrimitiveBlob::operator()()
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
+                                   decltype(tableSets.getInstanceColumn<"floats">())>);
     }
 
     // Check Bar.
@@ -92,6 +99,11 @@ void TableSetsPrimitiveBlob::operator()()
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
+                                   decltype(tableSets.getInstanceColumn<"ints">())>);
     }
 
     // Check Baz.
@@ -102,5 +114,12 @@ void TableSetsPrimitiveBlob::operator()()
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
+                                   decltype(tableSets.getInstanceColumn<"uints">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<2>()),
+                                   decltype(tableSets.getInstanceColumn<"doubles">())>);
     }
 }

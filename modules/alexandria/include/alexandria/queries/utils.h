@@ -134,4 +134,28 @@ namespace alex::detail
      */
     template<is_member M>
     using blob_array_table_t = sql::TypedTable<sql::row_id, std::string, member_to_column_t<M>>;
+
+    ////////////////////////////////////////////////////////////////
+    // ...
+    ////////////////////////////////////////////////////////////////
+
+    template<size_t I, MemberName Name, typename T>
+    constexpr size_t getColumnIndexImpl()
+    {
+        if constexpr (detail::compare<Name, std::tuple_element_t<I, T>::name_v>())
+            return I;
+        else if constexpr (I + 1 == std::tuple_size_v<T>)
+        {
+            constexpr_static_assert();
+            return 0;
+        }
+        else
+            return getColumnIndexImpl<I + 1, Name, T>();
+    }
+
+    template<MemberName Name, typename T>
+    constexpr size_t getColumnIndex()
+    {
+        return getColumnIndexImpl<0, Name, T>();
+    }
 }  // namespace alex::detail

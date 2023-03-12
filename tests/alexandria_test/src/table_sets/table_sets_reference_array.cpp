@@ -29,13 +29,14 @@ namespace
         alex::ReferenceArray<Bar> bar;
     };
 
-    using FooDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>;
+    using FooDescriptor = alex::
+      GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"a", &Foo::a>, alex::Member<"b", &Foo::b>>;
 
-    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::foo>>;
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Bar::id>, alex::Member<"foo", &Bar::foo>>;
 
-    using BazDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Baz::id>, alex::Member<&Baz::foo>, alex::Member<&Baz::bar>>;
+    using BazDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Baz::id>,
+                                                       alex::Member<"foo", &Baz::foo>,
+                                                       alex::Member<"bar", &Baz::bar>>;
 }  // namespace
 
 void TableSetsReferenceArray::operator()()
@@ -78,6 +79,11 @@ void TableSetsReferenceArray::operator()()
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(1, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getReferenceArrayTable<0>()),
+                                   decltype(tableSets.getReferenceArrayTable<"foo">())>);
     }
 
     // Check Baz.
@@ -91,5 +97,12 @@ void TableSetsReferenceArray::operator()()
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(2, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getReferenceArrayTable<0>()),
+                                   decltype(tableSets.getReferenceArrayTable<"foo">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getReferenceArrayTable<1>()),
+                                   decltype(tableSets.getReferenceArrayTable<"bar">())>);
     }
 }

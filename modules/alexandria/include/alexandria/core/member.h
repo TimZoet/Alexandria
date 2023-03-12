@@ -1,6 +1,12 @@
 #pragma once
 
 ////////////////////////////////////////////////////////////////
+// Standard includes.
+////////////////////////////////////////////////////////////////
+
+#include <algorithm>
+
+////////////////////////////////////////////////////////////////
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
@@ -64,13 +70,70 @@ namespace alex
 
         template<auto... Ms>
         concept is_mp_sequence = is_mp_sequence_impl<Ms...>::value;
+
+        template<size_t N>
+        struct MemberName
+        {
+            static constexpr size_t size = N;
+
+            template<size_t A, size_t B>
+            constexpr MemberName(const char (&strA)[A], const char (&strB)[B])
+            {
+                // Copy without null terminator.
+                std::copy_n(strA, A - 1, name);
+                // Place '.' inbetween.
+                *(name + A - 1) = '.';
+                // Copy with null terminator.
+                std::copy_n(strB, B, name + A);
+            }
+
+            constexpr MemberName(const char (&str)[N]) { std::copy_n(str, N, name); }
+
+            char name[N] = {};
+        };
+
+        /**
+         * \brief Concatenate two  MemberName types. Strings are concatenated as "A.B".
+         * \tparam A Left.
+         * \tparam B Right.
+         * \return MemberName.
+         */
+        template<MemberName A, MemberName B>
+        constexpr auto concat()
+        {
+            return MemberName<decltype(A)::size + decltype(B)::size>(A.name, B.name);
+        }
+
+        /**
+         * \brief Perform an exact comparison of two MemberName types.
+         * \tparam A Left.
+         * \tparam B Right.
+         * \return Equality.
+         */
+        template<MemberName A, MemberName B>
+        constexpr bool compare()
+        {
+            // If A and B have same lengths, compare strings.
+            if constexpr (std::same_as<decltype(A), decltype(B)>)
+            {
+                constexpr auto cmp = [](const char* a, const char* b) -> bool {
+                    while (*a || *b)
+                        if (*a++ != *b++) return false;
+                    return true;
+                };
+
+                return cmp(A.name, B.name);
+            }
+
+            return false;
+        }
     }  // namespace detail
 
     ////////////////////////////////////////////////////////////////
     // Member.
     ////////////////////////////////////////////////////////////////
 
-    template<auto M, auto... Ms>
+    template<detail::MemberName Name, auto M, auto... Ms>
         requires(detail::is_mp_sequence<M, Ms...>)
     class Member
     {
@@ -79,6 +142,7 @@ namespace alex
         inline static constexpr auto mp          = detail::get_last_mp<M, Ms...>::value;
         using class_t                            = member_pointer_class_t<std::decay_t<decltype(M)>>;
         using value_t                            = member_pointer_value_t<std::decay_t<decltype(mp)>>;
+        inline static constexpr auto name_v      = Name;
 
         static constexpr bool is_instance_id     = is_instance_id_mp<mp>;
         static constexpr bool is_blob            = is_blob_mp<mp>;
@@ -164,7 +228,7 @@ namespace alex
     // NestedMember.
     ////////////////////////////////////////////////////////////////
 
-    template<typename T, auto M>
+    template<detail::MemberName Name, typename T, auto M>
         requires(is_member_list<T> && std::same_as<typename T::class_t, member_pointer_value_t<decltype(M)>>)
     class NestedMember
     {
@@ -172,8 +236,8 @@ namespace alex
         using class_t = member_pointer_class_t<decltype(M)>;
     };
 
-    template<typename T, auto M>
-    struct IsNestedMemberImpl<NestedMember<T, M>> : std::true_type
+    template<detail::MemberName Name, typename T, auto M>
+    struct IsNestedMemberImpl<NestedMember<Name, T, M>> : std::true_type
     {
     };
 

@@ -9,6 +9,8 @@
 
 namespace alex
 {
+    // TODO: Verify that all members have a unique name.
+
     template<typename UuidMember, typename... Members>
     class TypeDescriptor
     {
@@ -43,11 +45,16 @@ namespace alex
 
         TypeDescriptor& operator=(TypeDescriptor&&) noexcept = default;
 
+        ////////////////////////////////////////////////////////////////
+        // Getters.
+        ////////////////////////////////////////////////////////////////
+
         [[nodiscard]] Type& getType() noexcept { return *type; }
 
         [[nodiscard]] const Type& getType() const noexcept { return *type; }
 
     private:
+
         ////////////////////////////////////////////////////////////////
         // Member variables.
         ////////////////////////////////////////////////////////////////
@@ -57,10 +64,13 @@ namespace alex
 
     namespace detail
     {
-        template<typename T, auto... M0s>
-        auto concat(Member<M0s...>)
+        template<typename T, MemberName Name0, auto... M0s>
+        auto concat(Member<Name0, M0s...>)
         {
-            auto f = []<auto... M1s>(Member<M1s...>) { return Member<M0s..., M1s...>(); };
+            auto f = []<MemberName Name1, auto... M1s>(Member<Name1, M1s...>)
+            {
+                return Member<detail::concat<Name0, Name1>(), M0s..., M1s...>();
+            };
             return f(T());
         }
 
@@ -71,7 +81,8 @@ namespace alex
         {
         public:
             // The get method takes a list of Member and NestedMember types. It turns this into a tuple of Member types
-            // through step-by-step conversions of the first parameter and then recursing on the remaining ones.
+            // through step-by-step conversions of the first parameter and then recursing on the remaining ones. Note
+            // that concatenation of MemberNames is left out of these examples.
             //
             // M*                     - pointer to member
             // Ms*...                 - list of 0 or more pointer to member
@@ -193,9 +204,9 @@ namespace alex
             template<typename Resolved, is_nested_member T, typename... Ts>
             static auto getImpl()
             {
-                auto f = [&]<auto M, typename... Us>(NestedMember<MemberList<Us...>, M>)
+                auto f = [&]<MemberName Name, auto M, typename... Us>(NestedMember<Name, MemberList<Us...>, M>)
                 {
-                    return getImpl<Resolved, MemberChain<Member<M>, Us...>, Ts...>();
+                    return getImpl<Resolved, MemberChain<Member<Name, M>, Us...>, Ts...>();
                 };
                 return f(T());
             }
@@ -217,9 +228,10 @@ namespace alex
                         // rule3
                         else if constexpr (is_nested_member<U>)
                         {
-                            auto g = [&]<auto NM, typename... Xs>(NestedMember<MemberList<Xs...>, NM>)
+                            auto g = [&]<MemberName Name, auto NM, typename... Xs>(
+                              NestedMember<Name, MemberList<Xs...>, NM>)
                             {
-                                using c0 = MemberChain<concat_t<M, Member<NM>>, Xs...>;
+                                using c0 = MemberChain<concat_t<M, Member<Name, NM>>, Xs...>;
                                 using c1 = MemberChain<M, Us...>;
                                 return getImpl<Resolved, c0, c1, Remaining...>();
                             };

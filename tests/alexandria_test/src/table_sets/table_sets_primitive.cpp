@@ -36,14 +36,14 @@ namespace
         }
     };
 
-    using FooDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>, alex::Member<&Foo::b>>;
+    using FooDescriptor = alex::
+      GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"a", &Foo::a>, alex::Member<"b", &Foo::b>>;
 
-    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Bar::id>,
-                                                       alex::Member<&Bar::a>,
-                                                       alex::Member<&Bar::b>,
-                                                       alex::Member<&Bar::c>,
-                                                       alex::Member<&Bar::d>>;
+    using BarDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Bar::id>,
+                                                       alex::Member<"a", &Bar::a>,
+                                                       alex::Member<"b", &Bar::b>,
+                                                       alex::Member<"c", &Bar::c>,
+                                                       alex::Member<"d", &Bar::d>>;
 }  // namespace
 
 void TableSetsPrimitive::operator()()
@@ -68,21 +68,39 @@ void TableSetsPrimitive::operator()()
 
     // Check Foo.
     {
-        auto  tableSets = alex::TableSets(FooDescriptor(fooType));
+        auto tableSets = alex::TableSets(FooDescriptor(fooType));
         static_cast<void>(tableSets);
 
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
+                                   decltype(tableSets.getInstanceColumn<"a">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<2>()),
+                                   decltype(tableSets.getInstanceColumn<"b">())>);
     }
 
     // Check Bar.
     {
-        auto  tableSets = alex::TableSets(BarDescriptor(barType));
+        auto tableSets = alex::TableSets(BarDescriptor(barType));
         static_cast<void>(tableSets);
 
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
+                                   decltype(tableSets.getInstanceColumn<"a">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<2>()),
+                                   decltype(tableSets.getInstanceColumn<"b">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<3>()),
+                                   decltype(tableSets.getInstanceColumn<"c">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<4>()),
+                                   decltype(tableSets.getInstanceColumn<"d">())>);
     }
 }

@@ -44,11 +44,31 @@ namespace alex
         }
 
         ////////////////////////////////////////////////////////////////
-        // Invoke.
+        // Getters.
         ////////////////////////////////////////////////////////////////
 
+        /**
+         * \brief Get instance table.
+         * \return Instance table.
+         */
         auto& getInstanceTable() noexcept { return primitiveTableSet.get(); }
 
+        /**
+         * \brief Get instance table column by index.
+         * \tparam Name Member name.
+         * \return Instance table column.
+         */
+        template<detail::MemberName Name>
+        [[nodiscard]] auto getInstanceColumn() noexcept
+        {
+            return primitiveTableSet.template col<Name>();
+        }
+
+        /**
+         * \brief Get primitive array table by index.
+         * \tparam I Index.
+         * \return Primitive array table.
+         */
         template<size_t I>
             requires(I < primitive_array_table_set_t::size)
         auto& getPrimitiveArrayTable() noexcept
@@ -56,6 +76,23 @@ namespace alex
             return primitiveArrayTableSet.template get<I>();
         }
 
+        /**
+         * \brief Get primitive array table from a member name.
+         * \tparam Name Member name.
+         * \return Primitive array table.
+         */
+        template<detail::MemberName Name>
+        auto& getPrimitiveArrayTable() noexcept
+        {
+            return getPrimitiveArrayTable<
+              detail::getColumnIndex<Name, typename primitive_array_table_set_t::members_t>()>();
+        }
+
+        /**
+         * \brief Get blob array table by index.
+         * \tparam I Index.
+         * \return Blob array table.
+         */
         template<size_t I>
             requires(I < blob_array_table_set_t::size)
         auto& getBlobArrayTable() noexcept
@@ -63,11 +100,39 @@ namespace alex
             return blobArrayTableSet.template get<I>();
         }
 
+        /**
+         * \brief Get blob array table from a member name.
+         * \tparam Name Member name.
+         * \return Blob array table.
+         */
+        template<detail::MemberName Name>
+        auto& getBlobArrayTable() noexcept
+        {
+            return getBlobArrayTable<detail::getColumnIndex<Name, typename blob_array_table_set_t::members_t>()>();
+        }
+
+        /**
+         * \brief Get reference array table by index.
+         * \tparam I Index.
+         * \return Reference array table.
+         */
         template<size_t I>
             requires(I < reference_array_table_set_t::size)
         auto& getReferenceArrayTable() noexcept
         {
             return referenceArrayTableSet.template get<I>();
+        }
+
+        /**
+         * \brief Get reference array table from a member name.
+         * \tparam Name Member name.
+         * \return Reference array table.
+         */
+        template<detail::MemberName Name>
+        auto& getReferenceArrayTable() noexcept
+        {
+            return getReferenceArrayTable<
+              detail::getColumnIndex<Name, typename reference_array_table_set_t::members_t>()>();
         }
 
     private:

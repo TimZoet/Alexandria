@@ -35,10 +35,10 @@ namespace
         alex::BlobArray<std::vector<float>> b;
     };
 
-    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"a", &Foo::a>>;
 
-    using BarDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<&Bar::id>, alex::Member<&Bar::a>, alex::Member<&Bar::b>>;
+    using BarDescriptor = alex::
+      GenerateTypeDescriptor<alex::Member<"id", &Bar::id>, alex::Member<"a", &Bar::a>, alex::Member<"b", &Bar::b>>;
 }  // namespace
 
 void TableSetsBlobArray::operator()()
@@ -67,6 +67,11 @@ void TableSetsBlobArray::operator()()
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(1, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+            decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(
+            std::is_same_v<decltype(tableSets.getBlobArrayTable<0>()), decltype(tableSets.getBlobArrayTable<"a">())>);
     }
 
     // Check Bar.
@@ -80,5 +85,12 @@ void TableSetsBlobArray::operator()()
         compareEQ(0, decltype(tableSets)::primitive_array_table_set_t::size);
         compareEQ(2, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
+
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(
+          std::is_same_v<decltype(tableSets.getBlobArrayTable<0>()), decltype(tableSets.getBlobArrayTable<"a">())>);
+        compareTrue(
+          std::is_same_v<decltype(tableSets.getBlobArrayTable<1>()), decltype(tableSets.getBlobArrayTable<"b">())>);
     }
 }

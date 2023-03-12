@@ -74,7 +74,7 @@ namespace alex
             explicit BlobArrayTableSetImpl(const type_descriptor_t& desc) : base_t(desc), table(compile(desc)) {}
 
             ////////////////////////////////////////////////////////////////
-            // Invoke.
+            // Getters.
             ////////////////////////////////////////////////////////////////
 
             [[nodiscard]] table_t& get(std::integral_constant<size_t, I>) noexcept { return table; }

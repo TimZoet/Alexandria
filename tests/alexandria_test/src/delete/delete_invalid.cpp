@@ -16,7 +16,7 @@ namespace
         int32_t          a = 0;
     };
 
-    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<&Foo::id>, alex::Member<&Foo::a>>;
+    using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"a", &Foo::a>>;
 }  // namespace
 
 void DeleteInvalid::operator()()
