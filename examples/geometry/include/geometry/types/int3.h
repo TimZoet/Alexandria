@@ -13,4 +13,4 @@ struct int3
     int32_t z = 0;
 };
 
-using int3_t = alex::MemberList<alex::Member<&int3::x>, alex::Member<&int3::y>, alex::Member<&int3::z>>;
+using int3_t = alex::MemberList<alex::Member<"x", &int3::x>, alex::Member<"y", &int3::y>, alex::Member<"z", &int3::z>>;

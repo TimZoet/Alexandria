@@ -24,8 +24,9 @@ struct Sphere
     std::string      name;
     float            radius = 0;
 
-    using descriptor_t = alex::
-      GenerateTypeDescriptor<alex::Member<&Sphere::id>, alex::Member<&Sphere::name>, alex::Member<&Sphere::radius>>;
+    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<"id", &Sphere::id>,
+                                                      alex::Member<"name", &Sphere::name>,
+                                                      alex::Member<"radius", &Sphere::radius>>;
     using delete_query_t = alex::DeleteQuery<descriptor_t>;
     using get_query_t    = alex::GetQuery<descriptor_t>;
 

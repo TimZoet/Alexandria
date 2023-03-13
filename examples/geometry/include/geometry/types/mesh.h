@@ -32,10 +32,10 @@ struct Mesh
     alex::Blob<std::vector<float3>> vertices;
     alex::Blob<std::vector<int3>>   indices;
 
-    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<&Mesh::id>,
-                                                      alex::Member<&Mesh::name>,
-                                                      alex::Member<&Mesh::vertices>,
-                                                      alex::Member<&Mesh::indices>>;
+    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<"id", &Mesh::id>,
+                                                      alex::Member<"name", &Mesh::name>,
+                                                      alex::Member<"vertices", &Mesh::vertices>,
+                                                      alex::Member<"indices", &Mesh::indices>>;
     using delete_query_t = alex::DeleteQuery<descriptor_t>;
     using get_query_t    = alex::GetQuery<descriptor_t>;
 

@@ -30,7 +30,9 @@ The `node` type combines a material and shape. It keeps references to a `materia
 * Extend `node` to also have a rotation and scale (note that especially rotation will probably require a slightly more extensive linear algebra library).
 * Add more types and extend `mesh` to allow sharing of vertex and index buffers to optimize memory usage.
 
-## Extended Queries
+## Queries
+
+### Custom Insert Queries
 
 Instead of directly using the `alex::InsertQuery` classes, some custom implementations are used. These perform additional validation just before invoking the base methods that write to the database. For instance, the `CubeInsertQuery` checks that the name of the instance is not empty, nor that its size along any of the axes is below zero.
 
@@ -55,7 +57,64 @@ void operator()(object_t& instance) override
 * Add more validation for e.g. the `mesh` type to check whether the indices are in range of the vertex list.
 * Add custom classes for the get queries that validate and fix objects that may be broken.
 
-## Search
+### Complex Search Queries
+
+The `--users` command runs a complex search query to find, for a specified instance, which other instances reference it. For example, which `nodes` reference a certain `material`. An even more complex query is the one that finds the `scenes` which include a `node`. This query has to perform a join across 3 tables: The `scene` instance table, the `node` instance table, and the `nodes` reference array table. Below a visual representation.
+
+![Type definitions](search.svg "Type definitions")
+
+In order to perform this query, we must do 4 things:
+
+1. Get the two instance tables and reference array table.
+2. Get the necessary columns from each table by index or name.
+3. Construct and compile the query.
+4. Run the query and iterate over results.
+
+```cpp
+// [1]
+// Scene instance table.
+auto& sceneTable      = tablesScene.getInstanceTable();
+// Node instance table.
+auto& nodeTable       = tablesNode.getInstanceTable();
+// Reference array table for nodes property of scene type.
+auto& nodeArrayTable  = tablesScene.getReferenceArrayTable<"nodes">();
+
+// [2]
+// The columns in the reference array table pointing to scene and node are at a fixed index.
+auto  sceneRefColumn  = nodeArrayTable.col<1>();
+auto  nodeRefColumn   = nodeArrayTable.col<2>();
+// The columns in the instance tables can be retrieved by the name that we specified in the TypeDescriptor.
+auto  sceneIdColumn   = tablesScene.getInstanceColumn<"id">();
+auto  sceneNameColumn = tablesScene.getInstanceColumn<"name">();
+auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+
+// [3]
+                        // Joining scene instance table with array table.
+auto  stmt            = sceneTable.join(sql::InnerJoin, nodeArrayTable)
+                        .on(sceneRefColumn == sceneIdColumn)
+                        // Joining node instance table with array table.
+                        .join(sql::InnerJoin, nodeTable)
+                        .on(nodeRefColumn == nodeIdColumn)
+                        // Select scene name.
+                        .selectAs<std::string>(sceneNameColumn)
+                        // Filter for specified node.
+                        .where(sql::like(nodeIdColumn, id.getAsString()))
+                        // Grouping by id will drop duplicates.
+                        .groupBy(sceneIdColumn)
+                        .compile()
+                        .bind(sql::BindParameters::All);
+
+// [4]
+std::cout << "Scenes referencing node: \n";
+for (const auto& name : stmt) std::cout << name << std::endl;
+```
+
+**Improvement ideas:**
+
+* Create a search query that finds all materials that have a red channel larger than a user specified threshold.
+* Create a search query that finds all unused meshes.
+
+### Clean Query
 
 ## Import
 
@@ -85,7 +144,22 @@ Since OBJ does not support any information about the transforms of objects, all 
 
 ## Command Line
 
-When you run the application, a console is opened that runs a loop reading commands. At present, there are 6 supported commands, each of which is described below.
+When you run the application, a console is opened that runs a loop reading commands. At present, there are 9 supported commands, each of which is described below.
+
+**Improvement ideas:**
+
+* Add a command to remove nodes from a scene.
+
+### append
+
+The `--append` command can be used to add existing nodes to an existing scene instance. It requires specifying the `--identifier` of the scene and a list of one or more `--nodes` to be added.
+
+```c
+> --append --identifier=8d75fd0b-a385-4a98-adb9-f8a7d1bcb503 --nodes=c5282816-382b-40c8-b83c-7498842296c2,3d373f0d-5499-4ec3-ac9c-2c4893bec0d7
+Appended 2 nodes to scene with id=8d75fd0b-a385-4a98-adb9-f8a7d1bcb503
+```
+
+### clean
 
 ### create
 
@@ -162,4 +236,14 @@ name=a id=c5282816-382b-40c8-b83c-7498842296c2
 name=a id=3d373f0d-5499-4ec3-ac9c-2c4893bec0d7
 Spheres:
 name=mysphere id=85ea058b-ee76-43b5-ad55-8294874b8ffc
+```
+
+### users
+
+The `--users` command can be used to find all objects that reference a material, shape or node. It requires specifying the type flag and an `--identifier`.
+
+```c
+> --users --cube --identifier=c38dcfdc-7b30-46c8-91f9-a147cca7e253
+Nodes referencing cube:
+a
 ```

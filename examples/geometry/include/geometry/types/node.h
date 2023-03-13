@@ -39,13 +39,13 @@ struct Node
     alex::Reference<Mesh>     mesh;
     alex::Reference<Sphere>   sphere;
 
-    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<&Node::id>,
-                                                      alex::Member<&Node::name>,
-                                                      alex::NestedMember<float3_t, &Node::translation>,
-                                                      alex::Member<&Node::material>,
-                                                      alex::Member<&Node::cube>,
-                                                      alex::Member<&Node::mesh>,
-                                                      alex::Member<&Node::sphere>>;
+    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<"id", &Node::id>,
+                                                      alex::Member<"name", &Node::name>,
+                                                      alex::NestedMember<"translation", float3_t, &Node::translation>,
+                                                      alex::Member<"material", &Node::material>,
+                                                      alex::Member<"cube", &Node::cube>,
+                                                      alex::Member<"mesh", &Node::mesh>,
+                                                      alex::Member<"sphere", &Node::sphere>>;
     using delete_query_t = alex::DeleteQuery<descriptor_t>;
     using get_query_t    = alex::GetQuery<descriptor_t>;
 

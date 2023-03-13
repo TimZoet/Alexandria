@@ -31,10 +31,10 @@ struct Material
     float3           color;
     float            specular = 0;
 
-    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<&Material::id>,
-                                                      alex::Member<&Material::name>,
-                                                      alex::NestedMember<float3_t, &Material::color>,
-                                                      alex::Member<&Material::specular>>;
+    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<"id", &Material::id>,
+                                                      alex::Member<"name", &Material::name>,
+                                                      alex::NestedMember<"color", float3_t, &Material::color>,
+                                                      alex::Member<"specular", &Material::specular>>;
     using delete_query_t = alex::DeleteQuery<descriptor_t>;
     using get_query_t    = alex::GetQuery<descriptor_t>;
 

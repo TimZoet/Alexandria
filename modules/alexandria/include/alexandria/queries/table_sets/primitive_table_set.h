@@ -68,7 +68,8 @@ namespace alex
         template<detail::MemberName Name>
         auto col() const noexcept
         {
-            return table.template col<detail::getColumnIndex<Name, members_t>()>();
+            // Add 1 to account for integer primary key column.
+            return table.template col<detail::getColumnIndex<Name, members_t>() + 1>();
         }
 
     private:

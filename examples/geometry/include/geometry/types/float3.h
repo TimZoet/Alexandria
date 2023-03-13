@@ -13,4 +13,5 @@ struct float3
     float z = 0;
 };
 
-using float3_t = alex::MemberList<alex::Member<&float3::x>, alex::Member<&float3::y>, alex::Member<&float3::z>>;
+using float3_t =
+  alex::MemberList<alex::Member<"x", &float3::x>, alex::Member<"y", &float3::y>, alex::Member<"z", &float3::z>>;

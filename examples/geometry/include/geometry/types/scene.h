@@ -19,6 +19,7 @@
 #include "alexandria/queries/delete_query.h"
 #include "alexandria/queries/get_query.h"
 #include "alexandria/queries/insert_query.h"
+#include "alexandria/queries/update_query.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.
@@ -64,11 +65,13 @@ struct Scene
     std::string                                 name;
     QueryableReferenceArray<Node::descriptor_t> nodes;
 
-    using descriptor_t =
-      alex::GenerateTypeDescriptor<alex::Member<&Scene::id>, alex::Member<&Scene::name>, alex::Member<&Scene::nodes>>;
+    using descriptor_t = alex::GenerateTypeDescriptor<alex::Member<"id", &Scene::id>,
+                                                      alex::Member<"name", &Scene::name>,
+                                                      alex::Member<"nodes", &Scene::nodes>>;
 
     using delete_query_t = alex::DeleteQuery<descriptor_t>;
     using get_query_t    = alex::GetQuery<descriptor_t>;
+    using update_query_t = alex::UpdateQuery<descriptor_t>;
 
     friend std::ostream& operator<<(std::ostream& out, const Scene& obj)
     {

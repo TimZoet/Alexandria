@@ -83,11 +83,18 @@ int main(int, char**)
     NodeInsertQuery          insertNode(descNode);
     SceneInsertQuery         insertScene(descScene);
     SphereInsertQuery        insertSphere(descSphere);
+    Scene::update_query_t    updateScene(descScene);
 
     std::unordered_map<std::string, alex::InstanceId> cache;
 
     // Setup parser.
     pt::parser parser(0, nullptr, true);
+
+    auto flagAppend = parser.add_flag('a', "append");
+    flagAppend->set_help("Append a node to a scene.");
+
+    auto flagClean = parser.add_flag('\0', "clean");
+    flagClean->set_help("Clean instances that are not referenced.");
 
     auto flagCreate = parser.add_flag('c', "create");
     flagCreate->set_help("Create a new instance.");
@@ -108,6 +115,9 @@ int main(int, char**)
     flagList->set_help(
       "List instances in the database.",
       "List instances in the database. You can either list --all instances, or instances of a specific --type.");
+
+    auto flagUsers = parser.add_flag('\0', "users");
+    flagUsers->set_help("Get other objects that reference this instance.");
 
     auto flagAll      = parser.add_flag('\0', "all");
     auto flagCache    = parser.add_flag('\0', "cache");
@@ -158,7 +168,120 @@ int main(int, char**)
 
         try
         {
-            if (flagCreate->is_set())
+            if (flagAppend->is_set())
+            {
+                alex::InstanceId sceneId;
+                if (auto it = cache.find(valueIdentifier->get_value()); it != cache.end())
+                    sceneId = it->second;
+                else
+                    sceneId = valueIdentifier->get_value();
+
+                Scene scene;
+                scene.id = sceneId;
+                getScene(scene);
+
+                for (const auto& node : listNodes->get_values())
+                {
+                    // Retrieve node from cache variable or assign identifier directly.
+                    if (auto it = cache.find(node); it != cache.end())
+                        scene.nodes.add(it->second);
+                    else
+                        scene.nodes.add(alex::InstanceId(node));
+                }
+                updateScene(scene);
+
+                if (valueVariable->is_set()) cache.insert_or_assign(valueVariable->get_value(), scene.id);
+
+                std::cout << "Appended " << listNodes->get_values().size() << " nodes to scene with id=" << scene.id
+                          << std::endl;
+            }
+            else if (flagClean->is_set())
+            {
+                if (flagCube->is_set() || flagAll->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesCube.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"cube">();
+                    auto  objectIdColumn  = tablesCube.getInstanceColumn<"id">();
+                    auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(objectIdColumn)
+                                  .where(nodeIdColumn == nullptr)
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    for (const auto& id : stmt)
+                    {
+                        std::cout << "Deleting unused cube " << id << std::endl;
+                        deleteCube(alex::InstanceId(id));
+                    }
+                }
+
+                if (flagMaterial->is_set() || flagAll->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesMaterial.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"material">();
+                    auto  objectIdColumn  = tablesMaterial.getInstanceColumn<"id">();
+                    auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(objectIdColumn)
+                                  .where(nodeIdColumn == nullptr)
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    for (const auto& id : stmt)
+                    {
+                        std::cout << "Deleting unused material " << id << std::endl;
+                        deleteMaterial(alex::InstanceId(id));
+                    }
+                }
+
+                if (flagMesh->is_set() || flagAll->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesMesh.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"mesh">();
+                    auto  objectIdColumn  = tablesMesh.getInstanceColumn<"id">();
+                    auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(objectIdColumn)
+                                  .where(nodeIdColumn == nullptr)
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    for (const auto& id : stmt)
+                    {
+                        std::cout << "Deleting unused mesh " << id << std::endl;
+                        deleteMesh(alex::InstanceId(id));
+                    }
+                }
+
+                if (flagSphere->is_set() || flagAll->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesSphere.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"sphere">();
+                    auto  objectIdColumn  = tablesSphere.getInstanceColumn<"id">();
+                    auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(objectIdColumn)
+                                  .where(nodeIdColumn == nullptr)
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    for (const auto& id : stmt)
+                    {
+                        std::cout << "Deleting unused sphere " << id << std::endl;
+                        deleteSphere(alex::InstanceId(id));
+                    }
+                }
+            }
+            else if (flagCreate->is_set())
             {
                 if (flagCube->is_set() && !flagNode->is_set())
                 {
@@ -424,6 +547,104 @@ int main(int, char**)
                     std::cout << "Spheres:" << std::endl;
                     lister(tablesSphere);
                 }
+            }
+            else if (flagUsers->is_set())
+            {
+                if (!valueIdentifier->is_set()) throw std::runtime_error("Need an identifier.");
+                const alex::InstanceId id(valueIdentifier->get_value());
+
+                if (flagCube->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesCube.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"cube">();
+                    auto  objectIdColumn  = tablesCube.getInstanceColumn<"id">();
+                    auto  nodeNameColumn  = tablesNode.getInstanceColumn<"name">();
+                    auto  stmt            = nodeTable.join(sql::InnerJoin, objectTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(nodeNameColumn)
+                                  .where(sql::like(objectIdColumn, id.getAsString()))
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    std::cout << "Nodes referencing cube: \n";
+                    for (const auto& name : stmt) std::cout << name << std::endl;
+                }
+                else if (flagMaterial->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesMaterial.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"material">();
+                    auto  objectIdColumn  = tablesMaterial.getInstanceColumn<"id">();
+                    auto  nodeNameColumn  = tablesNode.getInstanceColumn<"name">();
+                    auto  stmt            = nodeTable.join(sql::InnerJoin, objectTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(nodeNameColumn)
+                                  .where(sql::like(objectIdColumn, id.getAsString()))
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    std::cout << "Nodes referencing material: \n";
+                    for (const auto& name : stmt) std::cout << name << std::endl;
+                }
+                else if (flagMesh->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesMesh.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"mesh">();
+                    auto  objectIdColumn  = tablesMesh.getInstanceColumn<"id">();
+                    auto  nodeNameColumn  = tablesNode.getInstanceColumn<"name">();
+                    auto  stmt            = nodeTable.join(sql::InnerJoin, objectTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(nodeNameColumn)
+                                  .where(sql::like(objectIdColumn, id.getAsString()))
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    std::cout << "Nodes referencing mesh: \n";
+                    for (const auto& name : stmt) std::cout << name << std::endl;
+                }
+                else if (flagNode->is_set())
+                {
+                    auto& sceneTable      = tablesScene.getInstanceTable();
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& nodeArrayTable  = tablesScene.getReferenceArrayTable<"nodes">();
+                    auto  sceneRefColumn  = nodeArrayTable.col<1>();
+                    auto  nodeRefColumn   = nodeArrayTable.col<2>();
+                    auto  sceneIdColumn   = tablesScene.getInstanceColumn<"id">();
+                    auto  sceneNameColumn = tablesScene.getInstanceColumn<"name">();
+                    auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  stmt            = sceneTable.join(sql::InnerJoin, nodeArrayTable)
+                                  .on(sceneRefColumn == sceneIdColumn)
+                                  .join(sql::InnerJoin, nodeTable)
+                                  .on(nodeRefColumn == nodeIdColumn)
+                                  .selectAs<std::string>(sceneNameColumn)
+                                  .where(sql::like(nodeIdColumn, id.getAsString()))
+                                  .groupBy(sceneIdColumn)
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    std::cout << "Scenes referencing node: \n";
+                    for (const auto& name : stmt) std::cout << name << std::endl;
+                }
+                else if (flagSphere->is_set())
+                {
+                    auto& nodeTable       = tablesNode.getInstanceTable();
+                    auto& objectTable     = tablesSphere.getInstanceTable();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"sphere">();
+                    auto  objectIdColumn  = tablesSphere.getInstanceColumn<"id">();
+                    auto  nodeNameColumn  = tablesNode.getInstanceColumn<"name">();
+                    auto  stmt            = nodeTable.join(sql::InnerJoin, objectTable)
+                                  .on(objectRefColumn == objectIdColumn)
+                                  .selectAs<std::string>(nodeNameColumn)
+                                  .where(sql::like(objectIdColumn, id.getAsString()))
+                                  .compile()
+                                  .bind(sql::BindParameters::All);
+
+                    std::cout << "Nodes referencing sphere: \n";
+                    for (const auto& name : stmt) std::cout << name << std::endl;
+                }
+                else { std::cout << "Missing appropriate arguments" << std::endl; }
             }
         }
         catch (const pt::parser_tongue_exception& e)

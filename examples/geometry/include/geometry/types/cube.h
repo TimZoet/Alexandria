@@ -30,9 +30,9 @@ struct Cube
     std::string      name;
     float3           size;
 
-    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<&Cube::id>,
-                                                      alex::Member<&Cube::name>,
-                                                      alex::NestedMember<float3_t, &Cube::size>>;
+    using descriptor_t   = alex::GenerateTypeDescriptor<alex::Member<"id", &Cube::id>,
+                                                      alex::Member<"name", &Cube::name>,
+                                                      alex::NestedMember<"size", float3_t, &Cube::size>>;
     using delete_query_t = alex::DeleteQuery<descriptor_t>;
     using get_query_t    = alex::GetQuery<descriptor_t>;
 
