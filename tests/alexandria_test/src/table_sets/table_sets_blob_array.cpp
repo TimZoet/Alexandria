@@ -68,7 +68,7 @@ void TableSetsBlobArray::operator()()
         compareEQ(1, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
 
-        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
             decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(
             std::is_same_v<decltype(tableSets.getBlobArrayTable<0>()), decltype(tableSets.getBlobArrayTable<"a">())>);
@@ -86,7 +86,7 @@ void TableSetsBlobArray::operator()()
         compareEQ(2, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
 
-        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
                                    decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(
           std::is_same_v<decltype(tableSets.getBlobArrayTable<0>()), decltype(tableSets.getBlobArrayTable<"a">())>);

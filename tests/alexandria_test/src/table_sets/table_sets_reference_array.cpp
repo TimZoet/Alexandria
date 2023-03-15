@@ -80,7 +80,7 @@ void TableSetsReferenceArray::operator()()
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(1, decltype(tableSets)::reference_array_table_set_t::size);
 
-        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
                                    decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(std::is_same_v<decltype(tableSets.getReferenceArrayTable<0>()),
                                    decltype(tableSets.getReferenceArrayTable<"foo">())>);
@@ -98,7 +98,7 @@ void TableSetsReferenceArray::operator()()
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(2, decltype(tableSets)::reference_array_table_set_t::size);
 
-        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
                                    decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(std::is_same_v<decltype(tableSets.getReferenceArrayTable<0>()),
                                    decltype(tableSets.getReferenceArrayTable<"foo">())>);

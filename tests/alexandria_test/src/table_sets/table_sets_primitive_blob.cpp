@@ -85,9 +85,9 @@ void TableSetsPrimitiveBlob::operator()()
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
 
-        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
-                                   decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<2>()),
                                    decltype(tableSets.getInstanceColumn<"floats">())>);
     }
 
@@ -100,9 +100,9 @@ void TableSetsPrimitiveBlob::operator()()
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
 
-        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
-                                   decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<2>()),
                                    decltype(tableSets.getInstanceColumn<"ints">())>);
     }
 
@@ -115,11 +115,11 @@ void TableSetsPrimitiveBlob::operator()()
         compareEQ(0, decltype(tableSets)::blob_array_table_set_t::size);
         compareEQ(0, decltype(tableSets)::reference_array_table_set_t::size);
 
-        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<0>()),
-                                   decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<1>()),
-                                   decltype(tableSets.getInstanceColumn<"uints">())>);
+                                   decltype(tableSets.getInstanceColumn<"id">())>);
         compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<2>()),
+                                   decltype(tableSets.getInstanceColumn<"uints">())>);
+        compareTrue(std::is_same_v<decltype(tableSets.getInstanceTable().col<3>()),
                                    decltype(tableSets.getInstanceColumn<"doubles">())>);
     }
 }
