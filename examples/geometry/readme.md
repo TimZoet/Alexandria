@@ -61,7 +61,7 @@ void operator()(object_t& instance) override
 
 The `--users` command runs a complex search query to find, for a specified instance, which other instances reference it. For example, which `nodes` reference a certain `material`. An even more complex query is the one that finds the `scenes` which include a `node`. This query has to perform a join across 3 tables: The `scene` instance table, the `node` instance table, and the `nodes` reference array table. Below a visual representation.
 
-![Type definitions](search.svg "Type definitions")
+![Search query](search.svg "Search query")
 
 In order to perform this query, we must do 4 things:
 
@@ -116,6 +116,50 @@ for (const auto& name : stmt) std::cout << name << std::endl;
 
 ### Clean Query
 
+The `--clean` command runs a complex search query to find all shapes and materials that are not referenced by any nodes. In other words, it does more or less the opposite of the `--users` command. It then removes those instances by calling the delete query with each returned instance identifier. Below a visual representation for the `cube` type.
+
+![Clean query](clean.svg "Clean query")
+
+In order to perform this query, we must again do 4 things:
+
+1. Get the two instance tables.
+2. Get the identifier columns from each table by name.
+3. Construct and compile the query.
+4. Run the query and iterate over results, deleting each cube.
+
+```cpp
+// [1]
+auto& nodeTable       = tablesNode.getInstanceTable();
+auto& objectTable     = tablesCube.getInstanceTable();
+
+// [2]
+// The columns can be retrieved by the name that we specified in the TypeDescriptor.
+auto  objectIdColumn  = tablesCube.getInstanceColumn<"id">();
+auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+auto  objectRefColumn = tablesNode.getInstanceColumn<"cube">();
+
+// [3]
+                        // Joining cube instance table with node instance table.
+                        // Note LeftJoin to keep all cubes regardless of whether
+                        // they are referenced in the node table.
+auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
+                        .on(objectRefColumn == objectIdColumn)
+                        // Select cube identifier.
+                        .selectAs<std::string>(objectIdColumn)
+                        // Filter by cubes that were not referenced by any nodes.
+                        .where(nodeIdColumn == nullptr)
+                        .compile()
+                        .bind(sql::BindParameters::All);
+
+// [4]
+std::cout << "Deleting unused cubes:" << std::endl;
+for (const auto& id : stmt)
+{
+    std::cout << id << std::endl;
+    deleteCube(alex::InstanceId(id));
+}
+```
+
 ## Import
 
 The OBJ importer is implemented in `import.cpp`. It imports a single `.obj` file (and potentially a matching `.mtl` file) and creates a `scene` instance from it.
@@ -160,6 +204,17 @@ Appended 2 nodes to scene with id=8d75fd0b-a385-4a98-adb9-f8a7d1bcb503
 ```
 
 ### clean
+
+The `--clean` command can be used to delete shape and materials instances that are not referenced by any other object. To specify the type, pass the corresponding flag (e.g. `--cube`).
+
+```c
+> --clean --cube --material
+Deleting unused cubes:
+c38dcfdc-7b30-46c8-91f9-a147cca7e253
+Deleting unused materials:
+e6ac900e-ac99-4fa6-8f33-2ead72fef618
+65f14ca1-4968-490d-93df-d19b4d3c5300
+```
 
 ### create
 

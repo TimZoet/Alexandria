@@ -199,11 +199,11 @@ int main(int, char**)
             {
                 if (flagCube->is_set() || flagAll->is_set())
                 {
-                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto& objectTable     = tablesCube.getInstanceTable();
-                    auto  objectRefColumn = tablesNode.getInstanceColumn<"cube">();
+                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto  objectIdColumn  = tablesCube.getInstanceColumn<"id">();
                     auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"cube">();
                     auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
                                   .on(objectRefColumn == objectIdColumn)
                                   .selectAs<std::string>(objectIdColumn)
@@ -211,20 +211,21 @@ int main(int, char**)
                                   .compile()
                                   .bind(sql::BindParameters::All);
 
+                    std::cout << "Deleting unused cubes:" << std::endl;
                     for (const auto& id : stmt)
                     {
-                        std::cout << "Deleting unused cube " << id << std::endl;
+                        std::cout << id << std::endl;
                         deleteCube(alex::InstanceId(id));
                     }
                 }
 
                 if (flagMaterial->is_set() || flagAll->is_set())
                 {
-                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto& objectTable     = tablesMaterial.getInstanceTable();
-                    auto  objectRefColumn = tablesNode.getInstanceColumn<"material">();
+                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto  objectIdColumn  = tablesMaterial.getInstanceColumn<"id">();
                     auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"material">();
                     auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
                                   .on(objectRefColumn == objectIdColumn)
                                   .selectAs<std::string>(objectIdColumn)
@@ -232,20 +233,21 @@ int main(int, char**)
                                   .compile()
                                   .bind(sql::BindParameters::All);
 
+                    std::cout << "Deleting unused materials:" << std::endl;
                     for (const auto& id : stmt)
                     {
-                        std::cout << "Deleting unused material " << id << std::endl;
+                        std::cout << id << std::endl;
                         deleteMaterial(alex::InstanceId(id));
                     }
                 }
 
                 if (flagMesh->is_set() || flagAll->is_set())
                 {
-                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto& objectTable     = tablesMesh.getInstanceTable();
-                    auto  objectRefColumn = tablesNode.getInstanceColumn<"mesh">();
+                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto  objectIdColumn  = tablesMesh.getInstanceColumn<"id">();
                     auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
+                    auto  objectRefColumn = tablesNode.getInstanceColumn<"mesh">();
                     auto  stmt            = objectTable.join(sql::LeftJoin, nodeTable)
                                   .on(objectRefColumn == objectIdColumn)
                                   .selectAs<std::string>(objectIdColumn)
@@ -253,17 +255,18 @@ int main(int, char**)
                                   .compile()
                                   .bind(sql::BindParameters::All);
 
+                    std::cout << "Deleting unused mesh:" << std::endl;
                     for (const auto& id : stmt)
                     {
-                        std::cout << "Deleting unused mesh " << id << std::endl;
+                        std::cout << id << std::endl;
                         deleteMesh(alex::InstanceId(id));
                     }
                 }
 
                 if (flagSphere->is_set() || flagAll->is_set())
                 {
-                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto& objectTable     = tablesSphere.getInstanceTable();
+                    auto& nodeTable       = tablesNode.getInstanceTable();
                     auto  objectRefColumn = tablesNode.getInstanceColumn<"sphere">();
                     auto  objectIdColumn  = tablesSphere.getInstanceColumn<"id">();
                     auto  nodeIdColumn    = tablesNode.getInstanceColumn<"id">();
@@ -274,9 +277,10 @@ int main(int, char**)
                                   .compile()
                                   .bind(sql::BindParameters::All);
 
+                    std::cout << "Deleting unused spheres:" << std::endl;
                     for (const auto& id : stmt)
                     {
-                        std::cout << "Deleting unused sphere " << id << std::endl;
+                        std::cout << id << std::endl;
                         deleteSphere(alex::InstanceId(id));
                     }
                 }
