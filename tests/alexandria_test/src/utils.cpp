@@ -14,12 +14,18 @@
 
 namespace utils
 {
-    LibraryMember::LibraryMember()
+    LibraryMember::LibraryMember(const bool inMem) : inMemory(inMem)
     {
-        const auto cwd    = std::filesystem::current_path();
-        const auto dbPath = cwd / "lib.db";
-        if (exists(dbPath)) std::filesystem::remove(dbPath);
-        library   = alex::Library::create(dbPath);
+        if (inMemory)
+            library = alex::Library::create("");
+        else
+        {
+            const auto cwd    = std::filesystem::current_path();
+            const auto dbPath = cwd / "lib.db";
+            if (exists(dbPath)) std::filesystem::remove(dbPath);
+            library = alex::Library::create(dbPath);
+        }
+
         nameSpace = &library->createNamespace("main");
     }
 
@@ -28,9 +34,12 @@ namespace utils
         try
         {
             library.reset();
-            const auto cwd    = std::filesystem::current_path();
-            const auto dbPath = cwd / "lib.db";
-            std::filesystem::remove(dbPath);
+            if (!inMemory)
+            {
+                const auto cwd    = std::filesystem::current_path();
+                const auto dbPath = cwd / "lib.db";
+                std::filesystem::remove(dbPath);
+            }
         }
         catch (...)
         {
@@ -40,9 +49,14 @@ namespace utils
     void LibraryMember::reopen()
     {
         library.reset();
-        const auto cwd    = std::filesystem::current_path();
-        const auto dbPath = cwd / "lib.db";
-        library           = alex::Library::open(dbPath);
+        if (!inMemory)
+        {
+            const auto cwd    = std::filesystem::current_path();
+            const auto dbPath = cwd / "lib.db";
+            library           = alex::Library::open(dbPath);
+        }
+        else
+            throw std::runtime_error("Cannot reopen in-memory library.");
     }
 
     void LibraryMember::checkTypeTables(const std::vector<alex::NamespaceRow>& namespaces,

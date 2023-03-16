@@ -69,9 +69,16 @@ namespace alex
 
     LibraryPtr Library::create(const std::filesystem::path& file)
     {
-        if (exists(file)) throw std::runtime_error("Library file already exists");
+        if (!file.empty() && exists(file)) throw std::runtime_error("Library file already exists");
 
-        auto db = sql::Database::create(file);
+        sql::DatabasePtr db;
+        if (file.empty())
+            db = sql::Database::create("", SQLITE_OPEN_MEMORY | SQLITE_OPEN_NOMUTEX);
+        else
+            db = sql::Database::create(file);
+
+        db->setClose(sql::Database::Close::V2);
+        db->setShutdown(sql::Database::Shutdown::Off);
         enableForeignKeyConstraints(*db);
 
         // Create table holding namespace definitions.
@@ -121,6 +128,8 @@ namespace alex
         if (!exists(file)) throw std::runtime_error("Library file does not exist");
 
         auto db = sql::Database::open(file);
+        db->setClose(sql::Database::Close::V2);
+        db->setShutdown(sql::Database::Shutdown::Off);
         enableForeignKeyConstraints(*db);
         auto lib = std::make_unique<Library>(std::move(db));
         lib->readSpecification();
@@ -129,6 +138,8 @@ namespace alex
 
     std::pair<LibraryPtr, bool> Library::openOrCreate(const std::filesystem::path& file)
     {
+        if (file.empty()) return std::make_pair(create(""), true);
+
         return exists(file) ? std::make_pair(open(file), false) : std::make_pair(create(file), true);
     }
 

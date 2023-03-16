@@ -21,7 +21,7 @@ namespace utils
     class LibraryMember : public bt::UnitTest<LibraryMember, bt::CompareMixin, bt::ExceptionMixin>
     {
     public:
-        LibraryMember();
+        explicit LibraryMember(bool inMem = true);
 
         LibraryMember(const LibraryMember&) = delete;
 
@@ -42,6 +42,7 @@ namespace utils
 
     protected:
         alex::LibraryPtr library;
+        bool             inMemory;
         alex::Namespace* nameSpace = nullptr;
     };
 }  // namespace utils

@@ -11,5 +11,7 @@
 class CreateLibrary final : public bt::UnitTest<CreateLibrary, bt::CompareMixin, bt::ExceptionMixin>
 {
 public:
+    static constexpr bool isParallel = false;
+
     void operator()() override;
 };

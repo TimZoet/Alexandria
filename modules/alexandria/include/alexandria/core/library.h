@@ -51,7 +51,7 @@ namespace alex
 
         /**
          * \brief Create a new library.
-         * \param file Path to library file.
+         * \param file Path to library file. If empty, an in-memory library is opened.
          * \return Library.
          */
         static LibraryPtr create(const std::filesystem::path& file);
