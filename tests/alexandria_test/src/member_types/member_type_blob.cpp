@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/member_types/blob.h"
+#include "alexandria-core/member_types/blob.h"
 
 namespace
 {

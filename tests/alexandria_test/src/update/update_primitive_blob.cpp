@@ -4,10 +4,10 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/type_descriptor.h"
-#include "alexandria/queries/get_query.h"
-#include "alexandria/queries/insert_query.h"
-#include "alexandria/queries/update_query.h"
+#include "alexandria-core/core/type_descriptor.h"
+#include "alexandria-query/queries/get_query.h"
+#include "alexandria-query/queries/insert_query.h"
+#include "alexandria-query/queries/update_query.h"
 
 namespace
 {

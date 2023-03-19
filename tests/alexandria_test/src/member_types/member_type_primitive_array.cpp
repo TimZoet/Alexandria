@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/member_types/primitive_array.h"
+#include "alexandria-core/member_types/primitive_array.h"
 
 void MemberTypePrimitiveArray::operator()()
 {

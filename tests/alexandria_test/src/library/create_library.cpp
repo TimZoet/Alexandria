@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
+#include "alexandria-core/core/library.h"
 
 void CreateLibrary::operator()()
 {

@@ -30,7 +30,8 @@ set(SOURCES
 )
 
 set(DEPS_PUBLIC
-	alexandria
+	alexandria-core
+	alexandria-query
     parsertongue::parsertongue
 )
 

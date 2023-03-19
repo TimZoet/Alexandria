@@ -10,7 +10,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/member_types/primitive_blob.h"
+#include "alexandria-core/member_types/primitive_blob.h"
 
 namespace
 {

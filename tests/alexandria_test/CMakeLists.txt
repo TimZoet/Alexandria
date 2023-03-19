@@ -181,7 +181,8 @@ set(SOURCES
 )
 
 set(DEPS_PRIVATE
-    alexandria
+    alexandria-core
+    alexandria-query
 	bettertest::bettertest
 )
 

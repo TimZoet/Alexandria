@@ -69,8 +69,10 @@ class AlexandriaConan(ConanFile):
             self.requires("bettertest/1.0.0@timzoet/stable")
 
     def package_info(self):
-        self.cpp_info.components["core"].libs = ["alexandria"]
+        self.cpp_info.components["core"].libs = ["alexandria-core"]
         self.cpp_info.components["core"].requires = ["common::common", "cppql::cppql", "dot::dot"]
+        self.cpp_info.components["query"].libs = ["alexandria-query"]
+        self.cpp_info.components["query"].requires = ["alexandria-core", "common::common", "cppql::cppql", "dot::dot"]
     
     def generate(self):
         base = self.python_requires["pyreq"].module.BaseConan
