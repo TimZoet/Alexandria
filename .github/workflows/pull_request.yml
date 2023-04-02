@@ -1,0 +1,42 @@
+name: pull_request
+run-name: Build pull request ${{ github.ref }}
+on: [pull_request]
+jobs:
+  build-msvc:
+    runs-on: windows-latest
+    name: Build MSVC
+    steps:
+      - name: Setup Conan
+        uses: TimZoet/action-setup-conan@trunk
+      
+      - name: Setup current repository
+        uses: TimZoet/action-checkout-current@trunk
+      
+      - name: Retrieve pyreq
+        uses: actions/checkout@v3
+        with:
+          repository: TimZoet/pyreq
+          ref: v1.0.0
+          path: pyreq
+      - name: Export pyreq
+        run: conan export --user timzoet --channel v1.0.0 ${{ github.workspace }}/pyreq
+
+      - name: Retrieve dependencies
+        uses: TimZoet/action-retrieve-dependencies@trunk
+        with:
+          conanfile: ${{ github.workspace }}/source/conanfile.py
+          profile: ${{ github.workspace }}/source/buildtools/profiles/alexandria-test-vs2022-release
+          directory: ${{ github.workspace }}/packages
+
+      - name: Conan install
+        run: |
+          mkdir build
+          conan install -pr:h=${{ github.workspace }}/source/buildtools/profiles/alexandria-test-vs2022-release -pr:b=${{ github.workspace }}/source/buildtools/profiles/alexandria-test-vs2022-release -s build_type=Release --build=missing -of=${{ github.workspace }}/build ${{ github.workspace }}/source
+      - name: CMake configure
+        run: cmake -S ${{ github.workspace }}/source -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE:FILEPATH=conan_toolchain.cmake
+      - name: CMake build
+        run: cmake --build . --config Release
+        working-directory: ./build
+      - name: Run tests
+        run: .\alexandria_test
+        working-directory: ./build/bin/tests
