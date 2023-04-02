@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.24)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "_CMakePredefinedTargets")
 
@@ -16,8 +16,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # CMake modules.
 ################################################################################
 
-set(CMAKE_TEMPLATE_DIR "" CACHE PATH "Path to the cmake-template package directory")
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_BINARY_DIR};${CMAKE_TEMPLATE_DIR}")
+set(TZ_CMAKE_MODULES_DIR "" CACHE PATH "Path to the cmake-modules package directory")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_BINARY_DIR};${TZ_CMAKE_MODULES_DIR}")
 include(InstallTarget)
 include(ISA)
 include(MakeTarget)
@@ -27,6 +27,7 @@ include(MakeTarget)
 ################################################################################
 
 add_subdirectory(applications)
+add_subdirectory(buildtools)
 add_subdirectory(modules)
 if (BUILD_EXAMPLES)
     add_subdirectory(examples)

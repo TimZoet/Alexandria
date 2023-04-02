@@ -1,0 +1,5 @@
+include(vs2022-relwithdebinfo)
+
+[options]
+build_tests=False
+stduuid/*:with_cxx20_span=True

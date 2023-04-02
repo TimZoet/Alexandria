@@ -16,9 +16,15 @@ class AlexandriaConan(ConanFile):
     ## Settings.                                                              ##
     ############################################################################
 
-    python_requires = "pyreq/1.0.0@timzoet/stable"
+    python_requires = "pyreq/1.0.0@timzoet/v1.0.0"
     
     python_requires_extend = "pyreq.BaseConan"
+
+    options = {
+    }
+    
+    default_options = {
+    }
     
     ############################################################################
     ## Base methods.                                                          ##
@@ -30,10 +36,8 @@ class AlexandriaConan(ConanFile):
     
     def init(self):
         base = self.python_requires["pyreq"].module.BaseConan
-        self.generators = base.generators + self.generators
-        self.settings = base.settings + self.settings
-        self.options = {**base.options, **self.options}
-        self.default_options = {**base.default_options, **self.default_options}
+        self.settings = base.settings
+        self.options.update(base.options, base.default_options)
     
     ############################################################################
     ## Building.                                                              ##
@@ -45,28 +49,30 @@ class AlexandriaConan(ConanFile):
         copy(self, "license", self.recipe_folder, self.export_sources_folder)
         copy(self, "readme.md", self.recipe_folder, self.export_sources_folder)
         copy(self, "applications/*", self.recipe_folder, self.export_sources_folder)
+        copy(self, "buildtools/*", self.recipe_folder, self.export_sources_folder)
         copy(self, "modules/*", self.recipe_folder, self.export_sources_folder)
     
     def config_options(self):
         base = self.python_requires["pyreq"].module.BaseConan
+        base.config_options(self)
         if self.settings.os == "Windows":
             del self.options.fPIC
     
     def configure(self):
-        self.options["bettertest"].build_alexandria = False
+        pass
     
     def requirements(self):
         base = self.python_requires["pyreq"].module.BaseConan
         base.requirements(self)
         
-        self.requires("common/1.0.0@timzoet/stable")
-        self.requires("cppql/[>=0.2.0 <1]@timzoet/stable")
-        self.requires("dot/1.0.0@timzoet/stable")
-        self.requires("parsertongue/[>=1.2 <2]@timzoet/stable")
-        self.requires("stduuid/1.0.0@timzoet/stable")
+        self.requires("common/1.0.0@timzoet/v1.0.0")
+        self.requires("cppql/0.2.0@timzoet/v0.2.0")
+        self.requires("dot/1.0.0@timzoet/v1.0.0")
+        self.requires("parsertongue/1.3.0@timzoet/v1.3.0")
+        self.requires("stduuid/1.2.3")
 
         if self.options.build_tests:
-            self.requires("bettertest/1.0.0@timzoet/stable")
+            self.requires("bettertest/1.0.0@timzoet/v1.0.0")
 
     def package_info(self):
         self.cpp_info.components["core"].libs = ["alexandria-core"]
