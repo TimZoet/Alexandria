@@ -10,7 +10,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria-core/member_types/blob.h"
+#include "alexandria-core/properties/blob.h"
 
 namespace
 {

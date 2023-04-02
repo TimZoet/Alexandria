@@ -10,7 +10,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria-core/member_types/string_array.h"
+#include "alexandria-core/properties/string_array.h"
 
 namespace
 {

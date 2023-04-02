@@ -11,11 +11,11 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
-#include "alexandria/core/namespace.h"
-#include "alexandria/queries/delete_query.h"
-#include "alexandria/queries/get_query.h"
-#include "alexandria/queries/table_sets.h"
+#include "alexandria-core/library.h"
+#include "alexandria-core/namespace.h"
+#include "alexandria-query/delete_query.h"
+#include "alexandria-query/get_query.h"
+#include "alexandria-query/table_sets.h"
 #include "parsertongue/parser.h"
 
 ////////////////////////////////////////////////////////////////

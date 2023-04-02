@@ -4,9 +4,9 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
-#include "alexandria/core/namespace.h"
-#include "alexandria/core/type.h"
+#include "alexandria-core/library.h"
+#include "alexandria-core/namespace.h"
+#include "alexandria-core/type.h"
 
 alex::LibraryPtr createLibrary()
 {

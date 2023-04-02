@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria-core/member_types/primitive_blob.h"
+#include "alexandria-core/properties/primitive_blob.h"
 
 void MemberTypePrimitiveBlob::operator()()
 {

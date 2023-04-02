@@ -10,7 +10,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria-core/member_types/primitive_array.h"
+#include "alexandria-core/properties/primitive_array.h"
 
 namespace
 {

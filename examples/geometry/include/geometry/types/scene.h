@@ -12,14 +12,14 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/member.h"
-#include "alexandria/core/type_descriptor.h"
-#include "alexandria/member_types/instance_id.h"
-#include "alexandria/member_types/reference_array.h"
-#include "alexandria/queries/delete_query.h"
-#include "alexandria/queries/get_query.h"
-#include "alexandria/queries/insert_query.h"
-#include "alexandria/queries/update_query.h"
+#include "alexandria-core/member.h"
+#include "alexandria-core/type_descriptor.h"
+#include "alexandria-core/properties/instance_id.h"
+#include "alexandria-core/properties/reference_array.h"
+#include "alexandria-query/delete_query.h"
+#include "alexandria-query/get_query.h"
+#include "alexandria-query/insert_query.h"
+#include "alexandria-query/update_query.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.

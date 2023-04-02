@@ -4,7 +4,7 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/member.h"
+#include "alexandria-core/member.h"
 
 struct float3
 {

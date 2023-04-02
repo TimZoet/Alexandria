@@ -4,6 +4,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "alexandria/core/library.h"
+#include "alexandria-core/library.h"
 
 [[nodiscard]] alex::LibraryPtr createLibrary();
