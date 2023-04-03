@@ -59,6 +59,7 @@ set(HEADERS
 
     ${INCLUDE_DIR}/table_sets/table_sets_blob.h
 	${INCLUDE_DIR}/table_sets/table_sets_blob_array.h
+	${INCLUDE_DIR}/table_sets/table_sets_nested.h
 	${INCLUDE_DIR}/table_sets/table_sets_primitive.h
 	${INCLUDE_DIR}/table_sets/table_sets_primitive_array.h
 	${INCLUDE_DIR}/table_sets/table_sets_primitive_blob.h
@@ -147,6 +148,7 @@ set(SOURCES
 
     ${SRC_DIR}/table_sets/table_sets_blob.cpp
 	${SRC_DIR}/table_sets/table_sets_blob_array.cpp
+	${SRC_DIR}/table_sets/table_sets_nested.cpp
 	${SRC_DIR}/table_sets/table_sets_primitive.cpp
 	${SRC_DIR}/table_sets/table_sets_primitive_array.cpp
 	${SRC_DIR}/table_sets/table_sets_primitive_blob.cpp
