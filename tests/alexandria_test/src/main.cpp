@@ -56,6 +56,7 @@
 #include "alexandria_test/member_types/member_type_string_array_custom.h"
 #include "alexandria_test/table_sets/table_sets_blob.h"
 #include "alexandria_test/table_sets/table_sets_blob_array.h"
+#include "alexandria_test/table_sets/table_sets_nested.h"
 #include "alexandria_test/table_sets/table_sets_primitive.h"
 #include "alexandria_test/table_sets/table_sets_primitive_array.h"
 #include "alexandria_test/table_sets/table_sets_primitive_blob.h"
@@ -156,6 +157,7 @@ int main(const int argc, char** argv)
       // table sets
       TableSetsBlob,
       TableSetsBlobArray,
+      TableSetsNested,
       TableSetsPrimitive,
       TableSetsPrimitiveArray,
       TableSetsPrimitiveBlob,
