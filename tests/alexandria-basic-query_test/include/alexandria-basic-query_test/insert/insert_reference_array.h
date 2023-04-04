@@ -1,0 +1,13 @@
+#pragma once
+
+////////////////////////////////////////////////////////////////
+// Current target includes.
+////////////////////////////////////////////////////////////////
+
+#include "alexandria_testutils/utils.h"
+
+class InsertReferenceArray final : public utils::LibraryMember
+{
+public:
+    void operator()() override;
+};

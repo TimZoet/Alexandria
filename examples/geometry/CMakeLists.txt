@@ -31,7 +31,8 @@ set(SOURCES
 
 set(DEPS_PUBLIC
 	alexandria-core
-	alexandria-query
+	alexandria-basic-query
+	alexandria-extended-query
     parsertongue::parsertongue
 )
 

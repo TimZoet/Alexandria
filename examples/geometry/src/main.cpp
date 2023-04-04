@@ -13,9 +13,9 @@
 
 #include "alexandria-core/library.h"
 #include "alexandria-core/namespace.h"
-#include "alexandria-query/delete_query.h"
-#include "alexandria-query/get_query.h"
-#include "alexandria-query/table_sets.h"
+#include "alexandria-basic-query/delete_query.h"
+#include "alexandria-basic-query/get_query.h"
+#include "alexandria-extended-query/table_sets.h"
 #include "parsertongue/parser.h"
 
 ////////////////////////////////////////////////////////////////

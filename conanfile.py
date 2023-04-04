@@ -77,8 +77,10 @@ class AlexandriaConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["core"].libs = ["alexandria-core"]
         self.cpp_info.components["core"].requires = ["common::common", "cppql::cppql", "dot::dot"]
-        self.cpp_info.components["query"].libs = ["alexandria-query"]
-        self.cpp_info.components["query"].requires = ["alexandria-core", "common::common", "cppql::cppql", "dot::dot"]
+        self.cpp_info.components["basic-query"].libs = ["alexandria-basic-query"]
+        self.cpp_info.components["basic-query"].requires = ["alexandria-core", "common::common", "cppql::cppql", "dot::dot"]
+        self.cpp_info.components["extended-query"].libs = ["alexandria-extended-query"]
+        self.cpp_info.components["extended-query"].requires = ["alexandria-core", "alexandria-basic-query", "common::common", "cppql::cppql", "dot::dot"]
     
     def generate(self):
         base = self.python_requires["pyreq"].module.BaseConan

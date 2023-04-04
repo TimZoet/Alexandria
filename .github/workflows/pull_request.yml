@@ -37,6 +37,12 @@ jobs:
       - name: CMake build
         run: cmake --build . --config Release
         working-directory: ./build
-      - name: Run tests
-        run: .\alexandria_test
+      - name: Run alexandria-core tests
+        run: .\alexandria-core_test
+        working-directory: ./build/bin/tests
+      - name: Run alexandria-basic-query tests
+        run: .\alexandria-basic-query_test
+        working-directory: ./build/bin/tests
+      - name: Run alexandria-extended-query tests
+        run: .\alexandria-extended-query_test
         working-directory: ./build/bin/tests
