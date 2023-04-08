@@ -54,7 +54,6 @@ namespace alex
         [[nodiscard]] const Type& getType() const noexcept { return *type; }
 
     private:
-
         ////////////////////////////////////////////////////////////////
         // Member variables.
         ////////////////////////////////////////////////////////////////
@@ -64,6 +63,16 @@ namespace alex
 
     namespace detail
     {
+        template<typename...>
+        struct IsTypeDescriptor : std::false_type
+        {
+        };
+
+        template<typename... Members>
+        struct IsTypeDescriptor<TypeDescriptor<Members...>> : std::true_type
+        {
+        };
+
         template<typename T, MemberName Name0, auto... M0s>
         auto concat(Member<Name0, M0s...>)
         {
@@ -251,6 +260,9 @@ namespace alex
             }
         };
     }  // namespace detail
+
+    template<typename T>
+    concept is_type_descriptor = detail::IsTypeDescriptor<T>::value;
 
     template<typename... Ts>
     using GenerateTypeDescriptor = decltype(detail::GenerateTypeDescriptorImpl::get<Ts...>());

@@ -47,6 +47,8 @@ namespace alex
         // Getters.
         ////////////////////////////////////////////////////////////////
 
+        [[nodiscard]] type_descriptor_t getTypeDescriptor() const noexcept { return descriptor; }
+
         /**
          * \brief Get instance table.
          * \return Instance table.

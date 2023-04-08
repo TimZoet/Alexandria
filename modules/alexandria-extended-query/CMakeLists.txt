@@ -6,7 +6,11 @@ set(INCLUDE_DIR "include/alexandria-extended-query")
 set(SRC_DIR "src")
 
 set(HEADERS
+    ${INCLUDE_DIR}/search_query.h
     ${INCLUDE_DIR}/table_sets.h
+
+    ${INCLUDE_DIR}/search_queries/primitive_search.h
+
     ${INCLUDE_DIR}/table_sets/blob_array_table_set.h
     ${INCLUDE_DIR}/table_sets/primitive_array_table_set.h
     ${INCLUDE_DIR}/table_sets/primitive_table_set.h

@@ -22,6 +22,7 @@ make_target(
     TYPE ${TYPE}
     NAME ${NAME}
     OUTDIR "tests"
+    FOLDER "tests"
     WARNINGS WERROR
     STARTUP
     HEADERS "${HEADERS}"

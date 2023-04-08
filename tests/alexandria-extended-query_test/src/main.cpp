@@ -10,6 +10,7 @@
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
+#include "alexandria-extended-query_test/search_queries/primitive_search.h"
 #include "alexandria-extended-query_test/table_sets/table_sets_blob.h"
 #include "alexandria-extended-query_test/table_sets/table_sets_blob_array.h"
 #include "alexandria-extended-query_test/table_sets/table_sets_nested.h"
@@ -40,6 +41,8 @@ int main(const int argc, char** argv)
 #endif
 
     bt::run<
+      // search queries
+      PrimitiveSearch,
       // table sets
       TableSetsBlob,
       TableSetsBlobArray,
