@@ -4,7 +4,6 @@
 // Standard includes.
 ////////////////////////////////////////////////////////////////
 
-#include <functional>
 #include <tuple>
 #include <type_traits>
 
@@ -12,7 +11,6 @@
 // Module includes.
 ////////////////////////////////////////////////////////////////
 
-#include "common/static_assert.h"
 #include "alexandria-core/type_descriptor.h"
 
 ////////////////////////////////////////////////////////////////
@@ -91,8 +89,12 @@ namespace alex
         }
     }  // namespace detail
 
-    // TODO: Constrain M to reference array.
-
+    /**
+     * \brief Check if a reference array property conains a specific object reference.
+     * \tparam T TypeDescriptor.
+     * \tparam M MemberName.
+     * \return ReferenceSearchOperator which can be passed to the referenceSearch* functions.
+     */
     template<is_type_descriptor T, detail::MemberName M>
         requires(detail::is_reference_array_member_name<M, T>)
     [[nodiscard]] auto references()
@@ -103,10 +105,10 @@ namespace alex
     // TODO: Constrain T to tablesets.
 
     /**
-     * \brief Construct a SearchQuery to find all instances for which the primitive search operator is true.
+     * \brief Construct a SearchQuery to find all instances for which the reference search operator is true.
      * \tparam T TableSets type.
      * \param tables TableSets instance.
-     * \param op Single PrimitiveSearchOperator.
+     * \param op Single ReferenceSearchOperator.
      * \return SearchQuery.
      */
     template<typename T>
@@ -116,11 +118,11 @@ namespace alex
     }
 
     /**
-     * \brief Construct a SearchQuery to find all instances for which the conjunction (&&) of primitive search operators is true.
+     * \brief Construct a SearchQuery to find all instances for which the conjunction (&&) of reference search operators is true.
      * \tparam T TableSets type.
      * \param tables TableSets instance.
-     * \param op Single PrimitiveSearchOperator.
-     * \param operators PrimitiveSearchOperators.
+     * \param op Single ReferenceSearchOperator.
+     * \param operators ReferenceSearchOperators.
      * \return SearchQuery.
      */
     template<typename T>
@@ -130,11 +132,11 @@ namespace alex
     }
 
     /**
-     * \brief Construct a SearchQuery to find all instances for which the disjunction (||) of primitive search operators is true.
+     * \brief Construct a SearchQuery to find all instances for which the disjunction (||) of reference search operators is true.
      * \tparam T TableSets type.
      * \param tables TableSets instance.
-     * \param op Single PrimitiveSearchOperator.
-     * \param operators PrimitiveSearchOperators.
+     * \param op Single ReferenceSearchOperator.
+     * \param operators ReferenceSearchOperators.
      * \return SearchQuery.
      */
     template<typename T>
@@ -144,10 +146,10 @@ namespace alex
     }
 
     /**
-     * \brief Construct a SearchQuery to find all instances for which the primitive search operator is true.
+     * \brief Construct a SearchQuery to find all instances for which the reference search operator is true.
      * \tparam T TypeDescriptor type.
      * \param desc TypeDescriptor instance.
-     * \param op Single PrimitiveSearchOperator.
+     * \param op Single ReferenceSearchOperator.
      * \return SearchQuery.
      */
     template<is_type_descriptor T>
@@ -158,11 +160,11 @@ namespace alex
     }
 
     /**
-     * \brief Construct a SearchQuery to find all instances for which the conjunction (&&) of primitive search operators is true.
+     * \brief Construct a SearchQuery to find all instances for which the conjunction (&&) of reference search operators is true.
      * \tparam T TypeDescriptor type.
      * \param desc TypeDescriptor instance.
-     * \param op Single PrimitiveSearchOperator.
-     * \param operators PrimitiveSearchOperators.
+     * \param op Single ReferenceSearchOperator.
+     * \param operators ReferenceSearchOperators.
      * \return SearchQuery.
      */
     template<is_type_descriptor T>
@@ -173,11 +175,11 @@ namespace alex
     }
 
     /**
-     * \brief Construct a SearchQuery to find all instances for which the disjunction (||) of primitive search operators is true.
+     * \brief Construct a SearchQuery to find all instances for which the disjunction (||) of reference search operators is true.
      * \tparam T TypeDescriptor type.
      * \param desc TypeDescriptor instance.
-     * \param op Single PrimitiveSearchOperator.
-     * \param operators PrimitiveSearchOperators.
+     * \param op Single ReferenceSearchOperator.
+     * \param operators ReferenceSearchOperators.
      * \return SearchQuery.
      */
     template<is_type_descriptor T>

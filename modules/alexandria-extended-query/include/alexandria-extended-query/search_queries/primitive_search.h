@@ -107,7 +107,7 @@ namespace alex
      * \brief Compare a primitive property using the == operator.
      * \tparam T TypeDescriptor.
      * \tparam M MemberName.
-     * \return PrimitiveSearchOperator.
+     * \return PrimitiveSearchOperator which can be passed to the primitiveSearch* functions.
      */
     template<is_type_descriptor T, detail::MemberName M>
         requires(detail::is_primitive_member_name<M, T>)
@@ -120,7 +120,7 @@ namespace alex
      * \brief Compare a primitive property using the != operator.
      * \tparam T TypeDescriptor.
      * \tparam M MemberName.
-     * \return PrimitiveSearchOperator.
+     * \return PrimitiveSearchOperator which can be passed to the primitiveSearch* functions.
      */
     template<is_type_descriptor T, detail::MemberName M>
         requires(detail::is_primitive_member_name<M, T>)
@@ -133,7 +133,7 @@ namespace alex
      * \brief Compare a primitive property using the < operator.
      * \tparam T TypeDescriptor.
      * \tparam M MemberName.
-     * \return PrimitiveSearchOperator.
+     * \return PrimitiveSearchOperator which can be passed to the primitiveSearch* functions.
      */
     template<is_type_descriptor T, detail::MemberName M>
         requires(detail::is_primitive_member_name<M, T>)
@@ -146,7 +146,7 @@ namespace alex
      * \brief Compare a primitive property using the > operator.
      * \tparam T TypeDescriptor.
      * \tparam M MemberName.
-     * \return PrimitiveSearchOperator.
+     * \return PrimitiveSearchOperator which can be passed to the primitiveSearch* functions.
      */
     template<is_type_descriptor T, detail::MemberName M>
         requires(detail::is_primitive_member_name<M, T>)
@@ -159,7 +159,7 @@ namespace alex
      * \brief Compare a primitive property using the <= operator.
      * \tparam T TypeDescriptor.
      * \tparam M MemberName.
-     * \return PrimitiveSearchOperator.
+     * \return PrimitiveSearchOperator which can be passed to the primitiveSearch* functions.
      */
     template<is_type_descriptor T, detail::MemberName M>
         requires(detail::is_primitive_member_name<M, T>)
@@ -172,7 +172,7 @@ namespace alex
      * \brief Compare a primitive property using the >= operator.
      * \tparam T TypeDescriptor.
      * \tparam M MemberName.
-     * \return PrimitiveSearchOperator.
+     * \return PrimitiveSearchOperator which can be passed to the primitiveSearch* functions.
      */
     template<is_type_descriptor T, detail::MemberName M>
         requires(detail::is_primitive_member_name<M, T>)
@@ -186,7 +186,7 @@ namespace alex
      * \brief Check if a reference property is none/null/empty.
      * \tparam T TypeDescriptor.
      * \tparam M MemberName.
-     * \return PrimitiveSearchOperator.
+     * \return PrimitiveSearchOperator which can be passed to the primitiveSearch* functions.
      */
     template<is_type_descriptor T, detail::MemberName M>
     [[nodiscard]] auto none()
