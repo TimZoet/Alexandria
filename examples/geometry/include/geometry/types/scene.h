@@ -16,10 +16,10 @@
 #include "alexandria-core/type_descriptor.h"
 #include "alexandria-core/properties/instance_id.h"
 #include "alexandria-core/properties/reference_array.h"
-#include "alexandria-query/delete_query.h"
-#include "alexandria-query/get_query.h"
-#include "alexandria-query/insert_query.h"
-#include "alexandria-query/update_query.h"
+#include "alexandria-basic-query/delete_query.h"
+#include "alexandria-basic-query/get_query.h"
+#include "alexandria-basic-query/insert_query.h"
+#include "alexandria-basic-query/update_query.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.

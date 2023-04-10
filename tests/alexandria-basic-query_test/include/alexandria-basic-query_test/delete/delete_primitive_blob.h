@@ -1,0 +1,13 @@
+#pragma once
+
+////////////////////////////////////////////////////////////////
+// Current target includes.
+////////////////////////////////////////////////////////////////
+
+#include "alexandria_testutils/utils.h"
+
+class DeletePrimitiveBlob final : public utils::LibraryMember
+{
+public:
+    void operator()() override;
+};
