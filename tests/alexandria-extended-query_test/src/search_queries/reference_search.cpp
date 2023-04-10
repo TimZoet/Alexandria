@@ -159,7 +159,12 @@ void ReferenceSearch::operator()()
 
         query(foo0.id, bar3.id);
         std::vector<alex::InstanceId> ids(query.begin(), query.end());
-        compareEQ(std::vector{baz0.id, baz1.id}, ids);
+        compareEQ(2, ids.size()).fatal("Expected 2 results.");
+        // Order of results is not guaranteed.
+        if (ids[0] == baz0.id)
+            compareEQ(std::vector{baz0.id, baz1.id}, ids);
+        else
+            compareEQ(std::vector{baz1.id, baz0.id}, ids);
     }
 
     {
