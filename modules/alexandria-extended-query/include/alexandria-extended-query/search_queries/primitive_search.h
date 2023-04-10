@@ -32,7 +32,8 @@ namespace alex
             Less         = 2,
             Greater      = 3,
             LessEqual    = 4,
-            GreaterEqual = 5
+            GreaterEqual = 5,
+            None         = 6
         };
 
         template<typename T, MemberName M, PrimitiveSearchOp O>
@@ -75,8 +76,10 @@ namespace alex
                     return [](const auto& col, const auto& param) { return col <= param; };
                 else if constexpr (O::op() == PrimitiveSearchOp::GreaterEqual)
                     return [](const auto& col, const auto& param) { return col >= param; };
+                else if constexpr (O::op() == PrimitiveSearchOp::None)
+                    return [](const auto& col, const auto&) { return col == nullptr; };
                 else
-                    constexpr_static_assert();
+                    constexpr_static_assert<false>();
             };
 
             // Construct an expression with all column-parameter pairs of the form:
@@ -100,8 +103,6 @@ namespace alex
         }
     }  // namespace detail
 
-    // TODO: Constrain all M passed to the operator functions to be primitive members of the type descriptor.
-
     /**
      * \brief Compare a primitive property using the == operator.
      * \tparam T TypeDescriptor.
@@ -109,6 +110,7 @@ namespace alex
      * \return PrimitiveSearchOperator.
      */
     template<is_type_descriptor T, detail::MemberName M>
+        requires(detail::is_primitive_member_name<M, T>)
     [[nodiscard]] auto equal()
     {
         return detail::PrimitiveSearchOperator<T, M, detail::PrimitiveSearchOp::Equal>{};
@@ -121,6 +123,7 @@ namespace alex
      * \return PrimitiveSearchOperator.
      */
     template<is_type_descriptor T, detail::MemberName M>
+        requires(detail::is_primitive_member_name<M, T>)
     [[nodiscard]] auto notEqual()
     {
         return detail::PrimitiveSearchOperator<T, M, detail::PrimitiveSearchOp::NotEqual>{};
@@ -133,6 +136,7 @@ namespace alex
      * \return PrimitiveSearchOperator.
      */
     template<is_type_descriptor T, detail::MemberName M>
+        requires(detail::is_primitive_member_name<M, T>)
     [[nodiscard]] auto less()
     {
         return detail::PrimitiveSearchOperator<T, M, detail::PrimitiveSearchOp::Less>{};
@@ -145,6 +149,7 @@ namespace alex
      * \return PrimitiveSearchOperator.
      */
     template<is_type_descriptor T, detail::MemberName M>
+        requires(detail::is_primitive_member_name<M, T>)
     [[nodiscard]] auto greater()
     {
         return detail::PrimitiveSearchOperator<T, M, detail::PrimitiveSearchOp::Greater>{};
@@ -157,6 +162,7 @@ namespace alex
      * \return PrimitiveSearchOperator.
      */
     template<is_type_descriptor T, detail::MemberName M>
+        requires(detail::is_primitive_member_name<M, T>)
     [[nodiscard]] auto lessEqual()
     {
         return detail::PrimitiveSearchOperator<T, M, detail::PrimitiveSearchOp::LessEqual>{};
@@ -169,9 +175,23 @@ namespace alex
      * \return PrimitiveSearchOperator.
      */
     template<is_type_descriptor T, detail::MemberName M>
+        requires(detail::is_primitive_member_name<M, T>)
     [[nodiscard]] auto greaterEqual()
     {
         return detail::PrimitiveSearchOperator<T, M, detail::PrimitiveSearchOp::GreaterEqual>{};
+    }
+
+    // TODO: Constrain M to ref prop.
+    /**
+     * \brief Check if a reference property is none/null/empty.
+     * \tparam T TypeDescriptor.
+     * \tparam M MemberName.
+     * \return PrimitiveSearchOperator.
+     */
+    template<is_type_descriptor T, detail::MemberName M>
+    [[nodiscard]] auto none()
+    {
+        return detail::PrimitiveSearchOperator<T, M, detail::PrimitiveSearchOp::None>{};
     }
 
     // TODO: Constrain T to tablesets.

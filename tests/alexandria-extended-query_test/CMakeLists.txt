@@ -7,6 +7,7 @@ set(SRC_DIR "src")
 
 set(HEADERS
     ${INCLUDE_DIR}/search_queries/primitive_search.h
+    ${INCLUDE_DIR}/search_queries/reference_search.h
 
     ${INCLUDE_DIR}/table_sets/table_sets_blob.h
 	${INCLUDE_DIR}/table_sets/table_sets_blob_array.h
@@ -25,6 +26,7 @@ set(SOURCES
     ${SRC_DIR}/main.cpp
 
     ${SRC_DIR}/search_queries/primitive_search.cpp
+    ${SRC_DIR}/search_queries/reference_search.cpp
 
     ${SRC_DIR}/table_sets/table_sets_blob.cpp
 	${SRC_DIR}/table_sets/table_sets_blob_array.cpp

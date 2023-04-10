@@ -107,7 +107,7 @@ namespace alex
                 else if constexpr (M::is_string)
                     return sql::toText(M::template get(instance));
                 else
-                    constexpr_static_assert();
+                    constexpr_static_assert<false>();
             };
 
             const auto f = [&]<is_member M, is_member... Ms>(std::tuple<M, Ms...>)

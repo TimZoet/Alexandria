@@ -15,6 +15,12 @@
 #include "alexandria-core/properties/instance_id.h"
 #include "alexandria-core/properties/reference.h"
 
+////////////////////////////////////////////////////////////////
+// Current target includes.
+////////////////////////////////////////////////////////////////
+
+#include "alexandria-basic-query/types/member_extractor.h"
+
 namespace alex::detail
 {
     ////////////////////////////////////////////////////////////////
@@ -146,8 +152,8 @@ namespace alex::detail
             return I;
         else if constexpr (I + 1 == std::tuple_size_v<T>)
         {
-            constexpr_static_assert();
-            return 0;
+            constexpr_static_assert<false>();
+            return -1;
         }
         else
             return getColumnIndexImpl<I + 1, Name, T>();
@@ -158,4 +164,14 @@ namespace alex::detail
     {
         return getColumnIndexImpl<0, Name, T>();
     }
+
+    ////////////////////////////////////////////////////////////////
+    // ...
+    ////////////////////////////////////////////////////////////////
+
+    template<MemberName Name, typename T>
+    concept is_primitive_member_name = getColumnIndex<Name, extract_primitive_members_t<typename T::members_t>>() != -1;
+
+    template<MemberName Name, typename T>
+    concept is_reference_array_member_name = getColumnIndex<Name, extract_reference_array_members_t<typename T::members_t>>() != -1;
 }  // namespace alex::detail

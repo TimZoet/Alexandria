@@ -62,19 +62,40 @@ namespace alex
 
         auto end() { return statement.end(); }
 
-        auto& operator()(Ps&&... params)
+        template<typename... Ts>
+            requires(sizeof...(Ts) == sizeof...(Ps))
+        auto& operator()(Ts&&... params)
         {
-            [&]<size_t... Is>(std::index_sequence<Is...>, auto&& tuple)
-            {
-                return ((*std::get<Is>(parameters) = std::get<Is>(tuple)), ...);
-            }
-            (std::make_index_sequence<sizeof...(Ps)>{}, std::make_tuple<Ps...>(std::forward<Ps>(params)...));
-            statement.bind(sql::BindParameters::All);
+            // InstanceId needs to be explicitly turned into a string.
+            // Other parameters can be forwarded as-is.
+            constexpr auto get = []<typename P>(P&& param) {
+                if constexpr (std::same_as<InstanceId, std::decay_t<P>>)
+                    return param.getAsString();
+                else
+                    return std::forward<P>(param);
+            };
 
+            bind<0>(get(std::forward<Ts>(params))...);
+            statement.bind(sql::BindParameters::Dynamic);
             return *this;
         }
 
     private:
+        template<size_t I, typename Param, typename... Params>
+        void bind(Param&& param, Params&&... params)
+        {
+            bind<I>(std::forward<Param>(param));
+            bind<I + 1>(std::forward<Params>(params)...);
+        }
+
+        template<size_t I, typename Param>
+        void bind(Param&& param)
+        {
+            using type = typename std::tuple_element_t<I, parameters_t>::element_type;
+            if constexpr (!std::same_as<std::nullptr_t, std::decay_t<Param>>)
+                *std::get<I>(parameters) = static_cast<type>(param);
+        }
+
         ////////////////////////////////////////////////////////////////
         // Member variables.
         ////////////////////////////////////////////////////////////////
