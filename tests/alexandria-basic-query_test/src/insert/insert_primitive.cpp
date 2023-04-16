@@ -48,23 +48,22 @@ namespace
 
 void InsertPrimitive::operator()()
 {
-    // Create type with floats.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
-    fooType.createPrimitiveProperty("doubleprop", alex::DataType::Double);
-
-    // Create type with integers.
-    auto& barType = nameSpace->createType("bar");
-    barType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
-    barType.createPrimitiveProperty("int64prop", alex::DataType::Int64);
-    barType.createPrimitiveProperty("uint32prop", alex::DataType::Uint32);
-    barType.createPrimitiveProperty("uint64prop", alex::DataType::Uint64);
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveProperty("prop0", alex::DataType::Float);
+        fooLayout.createPrimitiveProperty("prop1", alex::DataType::Double);
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createPrimitiveProperty("prop0", alex::DataType::Int32);
+        barLayout.createPrimitiveProperty("prop1", alex::DataType::Int64);
+        barLayout.createPrimitiveProperty("prop2", alex::DataType::Uint32);
+        barLayout.createPrimitiveProperty("prop3", alex::DataType::Uint64);
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
 
     // Insert Foo.
     {

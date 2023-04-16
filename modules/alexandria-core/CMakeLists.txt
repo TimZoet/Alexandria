@@ -16,9 +16,10 @@ set(HEADERS
     ${INCLUDE_DIR}/library.h
     ${INCLUDE_DIR}/member.h
     ${INCLUDE_DIR}/namespace.h
-    ${INCLUDE_DIR}/property.h
+    ${INCLUDE_DIR}/property_layout.h
     ${INCLUDE_DIR}/type.h
     ${INCLUDE_DIR}/type_descriptor.h
+    ${INCLUDE_DIR}/type_layout.h
     ${INCLUDE_DIR}/properties/blob.h
     ${INCLUDE_DIR}/properties/blob_array.h
     ${INCLUDE_DIR}/properties/instance_id.h
@@ -35,8 +36,9 @@ set(SOURCES
     ${SRC_DIR}/data_type.cpp
     ${SRC_DIR}/library.cpp
     ${SRC_DIR}/namespace.cpp
-    ${SRC_DIR}/property.cpp
+    ${SRC_DIR}/property_layout.cpp
     ${SRC_DIR}/type.cpp
+    ${SRC_DIR}/type_layout.cpp
     ${SRC_DIR}/properties/instance_id.cpp
 )
 

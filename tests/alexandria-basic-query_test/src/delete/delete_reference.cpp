@@ -52,24 +52,25 @@ namespace
 
 void DeleteReference::operator()()
 {
-    // Create types.
-    auto& fooType = nameSpace->createType("foo");
-    auto& barType = nameSpace->createType("bar");
-    auto& bazType = nameSpace->createType("baz");
-
-    // Add properties to types.
-    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
-    fooType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
-    barType.createReferenceProperty("fooprop", fooType);
-    bazType.createReferenceProperty("fooprop", fooType);
-    bazType.createReferenceProperty("barprop", barType);
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
-        bazType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveProperty("prop0", alex::DataType::Float);
+        fooLayout.createPrimitiveProperty("prop1", alex::DataType::Int32);
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createReferenceProperty("prop0", nameSpace->getType("foo"));
+        barLayout.commit(*nameSpace, "bar");
+
+        alex::TypeLayout bazLayout;
+        bazLayout.createReferenceProperty("prop0", nameSpace->getType("foo"));
+        bazLayout.createReferenceProperty("prop1", nameSpace->getType("bar"));
+        bazLayout.commit(*nameSpace, "baz");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
+    auto& bazType = nameSpace->getType("baz");
 
     // Create Foo.
     Foo foo0{.a = 0.5f, .b = 4};

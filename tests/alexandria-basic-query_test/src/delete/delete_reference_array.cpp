@@ -43,24 +43,25 @@ namespace
 
 void DeleteReferenceArray::operator()()
 {
-    // Create types.
-    auto& fooType = nameSpace->createType("foo");
-    auto& barType = nameSpace->createType("bar");
-    auto& bazType = nameSpace->createType("baz");
-
-    // Add properties to types.
-    fooType.createPrimitiveProperty("floatprop", alex::DataType::Float);
-    fooType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
-    barType.createReferenceArrayProperty("fooprop", fooType);
-    bazType.createReferenceArrayProperty("fooprop", fooType);
-    bazType.createReferenceArrayProperty("barprop", barType);
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
-        bazType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveProperty("prop0", alex::DataType::Float);
+        fooLayout.createPrimitiveProperty("prop1", alex::DataType::Int32);
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createReferenceArrayProperty("prop0", nameSpace->getType("foo"));
+        barLayout.commit(*nameSpace, "bar");
+
+        alex::TypeLayout bazLayout;
+        bazLayout.createReferenceArrayProperty("prop0", nameSpace->getType("foo"));
+        bazLayout.createReferenceArrayProperty("prop1", nameSpace->getType("bar"));
+        bazLayout.commit(*nameSpace, "baz");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
+    auto& bazType = nameSpace->getType("baz");
 
     // Create Foo.
     Foo foo0{.a = 0.5f, .b = 4};
@@ -98,9 +99,9 @@ void DeleteReferenceArray::operator()()
     // Delete Baz.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string> array0Table(
-          library->getDatabase().getTable("main_baz_fooprop"));
+          library->getDatabase().getTable("main_baz_prop0"));
         const sql::TypedTable<sql::row_id, std::string, std::string> array1Table(
-          library->getDatabase().getTable("main_baz_barprop"));
+          library->getDatabase().getTable("main_baz_prop1"));
 
         auto deleter = alex::DeleteQuery(BazDescriptor(bazType));
 
@@ -129,7 +130,7 @@ void DeleteReferenceArray::operator()()
     // Delete Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
-          library->getDatabase().getTable("main_bar_fooprop"));
+          library->getDatabase().getTable("main_bar_prop0"));
         auto deleter = alex::DeleteQuery(BarDescriptor(barType));
 
         // Verify existence of objects before and after delete.

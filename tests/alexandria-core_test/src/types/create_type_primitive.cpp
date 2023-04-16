@@ -3,22 +3,21 @@
 void CreateTypePrimitive::operator()()
 {
     // Create type and property.
-    alex::Type* type = nullptr;
+    alex::TypeLayout layout;
     expectNoThrow([&] {
-        type = &nameSpace->createType("type");
-        type->createPrimitiveProperty("p0", alex::DataType::Int32);
-        type->createPrimitiveProperty("p1", alex::DataType::Int64);
-        type->createPrimitiveProperty("p2", alex::DataType::Float);
-        type->createPrimitiveProperty("p3", alex::DataType::Double);
+        layout.createPrimitiveProperty("p0", alex::DataType::Int32);
+        layout.createPrimitiveProperty("p1", alex::DataType::Int64);
+        layout.createPrimitiveProperty("p2", alex::DataType::Float);
+        layout.createPrimitiveProperty("p3", alex::DataType::Double);
     });
 
     // Should not be able to add non-primitive properties like this.
-    expectThrow([&] { type->createPrimitiveProperty("p4", alex::DataType::Blob); });
-    expectThrow([&] { type->createPrimitiveProperty("p5", alex::DataType::Reference); });
-    expectThrow([&] { type->createPrimitiveProperty("p6", alex::DataType::String); });
+    expectThrow([&] { layout.createPrimitiveProperty("p4", alex::DataType::Blob); });
+    expectThrow([&] { layout.createPrimitiveProperty("p5", alex::DataType::Reference); });
+    expectThrow([&] { layout.createPrimitiveProperty("p6", alex::DataType::String); });
 
     // Commit.
-    expectNoThrow([&] { type->commit(); });
+    compareEQ(alex::TypeLayout::Commit::Created, layout.commit(*nameSpace, "type").first);
 
     // Check type tables.
     const std::vector<alex::NamespaceRow> namespaces = {{1, "main"}};

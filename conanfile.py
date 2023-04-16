@@ -69,7 +69,8 @@ class AlexandriaConan(ConanFile):
         self.requires("cppql/0.2.1@timzoet/v0.2.1")
         self.requires("dot/1.0.0@timzoet/v1.0.0")
         self.requires("parsertongue/1.3.0@timzoet/v1.3.0")
-        self.requires("stduuid/1.2.3")
+        #self.requires("stduuid/1.2.3")
+        self.requires("stduuid/1.0.0@timzoet/stable")
 
         if self.options.build_tests:
             self.requires("bettertest/1.0.0@timzoet/v1.0.0")

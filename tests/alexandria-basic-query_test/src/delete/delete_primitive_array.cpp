@@ -58,30 +58,29 @@ namespace
 
 void DeletePrimitiveArray::operator()()
 {
-    // Create type with floats.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createPrimitiveArrayProperty("floats", alex::DataType::Float);
-
-    // Create type with integers.
-    auto& barType = nameSpace->createType("bar");
-    barType.createPrimitiveArrayProperty("ints", alex::DataType::Int32);
-
-    // Create type with floats and integers.
-    auto& bazType = nameSpace->createType("baz");
-    bazType.createPrimitiveArrayProperty("uints", alex::DataType::Uint64);
-    bazType.createPrimitiveArrayProperty("doubles", alex::DataType::Double);
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
-        bazType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveArrayProperty("prop0", alex::DataType::Float);
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createPrimitiveArrayProperty("prop0", alex::DataType::Int32);
+        barLayout.commit(*nameSpace, "bar");
+
+        alex::TypeLayout bazLayout;
+        bazLayout.createPrimitiveArrayProperty("prop0", alex::DataType::Uint64);
+        bazLayout.createPrimitiveArrayProperty("prop1", alex::DataType::Double);
+        bazLayout.commit(*nameSpace, "baz");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
+    auto& bazType = nameSpace->getType("baz");
 
     // Delete Foo.
     {
         const sql::TypedTable<sql::row_id, std::string, float> arrayTable(
-          library->getDatabase().getTable("main_foo_floats"));
+          library->getDatabase().getTable("main_foo_prop0"));
 
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
         auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
@@ -115,7 +114,7 @@ void DeletePrimitiveArray::operator()()
     // Delete Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, int32_t> arrayTable(
-          library->getDatabase().getTable("main_bar_ints"));
+          library->getDatabase().getTable("main_bar_prop0"));
 
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
         auto deleter  = alex::DeleteQuery(BarDescriptor(barType));
@@ -149,9 +148,9 @@ void DeletePrimitiveArray::operator()()
     // Delete Baz.
     {
         const sql::TypedTable<sql::row_id, std::string, uint32_t> array0Table(
-          library->getDatabase().getTable("main_baz_uints"));
+          library->getDatabase().getTable("main_baz_prop0"));
         const sql::TypedTable<sql::row_id, std::string, double> array1Table(
-          library->getDatabase().getTable("main_baz_doubles"));
+          library->getDatabase().getTable("main_baz_prop1"));
 
         auto inserter = alex::InsertQuery(BazDescriptor(bazType));
         auto deleter  = alex::DeleteQuery(BazDescriptor(bazType));

@@ -44,20 +44,19 @@ namespace
 
 void GetBlob::operator()()
 {
-    // Create type with 1 blob.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createBlobProperty("blobprop1");
-
-    // Create type with 2 blobs.
-    auto& barType = nameSpace->createType("bar");
-    barType.createBlobProperty("blobprop1");
-    barType.createBlobProperty("blobprop2");
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createBlobProperty("prop0");
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createBlobProperty("prop0");
+        barLayout.createBlobProperty("prop1");
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
 
     // Retrieve Foo.
     {

@@ -50,20 +50,19 @@ namespace
 
 void UpdateStringArray::operator()()
 {
-    // Create type with 1 string.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createStringArrayProperty("strings");
-
-    // Create type with 2 strings.
-    auto& barType = nameSpace->createType("bar");
-    barType.createStringArrayProperty("strings1");
-    barType.createStringArrayProperty("strings2");
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createStringArrayProperty("prop0");
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createStringArrayProperty("prop0");
+        barLayout.createStringArrayProperty("prop1");
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
 
     // Update Foo.
     {

@@ -4,75 +4,49 @@
 // Standard includes.
 ////////////////////////////////////////////////////////////////
 
+#include <memory>
 #include <string>
-
-////////////////////////////////////////////////////////////////
-// Module includes.
-////////////////////////////////////////////////////////////////
-
-#include "cppql/include_all.h"
 
 ////////////////////////////////////////////////////////////////
 // Current target includes.
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria-core/data_type.h"
-#include "alexandria-core/properties/instance_id.h"
+#include "alexandria-core/fwd.h"
 
 namespace alex
 {
-    class Property
+    class Type;
+
+    class PropertyLayout
     {
     public:
-        friend class Library;
-        friend class Type;
+        friend class TypeLayout;
 
         ////////////////////////////////////////////////////////////////
         // Constructors.
         ////////////////////////////////////////////////////////////////
 
-        Property(
-          Type& t, sql::row_id propId, std::string propName, DataType type, Type* refType, bool isArray, bool isBlob);
+        PropertyLayout(
+          TypeLayout& layout, std::string propName, DataType type, Type* refType, bool isArray, bool isBlob);
 
-        Property() = delete;
+        PropertyLayout() = delete;
 
-        Property(const Property&) = delete;
+        PropertyLayout(const PropertyLayout&) = default;
 
-        Property(Property&&) = default;
+        PropertyLayout(PropertyLayout&&) noexcept = default;
 
-        ~Property() = default;
+        ~PropertyLayout() noexcept = default;
 
-        Property& operator=(const Property&) = delete;
+        PropertyLayout& operator=(const PropertyLayout&) = default;
 
-        Property& operator=(Property&&) = default;
+        PropertyLayout& operator=(PropertyLayout&&) noexcept = default;
+
+        [[nodiscard]] bool operator==(const PropertyLayout& rhs) const noexcept;
 
         ////////////////////////////////////////////////////////////////
         // Getters.
         ////////////////////////////////////////////////////////////////
-
-        /**
-         * \brief Get type this property is a part of.
-         * \return Type.
-         */
-        [[nodiscard]] Type& getType() noexcept;
-
-        /**
-         * \brief Get type this property is a part of.
-         * \return Type.
-         */
-        [[nodiscard]] const Type& getType() const noexcept;
-
-        /**
-         * \brief Returns whether this property was committed to the database.
-         * \return True if committed.
-         */
-        [[nodiscard]] bool isCommitted() const noexcept;
-
-        /**
-         * \brief Get internal property ID.
-         * \return Property ID.
-         */
-        [[nodiscard]] sql::row_id getId() const noexcept;
 
         /**
          * \brief Get property name.
@@ -110,34 +84,28 @@ namespace alex
          */
         [[nodiscard]] bool isBlob() const noexcept;
 
-        ////////////////////////////////////////////////////////////////
-        // Commit.
-        ////////////////////////////////////////////////////////////////
-
-        void requireNotCommitted() const;
-
-        void requireCommitted() const;
-
-        void requireReferencedTypesCommitted() const;
-
     private:
         /**
          * \brief Commit this property to the library. Inserts entries into the property table.
          */
-        void commit();
+        [[nodiscard]] sql::row_id commit(Namespace& nameSpace, sql::row_id typeId) const;
 
-        void generate(Type& currentType, sql::Table& instanceTable, const std::string& prefix) const;
+        void generate(Library&                  library,
+                      sql::row_id               currentType,
+                      sql::Table&               instanceTable,
+                      std::vector<sql::Table*>& primitiveArrayTables,
+                      std::vector<sql::Table*>& blobArrayTables,
+                      std::vector<sql::Table*>& referenceArrayTables,
+                      const std::string&        prefix) const;
 
         ////////////////////////////////////////////////////////////////
         // Member variables.
         ////////////////////////////////////////////////////////////////
 
-        Type* type = nullptr;
-
         /**
-         * \brief Row ID.
+         * \brief Layout this property is part of.
          */
-        sql::row_id id = -1;
+        TypeLayout* typeLayout = nullptr;
 
         /**
          * \brief Property name.
@@ -164,4 +132,6 @@ namespace alex
          */
         bool blob;
     };
+
+    using PropertyLayoutPtr = std::unique_ptr<PropertyLayout>;
 }  // namespace alex

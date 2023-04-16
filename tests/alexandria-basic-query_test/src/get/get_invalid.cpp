@@ -21,10 +21,13 @@ namespace
 
 void GetInvalid::operator()()
 {
-    // Create type.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createPrimitiveProperty("a", alex::DataType::Int32);
-    expectNoThrow([&] { fooType.commit(); }).fatal("Failed to commit types");
+    expectNoThrow([&] {
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveProperty("prop0", alex::DataType::Int32);
+        fooLayout.commit(*nameSpace, "foo");
+    }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
 
     auto inserter = alex::InsertQuery(FooDescriptor(fooType));
     auto getter   = alex::GetQuery(FooDescriptor(fooType));

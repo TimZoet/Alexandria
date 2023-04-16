@@ -30,20 +30,18 @@ namespace
 
 void TableSetsNested::operator()()
 {
-    // Create types.
-    auto& fooType = nameSpace->createType("foo", false);
-    auto& barType = nameSpace->createType("bar");
-
-    // Add properties to types.
-    fooType.createPrimitiveProperty("a", alex::DataType::Int32);
-    fooType.createPrimitiveProperty("b", alex::DataType::Int32);
-    barType.createNestedTypeProperty("foo", fooType);
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveProperty("prop0", alex::DataType::Int32);
+        fooLayout.createPrimitiveProperty("prop1", alex::DataType::Int32);
+        fooLayout.commit(*nameSpace, "foo", alex::TypeLayout::Instantiable::False);
+
+        alex::TypeLayout barLayout;
+        barLayout.createNestedTypeProperty("prop0", nameSpace->getType("foo"));
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& barType = nameSpace->getType("bar");
 
     {
         auto tableSets = alex::TableSets(BarDescriptor(barType));

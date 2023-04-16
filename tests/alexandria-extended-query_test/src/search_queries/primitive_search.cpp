@@ -26,14 +26,15 @@ namespace
 
 void PrimitiveSearch::operator()()
 {
-    // Create type.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createPrimitiveProperty("a", alex::DataType::Float);
-    fooType.createPrimitiveProperty("b", alex::DataType::Int32);
-    fooType.createStringProperty("c");
+    expectNoThrow([&] {
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveProperty("prop0", alex::DataType::Float);
+        fooLayout.createPrimitiveProperty("prop1", alex::DataType::Int32);
+        fooLayout.createStringProperty("prop2");
+        fooLayout.commit(*nameSpace, "foo");
+    }).fatal("Failed to commit types");
 
-    // Commit types.
-    expectNoThrow([&] { fooType.commit(); }).fatal("Failed to commit types");
+    auto& fooType = nameSpace->getType("foo");
 
     Foo foo0{.a = 10, .b = -33, .c = "abc"};
     Foo foo1{.a = 20, .b = -33, .c = "def"};

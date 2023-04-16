@@ -57,25 +57,24 @@ namespace
 
 void GetPrimitiveBlob::operator()()
 {
-    // Create type with floats.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createPrimitiveBlobProperty("floats", alex::DataType::Float);
-
-    // Create type with integers.
-    auto& barType = nameSpace->createType("bar");
-    barType.createPrimitiveBlobProperty("ints", alex::DataType::Int32);
-
-    // Create type with floats and integers.
-    auto& bazType = nameSpace->createType("baz");
-    bazType.createPrimitiveBlobProperty("uints", alex::DataType::Uint64);
-    bazType.createPrimitiveBlobProperty("doubles", alex::DataType::Double);
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
-        bazType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveBlobProperty("prop0", alex::DataType::Float);
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createPrimitiveBlobProperty("prop0", alex::DataType::Int32);
+        barLayout.commit(*nameSpace, "bar");
+
+        alex::TypeLayout bazLayout;
+        bazLayout.createPrimitiveBlobProperty("prop0", alex::DataType::Uint64);
+        bazLayout.createPrimitiveBlobProperty("prop1", alex::DataType::Double);
+        bazLayout.commit(*nameSpace, "baz");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
+    auto& bazType = nameSpace->getType("baz");
 
     // Retrieve Foo.
     {

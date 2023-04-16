@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////
 
 #include "alexandria-core/namespace.h"
+#include "alexandria-core/property_layout.h"
+#include "alexandria-core/type_layout.h"
 
 namespace
 {
@@ -308,11 +310,13 @@ namespace alex
         for (auto          select = typeTable.selectAs<TypeRow>().orderBy(ascending(typeTable.col<0>())).compile();
              const TypeRow row : select)
         {
-            auto& ns = *namespacemap.find(row.nameSpace)->second;
-            auto& type =
-              *ns.types
-                 .emplace(row.name, std::make_unique<Type>(row.id, ns, row.name, row.isInstance > 0 ? true : false))
-                 .first->second;
+            auto& ns          = *namespacemap.find(row.nameSpace)->second;
+            auto& type        = *ns.types.emplace(row.name, std::make_unique<Type>()).first->second;
+            type.id           = row.id;
+            type.name         = row.name;
+            type.instantiable = row.isInstance > 0 ? TypeLayout::Instantiable::True : TypeLayout::Instantiable::False;
+            type.nameSpace    = &ns;
+            type.typeLayout   = std::make_unique<TypeLayout>();
             typemap.insert({type.id, &type});
         }
 
@@ -324,16 +328,18 @@ namespace alex
             fromString(row.dataType, dataType);
 
             auto& type = *typemap.at(row.type);
+            type.propertyIds.push_back(row.id);
+
             if (dataType == DataType::Reference)
             {
                 auto refType = typemap.at(row.referenceType);
-                type.addProperty(std::make_unique<Property>(
-                  type, row.id, std::move(row.name), dataType, refType, row.isArray, row.isBlob));
+                type.typeLayout->addProperty(std::make_unique<PropertyLayout>(
+                  *type.typeLayout, std::move(row.name), dataType, refType, row.isArray, row.isBlob));
             }
             else
             {
-                type.addProperty(std::make_unique<Property>(
-                  type, row.id, std::move(row.name), dataType, nullptr, row.isArray, row.isBlob));
+                type.typeLayout->addProperty(std::make_unique<PropertyLayout>(
+                  *type.typeLayout, std::move(row.name), dataType, nullptr, row.isArray, row.isBlob));
             }
         }
 
@@ -343,13 +349,13 @@ namespace alex
         {
             auto& type = *typemap.find(row.type)->second;
             if (row.kind == "instance")
-                type.instanceTable = &database->getTable(row.name);
+                type.tables.instance = &database->getTable(row.name);
             else if (row.kind == "blob_array")
-                type.blobArrayTables.emplace_back(&database->getTable(row.name));
+                type.tables.blobArrays.emplace_back(&database->getTable(row.name));
             else if (row.kind == "primitive_array")
-                type.primitiveArrayTables.emplace_back(&database->getTable(row.name));
+                type.tables.primitiveArrays.emplace_back(&database->getTable(row.name));
             else if (row.kind == "reference_array")
-                type.referenceArrayTables.emplace_back(&database->getTable(row.name));
+                type.tables.referenceArrays.emplace_back(&database->getTable(row.name));
         }
     }
 }  // namespace alex
