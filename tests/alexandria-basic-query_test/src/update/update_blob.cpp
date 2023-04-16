@@ -39,26 +39,25 @@ namespace
 
     using FooDescriptor = alex::GenerateTypeDescriptor<alex::Member<"id", &Foo::id>, alex::Member<"a", &Foo::a>>;
 
-    using BarDescriptor =
-      alex::GenerateTypeDescriptor<alex::Member<"id", &Bar::id>, alex::Member<"a", &Bar::a>, alex::Member<"b", &Bar::b>>;
+    using BarDescriptor = alex::
+      GenerateTypeDescriptor<alex::Member<"id", &Bar::id>, alex::Member<"a", &Bar::a>, alex::Member<"b", &Bar::b>>;
 }  // namespace
 
 void UpdateBlob::operator()()
 {
-    // Create type with 1 blob.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createBlobProperty("blobprop1");
-
-    // Create type with 2 blobs.
-    auto& barType = nameSpace->createType("bar");
-    barType.createBlobProperty("blobprop1");
-    barType.createBlobProperty("blobprop2");
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createBlobProperty("prop0");
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createBlobProperty("prop0");
+        barLayout.createBlobProperty("prop1");
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
 
     // Update Foo.
     {

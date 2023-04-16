@@ -29,19 +29,18 @@ namespace
 
 void TableSetsQuery::operator()()
 {
-    // Create types.
-    auto& fooType = nameSpace->createType("foo");
-    auto& barType = nameSpace->createType("bar");
-
-    // Add properties to types.
-    fooType.createPrimitiveProperty("int32prop", alex::DataType::Int32);
-    barType.createReferenceArrayProperty("fooprop", fooType);
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createPrimitiveProperty("prop0", alex::DataType::Int32);
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createReferenceArrayProperty("prop0", nameSpace->getType("foo"));
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
 
     // Insert objects.
     Bar bar0, bar1;

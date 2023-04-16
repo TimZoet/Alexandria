@@ -14,10 +14,13 @@
 
 namespace alex
 {
+    class TypeLayout;
+
     class Namespace
     {
     public:
         friend class Library;
+        friend class TypeLayout;
 
         ////////////////////////////////////////////////////////////////
         // Constructors.
@@ -57,20 +60,15 @@ namespace alex
 
         [[nodiscard]] const Type& getType(const std::string& typeName) const;
 
+        [[nodiscard]] bool getType(const std::string& typeName, Type** type) const;
+
+    private:
         ////////////////////////////////////////////////////////////////
         // Types.
         ////////////////////////////////////////////////////////////////
 
-        /**
-         * \brief Create a new type.
-         * \param typeName Unique type name.
-         * \param instantiable Whether instances of this type can be created, or if it is only to be used as a nested type.
-         * If false, no tables are generated when committing this type.
-         * \return Type.
-         */
-        Type& createType(const std::string& typeName, bool instantiable = true);
+        Type& createType(const std::string& typeName);
 
-    private:
         ////////////////////////////////////////////////////////////////
         // Member variables.
         ////////////////////////////////////////////////////////////////

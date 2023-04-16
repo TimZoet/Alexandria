@@ -2,15 +2,9 @@
 
 void CreateTypeString::operator()()
 {
-    // Create type and property.
-    alex::Type* type = nullptr;
-    expectNoThrow([&] {
-        type = &nameSpace->createType("type");
-        type->createStringProperty("prop");
-    });
-
-    // Commit.
-    expectNoThrow([&] { type->commit(); });
+    alex::TypeLayout layout;
+    expectNoThrow([&] { layout.createStringProperty("prop"); });
+    compareEQ(alex::TypeLayout::Commit::Created, layout.commit(*nameSpace, "type").first);
 
     // Check type tables.
     const std::vector<alex::NamespaceRow> namespaces = {{1, "main"}};

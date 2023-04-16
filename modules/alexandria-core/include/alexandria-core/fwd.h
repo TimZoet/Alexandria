@@ -25,15 +25,18 @@ namespace alex
     class Library;
     class Namespace;
     class Property;
+    class PropertyLayout;
     class Type;
+    class TypeLayout;
 
-    using LibraryPtr   = std::unique_ptr<Library>;
-    using NamespacePtr = std::unique_ptr<Namespace>;
-    using PropertyPtr  = std::unique_ptr<Property>;
-    using TypePtr      = std::unique_ptr<Type>;
-    using PropertyList = std::vector<PropertyPtr>;
-    using NamespaceMap = std::map<std::string, NamespacePtr>;
-    using TypeMap      = std::map<std::string, TypePtr>;
+    using LibraryPtr        = std::unique_ptr<Library>;
+    using NamespacePtr      = std::unique_ptr<Namespace>;
+    using PropertyPtr       = std::unique_ptr<Property>;
+    using PropertyLayoutPtr = std::unique_ptr<PropertyLayout>;
+    using TypePtr           = std::unique_ptr<Type>;
+    using TypeLayoutPtr     = std::unique_ptr<TypeLayout>;
+    using NamespaceMap      = std::map<std::string, NamespacePtr>;
+    using TypeMap           = std::map<std::string, TypePtr>;
 
     struct NamespaceRow
     {
@@ -144,5 +147,6 @@ namespace alex
 
     using TypeTableInsert = std::remove_cvref_t<decltype(std::declval<TypeTable>().insert().compile())>;
 
-    using GeneratedTablesInsert = std::remove_cvref_t<decltype(std::declval<GeneratedTablesTable>().insert().compile())>;
+    using GeneratedTablesInsert =
+      std::remove_cvref_t<decltype(std::declval<GeneratedTablesTable>().insert().compile())>;
 }  // namespace alex

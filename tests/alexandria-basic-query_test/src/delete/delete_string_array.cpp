@@ -50,25 +50,24 @@ namespace
 
 void DeleteStringArray::operator()()
 {
-    // Create type with 1 string.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createStringArrayProperty("strings");
-
-    // Create type with 2 strings.
-    auto& barType = nameSpace->createType("bar");
-    barType.createStringArrayProperty("strings1");
-    barType.createStringArrayProperty("strings2");
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createStringArrayProperty("prop0");
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createStringArrayProperty("prop0");
+        barLayout.createStringArrayProperty("prop1");
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
 
     // Delete Foo.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string> arrayTable(
-          library->getDatabase().getTable("main_foo_strings"));
+          library->getDatabase().getTable("main_foo_prop0"));
 
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
         auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
@@ -102,9 +101,9 @@ void DeleteStringArray::operator()()
     // Insert Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, std::string> array0Table(
-          library->getDatabase().getTable("main_bar_strings1"));
+          library->getDatabase().getTable("main_bar_prop0"));
         const sql::TypedTable<sql::row_id, std::string, std::string> array1Table(
-          library->getDatabase().getTable("main_bar_strings2"));
+          library->getDatabase().getTable("main_bar_prop1"));
 
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
         auto deleter  = alex::DeleteQuery(BarDescriptor(barType));

@@ -2,56 +2,46 @@
 
 void CreateType::operator()()
 {
-    // Create several types.
-    alex::Type *type0 = nullptr, *type1 = nullptr, *type2 = nullptr;
-    expectNoThrow([&] { type0 = &nameSpace->createType("type0"); });
-    expectNoThrow([&] { type1 = &nameSpace->createType("type1"); });
-    expectNoThrow([&] { type2 = &nameSpace->createType("type2_", false); });
-    expectNoThrow([&] { nameSpace->createType("type3_aaaa034"); });
+    alex::TypeLayout layout;
 
-    // Recreating types with same name should throw.
-    expectThrow([&] { nameSpace->createType("type0"); });
-    expectThrow([&] { nameSpace->createType("type1"); });
-    expectThrow([&] { nameSpace->createType("type2_"); });
+    // Committing empty layout should throw.
+    expectThrow([&] { layout.commit(*nameSpace, "type"); });
+
+    // Creating property with invalid name should throw.
+    expectThrow([&] { layout.createPrimitiveProperty("5", alex::DataType::Float); });
+
+    // Creating property with same name should throw.
+    expectNoThrow([&] { layout.createPrimitiveProperty("prop", alex::DataType::Float); });
+    expectThrow([&] { layout.createBlobProperty("prop"); });
+
+    // Commit should create type.
+    auto [commit0, type0] = layout.commit(*nameSpace, "type");
+    compareEQ(alex::TypeLayout::Commit::Created, commit0);
+    compareNE(nullptr, type0);
+
+    // Another commit should return existing type.
+    auto [commit1, type1] = layout.commit(*nameSpace, "type");
+    compareEQ(alex::TypeLayout::Commit::Existed, commit1);
+    compareEQ(type0, type1);
+
+    // Committing a layout with a known name but different properties should throw.
+    layout.createPrimitiveProperty("prop2", alex::DataType::Int32);
+    expectThrow([&] { layout.commit(*nameSpace, "type"); });
 
     // Creating some types with invalid names.
-    expectThrow([&] { nameSpace->createType("_abc"); });
-    expectThrow([&] { nameSpace->createType("0ad"); });
-    expectThrow([&] { nameSpace->createType("^%%*)"); });
-    expectThrow([&] { nameSpace->createType("ABD"); });
-
-    // Check name and committed.
-    compareEQ(type0->getName(), "type0");
-    compareEQ(type1->getName(), "type1");
-    compareEQ(type2->getName(), "type2_");
-    compareFalse(type0->isCommitted());
-    compareFalse(type1->isCommitted());
-    compareFalse(type2->isCommitted());
-
-    // Commit without props should throw.
-    expectThrow([&] { type0->commit(); });
-    expectThrow([&] { type1->commit(); });
-    expectThrow([&] { type2->commit(); });
-
-    expectNoThrow([&] { type0->createPrimitiveProperty("a", alex::DataType::Float); });
-    expectNoThrow([&] { type1->createPrimitiveProperty("b", alex::DataType::Float); });
-    expectNoThrow([&] { type2->createPrimitiveProperty("c", alex::DataType::Float); });
-
-    // Commit.
-    expectNoThrow([&] { type0->commit(); });
-    expectNoThrow([&] { type1->commit(); });
-    expectNoThrow([&] { type2->commit(); });
-
-    // Check committed.
-    compareTrue(type0->isCommitted());
-    compareTrue(type1->isCommitted());
-    compareTrue(type2->isCommitted());
-
-    // Commit again should throw.
-    expectThrow([&] { type0->commit(); });
-    expectThrow([&] { type1->commit(); });
-    expectThrow([&] { type2->commit(); });
-
-    // Adding another property should throw.
-    expectThrow([&] { type0->createPrimitiveProperty("d", alex::DataType::Float); });
+    expectThrow([&] {
+        alex::TypeLayout l;
+        l.createPrimitiveProperty("prop", alex::DataType::Float);
+        l.commit(*nameSpace, "0ad");
+    });
+    expectThrow([&] {
+        alex::TypeLayout l;
+        l.createPrimitiveProperty("prop", alex::DataType::Float);
+        l.commit(*nameSpace, "^%%*)");
+    });
+    expectThrow([&] {
+        alex::TypeLayout l;
+        l.createPrimitiveProperty("prop", alex::DataType::Float);
+        l.commit(*nameSpace, "ABD");
+    });
 }

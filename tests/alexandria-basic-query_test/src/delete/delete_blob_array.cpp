@@ -45,25 +45,24 @@ namespace
 
 void DeleteBlobArray::operator()()
 {
-    // Create type with 1 blob.
-    auto& fooType = nameSpace->createType("foo");
-    fooType.createBlobArrayProperty("blob1");
-
-    // Create type with 2 blobs.
-    auto& barType = nameSpace->createType("bar");
-    barType.createBlobArrayProperty("blob1");
-    barType.createBlobArrayProperty("blob2");
-
-    // Commit types.
     expectNoThrow([&] {
-        fooType.commit();
-        barType.commit();
+        alex::TypeLayout fooLayout;
+        fooLayout.createBlobArrayProperty("prop0");
+        fooLayout.commit(*nameSpace, "foo");
+
+        alex::TypeLayout barLayout;
+        barLayout.createBlobArrayProperty("prop0");
+        barLayout.createBlobArrayProperty("prop1");
+        barLayout.commit(*nameSpace, "bar");
     }).fatal("Failed to commit types");
+
+    auto& fooType = nameSpace->getType("foo");
+    auto& barType = nameSpace->getType("bar");
 
     // Delete Foo.
     {
         const sql::TypedTable<sql::row_id, std::string, Baz> arrayTable(
-          library->getDatabase().getTable("main_foo_blob1"));
+          library->getDatabase().getTable("main_foo_prop0"));
 
         auto inserter = alex::InsertQuery(FooDescriptor(fooType));
         auto deleter  = alex::DeleteQuery(FooDescriptor(fooType));
@@ -95,9 +94,9 @@ void DeleteBlobArray::operator()()
     // Delete Bar.
     {
         const sql::TypedTable<sql::row_id, std::string, std::vector<Baz>> array0Table(
-          library->getDatabase().getTable("main_bar_blob1"));
+          library->getDatabase().getTable("main_bar_prop0"));
         const sql::TypedTable<sql::row_id, std::string, std::vector<float>> array1Table(
-          library->getDatabase().getTable("main_bar_blob2"));
+          library->getDatabase().getTable("main_bar_prop1"));
 
         auto inserter = alex::InsertQuery(BarDescriptor(barType));
         auto deleter  = alex::DeleteQuery(BarDescriptor(barType));

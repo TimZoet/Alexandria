@@ -48,11 +48,18 @@ namespace alex
         return *it->second;
     }
 
+    bool Namespace::getType(const std::string& typeName, Type** type) const
+    {
+        const auto it = types.find(typeName);
+        *type         = it == types.end() ? nullptr : it->second.get();
+        return *type != nullptr;
+    }
+
     ////////////////////////////////////////////////////////////////
     // Types.
     ////////////////////////////////////////////////////////////////
 
-    Type& Namespace::createType(const std::string& typeName, const bool instantiable)
+    Type& Namespace::createType(const std::string& typeName)
     {
         if (types.contains(typeName))
             throw std::runtime_error(
@@ -62,7 +69,7 @@ namespace alex
             throw std::runtime_error(std::format(
               R"(Cannot create type with name "{}". It does not match the regex "^[a-z][a-z0-9_]*$".)", typeName));
 
-        auto type = std::make_unique<Type>(*this, typeName, instantiable);
+        auto type = std::make_unique<Type>();
         return *types.emplace(typeName, std::move(type)).first->second;
     }
 }  // namespace alex

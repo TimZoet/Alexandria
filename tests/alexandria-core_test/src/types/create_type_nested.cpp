@@ -10,28 +10,28 @@ void CreateTypeNested::operator()()
     // type3 -> propB
     //       \
     //        -> propC
-    alex::Type *type0 = nullptr, *type1 = nullptr, *type2 = nullptr, *type3 = nullptr;
-    expectNoThrow([&] { type0 = &nameSpace->createType("type0"); });
-    expectNoThrow([&] { type1 = &nameSpace->createType("type1"); });
-    expectNoThrow([&] { type2 = &nameSpace->createType("type2"); });
-    expectNoThrow([&] { type3 = &nameSpace->createType("type3"); });
+    alex::TypeLayout layout0;
+    alex::TypeLayout layout1;
+    alex::TypeLayout layout2;
+    alex::TypeLayout layout3;
 
-    expectNoThrow([&] { type0->createNestedTypeProperty("prop1", *type1); });
-    expectNoThrow([&] { type0->createNestedTypeProperty("prop3", *type3); });
-    expectNoThrow([&] { type1->createNestedTypeProperty("prop2", *type2); });
-    expectNoThrow([&] { type2->createPrimitiveProperty("propa", alex::DataType::Float); });
-    expectNoThrow([&] { type3->createPrimitiveProperty("propb", alex::DataType::Double); });
-    expectNoThrow([&] { type3->createPrimitiveProperty("propc", alex::DataType::Int32); });
+    expectNoThrow([&] { layout3.createPrimitiveProperty("propb", alex::DataType::Double); });
+    expectNoThrow([&] { layout3.createPrimitiveProperty("propc", alex::DataType::Int32); });
+    auto [commit3, type3] = layout3.commit(*nameSpace, "type3");
+    compareEQ(alex::TypeLayout::Commit::Created, commit3);
 
-    // Referenced types must be committed first.
-    expectThrow([&] { type0->commit(); });
-    expectThrow([&] { type1->commit(); });
+    expectNoThrow([&] { layout2.createPrimitiveProperty("propa", alex::DataType::Float); });
+    auto [commit2, type2] = layout2.commit(*nameSpace, "type2");
+    compareEQ(alex::TypeLayout::Commit::Created, commit2);
 
-    // Commit.
-    expectNoThrow([&] { type3->commit(); });
-    expectNoThrow([&] { type2->commit(); });
-    expectNoThrow([&] { type1->commit(); });
-    expectNoThrow([&] { type0->commit(); });
+    expectNoThrow([&] { layout1.createNestedTypeProperty("prop2", *type2); });
+    auto [commit1, type1] = layout1.commit(*nameSpace, "type1");
+    compareEQ(alex::TypeLayout::Commit::Created, commit1);
+
+    expectNoThrow([&] { layout0.createNestedTypeProperty("prop1", *type1); });
+    expectNoThrow([&] { layout0.createNestedTypeProperty("prop3", *type3); });
+    auto [commit0, type0] = layout0.commit(*nameSpace, "type0");
+    compareEQ(alex::TypeLayout::Commit::Created, commit0);
 
     // Check type tables.
     const std::vector<alex::NamespaceRow> namespaces = {{1, "main"}};
