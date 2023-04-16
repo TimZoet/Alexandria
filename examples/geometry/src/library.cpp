@@ -7,6 +7,7 @@
 #include "alexandria-core/library.h"
 #include "alexandria-core/namespace.h"
 #include "alexandria-core/type.h"
+#include "alexandria-core/type_layout.h"
 
 alex::LibraryPtr createLibrary()
 {
@@ -15,47 +16,53 @@ alex::LibraryPtr createLibrary()
     {
         auto& mainSpace = library->createNamespace("main");
 
-        alex::Type& typeFloat3 = mainSpace.createType("float3", false);
-        typeFloat3.createPrimitiveProperty("x", alex::DataType::Float);
-        typeFloat3.createPrimitiveProperty("y", alex::DataType::Float);
-        typeFloat3.createPrimitiveProperty("z", alex::DataType::Float);
-        typeFloat3.commit();
+        alex::TypeLayout layoutFloat3;
+        layoutFloat3.createPrimitiveProperty("x", alex::DataType::Float);
+        layoutFloat3.createPrimitiveProperty("y", alex::DataType::Float);
+        layoutFloat3.createPrimitiveProperty("z", alex::DataType::Float);
+        layoutFloat3.commit(mainSpace, "float3", alex::TypeLayout::Instantiable::False);
+        alex::Type& typeFloat3 = mainSpace.getType("float3");
 
-        alex::Type& typeCube = mainSpace.createType("cube");
-        typeCube.createStringProperty("name");
-        typeCube.createNestedTypeProperty("size", typeFloat3);
-        typeCube.commit();
+        alex::TypeLayout layoutCube;
+        layoutCube.createStringProperty("name");
+        layoutCube.createNestedTypeProperty("size", typeFloat3);
+        layoutCube.commit(mainSpace, "cube");
+        alex::Type& typeCube = mainSpace.getType("cube");
 
-        alex::Type& typeMaterial = mainSpace.createType("material");
-        typeMaterial.createStringProperty("name");
-        typeMaterial.createNestedTypeProperty("color", typeFloat3);
-        typeMaterial.createPrimitiveProperty("specular", alex::DataType::Float);
-        typeMaterial.commit();
+        alex::TypeLayout layoutMaterial;
+        layoutMaterial.createStringProperty("name");
+        layoutMaterial.createNestedTypeProperty("color", typeFloat3);
+        layoutMaterial.createPrimitiveProperty("specular", alex::DataType::Float);
+        layoutMaterial.commit(mainSpace, "material");
+        alex::Type& typeMaterial = mainSpace.getType("material");
 
-        alex::Type& typeMesh = mainSpace.createType("mesh");
-        typeMesh.createStringProperty("name");
-        typeMesh.createBlobProperty("vertices");
-        typeMesh.createBlobProperty("indices");
-        typeMesh.commit();
+        alex::TypeLayout layoutMesh;
+        layoutMesh.createStringProperty("name");
+        layoutMesh.createBlobProperty("vertices");
+        layoutMesh.createBlobProperty("indices");
+        layoutMesh.commit(mainSpace, "mesh");
+        alex::Type& typeMesh = mainSpace.getType("mesh");
 
-        alex::Type& typeSphere = mainSpace.createType("sphere");
-        typeSphere.createStringProperty("name");
-        typeSphere.createPrimitiveProperty("radius", alex::DataType::Float);
-        typeSphere.commit();
+        alex::TypeLayout layoutSphere;
+        layoutSphere.createStringProperty("name");
+        layoutSphere.createPrimitiveProperty("radius", alex::DataType::Float);
+        layoutSphere.commit(mainSpace, "sphere");
+        alex::Type& typeSphere = mainSpace.getType("sphere");
 
-        alex::Type& typeNode = mainSpace.createType("node");
-        typeNode.createStringProperty("name");
-        typeNode.createNestedTypeProperty("translation", typeFloat3);
-        typeNode.createReferenceProperty("material", typeMaterial);
-        typeNode.createReferenceProperty("cube", typeCube);
-        typeNode.createReferenceProperty("mesh", typeMesh);
-        typeNode.createReferenceProperty("sphere", typeSphere);
-        typeNode.commit();
+        alex::TypeLayout layoutNode;
+        layoutNode.createStringProperty("name");
+        layoutNode.createNestedTypeProperty("translation", typeFloat3);
+        layoutNode.createReferenceProperty("material", typeMaterial);
+        layoutNode.createReferenceProperty("cube", typeCube);
+        layoutNode.createReferenceProperty("mesh", typeMesh);
+        layoutNode.createReferenceProperty("sphere", typeSphere);
+        layoutNode.commit(mainSpace, "node");
+        alex::Type& typeNode = mainSpace.getType("node");
 
-        alex::Type& typeScene = mainSpace.createType("scene");
-        typeScene.createStringProperty("name");
-        typeScene.createReferenceArrayProperty("nodes", typeNode);
-        typeScene.commit();
+        alex::TypeLayout layoutScene;
+        layoutScene.createStringProperty("name");
+        layoutScene.createReferenceArrayProperty("nodes", typeNode);
+        layoutScene.commit(mainSpace, "scene");
     }
 
     return std::move(library);
