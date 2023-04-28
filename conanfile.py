@@ -68,20 +68,22 @@ class AlexandriaConan(ConanFile):
         self.requires("common/1.0.0@timzoet/v1.0.0")
         self.requires("cppql/0.2.1@timzoet/v0.2.1")
         self.requires("dot/1.0.0@timzoet/v1.0.0")
-        self.requires("parsertongue/1.3.0@timzoet/v1.3.0")
         #self.requires("stduuid/1.2.3")
         self.requires("stduuid/1.0.0@timzoet/stable")
 
         if self.options.build_tests:
             self.requires("bettertest/1.0.0@timzoet/v1.0.0")
+        
+        if self.options.build_tests or self.options.build_examples:
+            self.requires("parsertongue/1.3.0@timzoet/v1.3.0")
 
     def package_info(self):
         self.cpp_info.components["core"].libs = ["alexandria-core"]
-        self.cpp_info.components["core"].requires = ["common::common", "cppql::cppql", "dot::dot"]
+        self.cpp_info.components["core"].requires = ["cmake-modules::cmake-modules", "common::common", "cppql::cppql", "dot::dot", "stduuid::stduuid"]
         self.cpp_info.components["basic-query"].libs = ["alexandria-basic-query"]
-        self.cpp_info.components["basic-query"].requires = ["alexandria-core", "common::common", "cppql::cppql", "dot::dot"]
+        self.cpp_info.components["basic-query"].requires = ["core", "common::common", "cppql::cppql", "dot::dot"]
         self.cpp_info.components["extended-query"].libs = ["alexandria-extended-query"]
-        self.cpp_info.components["extended-query"].requires = ["alexandria-core", "alexandria-basic-query", "common::common", "cppql::cppql", "dot::dot"]
+        self.cpp_info.components["extended-query"].requires = ["core", "basic-query", "common::common", "cppql::cppql", "dot::dot"]
     
     def generate(self):
         base = self.python_requires["pyreq"].module.BaseConan
